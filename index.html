@@ -1,0 +1,131 @@
+---
+layout: default
+title: Teach genomics with the tools researchers use
+description: >-
+  Guides for educators and developers on teaching genomics with genome browsers,
+  alignments, 3D structures, networks, Galaxy, R and Python in the browser,
+  phylogenetic trees and charts, with live examples and code you can copy.
+ads: false
+body_class: home-page
+---
+<main id="main" class="home">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-text">
+      <h1 id="hero-title">Teach genomics with the tools researchers use</h1>
+      <p class="lede">Guides for educators and developers on genome browsers, alignments, 3D structures, networks, Galaxy, R and Python in the browser, phylogenetic trees and charts. Every guide has live examples, and every example has code you can copy.</p>
+      <div class="doors">
+        <a class="door door--teach" href="{{ '/educators/' | relative_url }}">
+          <span class="door-title">For educators</span>
+          <span class="door-text">What each tool is good for in class, activities to run with it, and the evidence behind them.</span>
+        </a>
+        <a class="door door--build" href="{{ '/developers/' | relative_url }}">
+          <span class="door-title">For developers</span>
+          <span class="door-text">How to put each tool into your own teaching pages, with working examples.</span>
+        </a>
+      </div>
+    </div>
+
+    <figure class="seq-figure" data-hbb data-variant-note="One base changes. <strong>c.20A&gt;T</strong> turns GAG into GTG, so codon 7 now codes for valine: the change behind sickle-cell disease. Older papers call it Glu6Val, because they number the protein without its first methionine.">
+      <figcaption><strong>HBB</strong>, the β-globin gene: the first 30 codons of its coding sequence, each with the amino acid it codes for.</figcaption>
+      <p class="visually-hidden">The sequence reads ATG GTG CAT CTG ACT CCT GAG GAG AAG TCT GCC GTT ACT GCC CTG TGG GGC AAG GTG AAC GTG GAT GAA GTT GGT GGT GAG GCC CTG GGC.</p>
+      <div class="seq" aria-hidden="true">
+          <span class="codon"><span class="codon-nts"><span class="nt A">A</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Met</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Val</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt C">C</span><span class="nt A">A</span><span class="nt T">T</span></span><span class="codon-aa">His</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt C">C</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Leu</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt A">A</span><span class="nt C">C</span><span class="nt T">T</span></span><span class="codon-aa">Thr</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt C">C</span><span class="nt C">C</span><span class="nt T">T</span></span><span class="codon-aa">Pro</span></span>
+          <span class="codon codon--focus"><span class="codon-num">codon 7</span><span class="codon-nts"><span class="nt G">G</span><span class="nt A" data-c20>A</span><span class="nt G">G</span></span><span class="codon-aa" data-codon7-aa>Glu</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt A">A</span><span class="nt G">G</span></span><span class="codon-aa">Glu</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt A">A</span><span class="nt A">A</span><span class="nt G">G</span></span><span class="codon-aa">Lys</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt T">T</span><span class="nt C">C</span><span class="nt T">T</span></span><span class="codon-aa">Ser</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt C">C</span><span class="nt C">C</span></span><span class="codon-aa">Ala</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt T">T</span><span class="nt T">T</span></span><span class="codon-aa">Val</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt A">A</span><span class="nt C">C</span><span class="nt T">T</span></span><span class="codon-aa">Thr</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt C">C</span><span class="nt C">C</span></span><span class="codon-aa">Ala</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt C">C</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Leu</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt T">T</span><span class="nt G">G</span><span class="nt G">G</span></span><span class="codon-aa">Trp</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt G">G</span><span class="nt C">C</span></span><span class="codon-aa">Gly</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt A">A</span><span class="nt A">A</span><span class="nt G">G</span></span><span class="codon-aa">Lys</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Val</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt A">A</span><span class="nt A">A</span><span class="nt C">C</span></span><span class="codon-aa">Asn</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Val</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt A">A</span><span class="nt T">T</span></span><span class="codon-aa">Asp</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt A">A</span><span class="nt A">A</span></span><span class="codon-aa">Glu</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt T">T</span><span class="nt T">T</span></span><span class="codon-aa">Val</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt G">G</span><span class="nt T">T</span></span><span class="codon-aa">Gly</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt G">G</span><span class="nt T">T</span></span><span class="codon-aa">Gly</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt A">A</span><span class="nt G">G</span></span><span class="codon-aa">Glu</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt C">C</span><span class="nt C">C</span></span><span class="codon-aa">Ala</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt C">C</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Leu</span></span>
+          <span class="codon"><span class="codon-nts"><span class="nt G">G</span><span class="nt G">G</span><span class="nt C">C</span></span><span class="codon-aa">Gly</span></span>
+      </div>
+      <div class="seq-controls">
+        <button type="button" class="seq-toggle">Make the sickle-cell change</button>
+      </div>
+      <p class="seq-note" aria-live="polite">Codon 7 reads GAG, which codes for glutamate.</p>
+      <p class="seq-links">Follow this gene through the site: <a href="{{ '/developers/genome-browsers/' | relative_url }}">in a genome browser</a>, <a href="{{ '/developers/sequences/' | relative_url }}">in an alignment</a> and <a href="{{ '/developers/structures/' | relative_url }}">in the haemoglobin structure</a>.</p>
+    </figure>
+  </section>
+
+  <section class="ladder-section" aria-labelledby="topics-title">
+    <h2 id="topics-title">Eight topics, each seen from two sides</h2>
+    <p class="section-intro">Each topic has a page for educators, on what the tool is good for in class and how to run an activity with it, and a page for developers, on how to build it into a web page. Each page links to its partner.</p>
+    <div class="ladder-head" aria-hidden="true">
+      <span>Topic</span><span class="lh-teach">For educators</span><span class="lh-build">For developers</span>
+    </div>
+    <ul class="ladder">
+      {%- for t in site.data.topics %}
+      <li class="rung">
+        <h3 class="rung-name">{{ t.name }}</h3>
+        <a class="rung-end rung-end--teach" href="{{ '/educators/' | append: t.slug | append: '/' | relative_url }}">
+          <span class="rung-side">For educators</span>
+          {{ t.teach }}<span class="visually-hidden"> ({{ t.teach_title }})</span>
+        </a>
+        <a class="rung-end rung-end--build" href="{{ '/developers/' | append: t.slug | append: '/' | relative_url }}">
+          <span class="rung-side">For developers</span>
+          {{ t.build }}<span class="visually-hidden"> ({{ t.build_title }})</span>
+        </a>
+      </li>
+      {%- endfor %}
+    </ul>
+  </section>
+
+  <section class="home-band" aria-labelledby="start-title">
+    <h2 id="start-title">Before you start</h2>
+    <div class="general-pages">
+      <div>
+        <h3 class="teach">For educators</h3>
+        <ul>
+          {%- for item in site.data.nav.educators offset: 1 %}
+          <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+          {%- endfor %}
+        </ul>
+      </div>
+      <div>
+        <h3 class="build">For developers</h3>
+        <ul>
+          {%- for item in site.data.nav.developers offset: 1 %}
+          <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+          {%- endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-band" aria-labelledby="sites-title">
+    <h2 id="sites-title">Teaching sites we have made</h2>
+    <p class="section-intro">They run in a web browser, so students have nothing to install. <a href="{{ '/sites/' | relative_url }}">See all our sites and teaching code</a>.</p>
+    <ul class="site-list">
+      {%- for group in site.data.sites %}{%- for s in group.items %}{%- if s.featured %}
+      <li class="site-item">
+        <h3><a href="{{ s.url }}">{{ s.name }}</a></h3>
+        <p>{{ s.description }}</p>
+        <p class="site-links"><span class="site-url">{{ s.url | remove: 'https://' | remove: 'http://' | remove_last: '/' }}</span>{% if s.github %}<a href="{{ s.github }}">Code on GitHub<span class="visually-hidden"> for {{ s.name }}</span></a>{% endif %}</p>
+      </li>
+      {%- endif %}{%- endfor %}{%- endfor %}
+    </ul>
+  </section>
+
+</main>

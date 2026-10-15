@@ -1,0 +1,19 @@
+##fileformat=VCFv4.2
+##source=genomics.tel teaching example; variants from ClinVar (GRCh38, clinvar_20261004); GENOTYPES ARE SYNTHETIC
+##contig=<ID=HBB_region,length=20000,assembly=GRCh38_chr11_5217001_5237000>
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene symbol">
+##INFO=<ID=GRCh38,Number=1,Type=String,Description="Position on GRCh38 (chr:pos)">
+##INFO=<ID=HGVSc,Number=1,Type=String,Description="HGVS coding change on NM_000518.5">
+##INFO=<ID=HGVSp,Number=1,Type=String,Description="HGVS protein change (initiator Met = 1)">
+##INFO=<ID=LEGACY,Number=1,Type=String,Description="Traditional name">
+##INFO=<ID=CLNSIG,Number=1,Type=String,Description="ClinVar classification">
+##INFO=<ID=CLNID,Number=1,Type=Integer,Description="ClinVar VariationID">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype (synthetic)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Individual_1	Individual_2	Individual_3	Individual_4
+HBB_region	8911	rs1609812	G	A	.	PASS	GENE=HBB;GRCh38=chr11:5225911;HGVSc=c.316-185C>T;HGVSp=p.?;LEGACY=IVS-II-666_C>T_polymorphism;CLNSIG=Benign;CLNID=36316	GT	1/1	0/1	0/0	0/1
+HBB_region	9774	rs11549407	G	A	.	PASS	GENE=HBB;GRCh38=chr11:5226774;HGVSc=c.118C>T;HGVSp=p.Gln40Ter;LEGACY=codon_39_nonsense_(beta0-thalassaemia);CLNSIG=Pathogenic;CLNID=15402	GT	0/0	0/0	0/0	0/1
+HBB_region	9820	rs35004220	C	T	.	PASS	GENE=HBB;GRCh38=chr11:5226820;HGVSc=c.93-21G>A;HGVSp=p.?;LEGACY=IVS-I-110_G>A_(beta+-thalassaemia);CLNSIG=Pathogenic;CLNID=15454	GT	0/0	0/0	0/0	0/0
+HBB_region	9943	rs33950507	C	T	.	PASS	GENE=HBB;GRCh38=chr11:5226943;HGVSc=c.79G>A;HGVSp=p.Glu27Lys;LEGACY=HbE_(Glu26Lys_mature_numbering);CLNSIG=Pathogenic;CLNID=15161	GT	0/0	0/0	0/0	0/0
+HBB_region	10002	rs334	T	A	.	PASS	GENE=HBB;GRCh38=chr11:5227002;HGVSc=c.20A>T;HGVSp=p.Glu7Val;LEGACY=HbS_(Glu6Val_mature_numbering);CLNSIG=Pathogenic;CLNID=15333	GT	0/1	1/1	0/1	0/0
+HBB_region	10003	rs33930165	C	T	.	PASS	GENE=HBB;GRCh38=chr11:5227003;HGVSc=c.19G>A;HGVSp=p.Glu7Lys;LEGACY=HbC_(Glu6Lys_mature_numbering);CLNSIG=Pathogenic/Likely_pathogenic;CLNID=15126	GT	0/0	0/0	0/1	0/0
+HBB_region	10013	rs713040	A	G	.	PASS	GENE=HBB;GRCh38=chr11:5227013;HGVSc=c.9T>C;HGVSp=p.His3=;LEGACY=synonymous;CLNSIG=Benign;CLNID=193106	GT	0/1	1/1	0/0	0/1

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JBrowse 2: a linear genome view open at HBB</title>
+  <!-- One bundle that includes React. It defines the global JBrowseReactLinearGenomeView. -->
+  <script src="https://cdn.jsdelivr.net/npm/@jbrowse/react-linear-genome-view2@4.3.0/dist/react-linear-genome-view.umd.production.min.js"
+          integrity="sha384-J8EFPOshnppmv2fT8oYTTjrGpanve6mVThvdPS/++mu+OLoZla3BKDnAe0UyN27B"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <h1>HBB in JBrowse 2. Click a transcript to see its details.</h1>
+  <div id="jbrowse"></div>
+
+  <script>
+    const { React, createRoot, createViewState, JBrowseLinearGenomeView } = JBrowseReactLinearGenomeView;
+
+    const state = createViewState({
+      assembly: {
+        name: "hg38",
+        sequence: {
+          type: "ReferenceSequenceTrack",
+          trackId: "hg38-reference",
+          adapter: { type: "BgzipFastaAdapter", uri: "https://jbrowse.org/genomes/GRCh38/fasta/hg38.prefix.fa.gz" }
+        },
+        // This FASTA calls chromosome 11 "11" and UCSC's files call it "chr11". The alias table links the two.
+        refNameAliases: {
+          adapter: { type: "RefNameAliasAdapter", uri: "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromAlias.txt" }
+        }
+      },
+      tracks: [{
+        type: "FeatureTrack",
+        trackId: "mane",
+        name: "MANE Select transcripts",
+        assemblyNames: ["hg38"],
+        adapter: { type: "BigBedAdapter", uri: "https://hgdownload.soe.ucsc.edu/gbdb/hg38/mane/mane.1.0.bb" }
+      }],
+      location: "chr11:5,225,464..5,229,395"
+    });
+
+    state.session.view.showTrack("mane");
+    createRoot(document.getElementById("jbrowse")).render(
+      React.createElement(JBrowseLinearGenomeView, { viewState: state })
+    );
+  </script>
+</body>
+</html>

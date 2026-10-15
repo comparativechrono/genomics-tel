@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>igv.js activity: find the sickle-cell variant</title>
+  <script src="https://cdn.jsdelivr.net/npm/igv@3.8.9/dist/igv.min.js"
+          integrity="sha384-J2SJJANecDBpqn++zIO/AJY/Fpk64lYDp43ibq7bmQONxd9b80ZpvLKBrKdCtYIu"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; }
+    ol { margin: 4px 0 8px; padding-left: 1.4rem; }
+    li { margin: 2px 0; }
+    li.done { color: #0b6b50; }
+    li.done::after { content: "  ✓ done"; font-weight: 700; }
+    #feedback { min-height: 1.5em; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Activity: find the sickle-cell variant</h1>
+  <p>Sickle-cell disease is caused by one base change in the β-globin gene, <i>HBB</i>:
+     <code>NM_000518.5:c.20A&gt;T</code>, which changes glutamate to valine.</p>
+  <ol>
+    <li id="t1">Type <b>HBB</b> in the search box above the tracks and press Enter.</li>
+    <li id="t2">Zoom in until you can read single DNA letters (less than 150 bases across).</li>
+    <li id="t3">In the <b>Teaching variants</b> track, click the variant that causes sickle-cell disease.</li>
+    <li id="t4">Which person has sickle-cell disease, with two copies? Click their genotype under that variant.</li>
+  </ol>
+  <p id="feedback" role="status" aria-live="polite"></p>
+  <div id="igv"></div>
+
+  <script>
+    const UCSC = "https://hgdownload.soe.ucsc.edu";
+    const HBB = { chr: "chr11", start: 5225463, end: 5229395 };   // 0-based start, as igv.js reports
+    const HBS = { pos: 5227002, id: "rs334" };                    // 1-based, as in the VCF
+
+    const feedback = document.getElementById("feedback");
+    const done = id => document.getElementById(id).classList.add("done");
+    const say = text => { feedback.textContent = text; };
+
+    igv.createBrowser(document.getElementById("igv"), {
+      reference: {
+        id: "hg38",
+        name: "Human (GRCh38/hg38)",
+        twoBitURL: UCSC + "/goldenPath/hg38/bigZips/hg38.2bit",
+        chromSizesURL: UCSC + "/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+        cytobandURL: UCSC + "/goldenPath/hg38/database/cytoBandIdeo.txt.gz",
+        maneBbURL: UCSC + "/gbdb/hg38/mane/mane.1.0.bb",
+        maneTrixURL: UCSC + "/gbdb/hg38/mane/mane.1.0.ix"
+      },
+      loadDefaultGenomes: false,
+      showSampleNames: true,                 // label genotype rows with the people's names
+      locus: "chr11:5,000,000-5,500,000",
+      tracks: [
+        { name: "MANE Select transcripts", url: UCSC + "/gbdb/hg38/mane/mane.1.0.bb", format: "bigBed", labelField: "geneName2" },
+        {
+          name: "Teaching variants",
+          type: "variant",
+          format: "vcf",
+          // seven ClinVar variants with four fictional people (made-up genotypes), stored next to this page
+          url: "data/hbb-variants.grch38.vcf.gz",
+          indexURL: "data/hbb-variants.grch38.vcf.gz.tbi",
+          displayMode: "EXPANDED",
+          height: 90
+        }
+      ]
+    }).then(function (browser) {
+
+      // Fires whenever the view moves. Each frame has chr, start (0-based) and end.
+      browser.on("locuschange", function (frames) {
+        const f = frames[0];
+        const onHBB = f.chr === HBB.chr && f.start < HBB.end && f.end > HBB.start;
+        if (onHBB) done("t1");
+        if (onHBB && f.end - f.start < 150) done("t2");
+      });
+
+      // Fires when a feature is clicked. Return false to hide igv.js's own pop-up,
+      // a string of HTML to show your own, or undefined to keep the default.
+      browser.on("trackclick", function (track, data, genomicLocation) {
+        if (track.name !== "Teaching variants" || !data) return undefined;
+        const field = name => (data.find(d => d && d.name === name) || {}).value;
+        const onHbS = Math.floor(genomicLocation) + 1 === HBS.pos;
+
+        if (field("Sample")) {                               // a genotype was clicked
+          if (!onHbS) { say("That genotype is not at the sickle-cell variant. Click the column under rs334."); return false; }
+          if (field("Zygosity") === "Homozygous variant") {
+            done("t4");
+            say(field("Sample") + " has two copies of the HbS allele (" + field("Genotype") + "), so has sickle-cell disease.");
+          } else {
+            say(field("Sample") + " is " + (field("Zygosity") || "").toLowerCase() + ", so does not have sickle-cell disease. Try another row.");
+          }
+          return false;
+        }
+
+        const id = field("ID");
+        if (id === HBS.id) {
+          done("t3");
+          say("Correct. rs334 (chr11:5,227,002 T>A) changes codon 7 from GAG (glutamate) to GTG (valine).");
+          return false;
+        }
+        if (id) {
+          say("Not this one: that is " + id + " (" + (field("LEGACY") || "").replace(/_/g, " ") + "). Look a few bases away.");
+          return false;
+        }
+        return undefined;
+      });
+    });
+  </script>
+</body>
+</html>

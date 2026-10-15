@@ -1,0 +1,23 @@
+{%- comment -%}
+  An ad unit. Usage in a page: include ad.html slot="in_article"
+  Slots are set in _config.yml (adsense.slots). Google allows only the label
+  "Advertisements" or "Sponsored Links". Keep ad units away from examples,
+  buttons and navigation: put them between paragraphs of prose.
+{%- endcomment -%}
+{%- include ads-flags.html -%}
+{%- if page_ads -%}
+{%- assign slot_id = site.adsense.slots[include.slot] -%}
+{%- if ads_live and slot_id and slot_id != "" %}
+<aside class="ad" aria-label="Advertisements">
+  <p class="ad-label">Advertisements</p>
+  <div class="ad-space">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="{{ site.adsense.publisher_id }}" data-ad-slot="{{ slot_id }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+</aside>
+{%- elsif site.adsense.show_placeholders %}
+<aside class="ad ad--placeholder" aria-label="Advertisements">
+  <p class="ad-label">Advertisements</p>
+  <div class="ad-space"><p>Ad space ({{ include.slot | replace: '_', ' ' }}). No ads are loaded yet.</p></div>
+</aside>
+{%- endif -%}
+{%- endif -%}

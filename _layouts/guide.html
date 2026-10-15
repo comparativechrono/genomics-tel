@@ -1,0 +1,48 @@
+---
+layout: default
+---
+{%- comment -%}
+  Pages for one side of the site (educators or developers). Front matter:
+    title, lede (one or two sentences under the title)
+    topic: the slug of one of the eight topics in _data/topics.yml, if the page is about one
+    ads: false to leave out the ad at the end (use for short or list-like pages)
+{%- endcomment -%}
+{%- assign topic = nil -%}
+{%- if page.topic -%}{%- assign topic = site.data.topics | where: "slug", page.topic | first -%}{%- endif -%}
+{%- assign nav_item = site.data.nav[page.side] | where: "url", page.url | first -%}
+<div class="guide guide--{{ page.side }}">
+  {% include sidenav.html %}
+  <main id="main" class="guide-main">
+    <article class="prose">
+      <header class="guide-head">
+        {%- unless topic or page.url == '/educators/' or page.url == '/developers/' %}
+        <p class="side-label">{% if page.side == 'educators' %}For educators{% else %}For developers{% endif %}</p>
+        {%- endunless %}
+        <h1>{{ page.title }}</h1>
+        {%- if page.lede %}
+        <p class="lede">{{ page.lede }}</p>
+        {%- endif %}
+        {%- if topic %}
+        {% include strands.html %}
+        {%- elsif nav_item.pair %}
+        {%- assign pair_page = site.pages | where: "url", nav_item.pair | first %}
+        <nav class="strands" aria-label="Both sides of this page">
+          {%- if page.side == 'educators' %}
+          <a class="strand strand--teach" href="{{ page.url | relative_url }}" aria-current="page"><span class="strand-side">For educators</span><span class="strand-title">{{ page.title }}</span></a>
+          <a class="strand strand--build" href="{{ nav_item.pair | relative_url }}"><span class="strand-side">For developers</span><span class="strand-title">{{ pair_page.title }}</span></a>
+          {%- else %}
+          <a class="strand strand--teach" href="{{ nav_item.pair | relative_url }}"><span class="strand-side">For educators</span><span class="strand-title">{{ pair_page.title }}</span></a>
+          <a class="strand strand--build" href="{{ page.url | relative_url }}" aria-current="page"><span class="strand-side">For developers</span><span class="strand-title">{{ page.title }}</span></a>
+          {%- endif %}
+        </nav>
+        {%- endif %}
+      </header>
+      {{ content }}
+      {% include ad.html slot="end_of_article" %}
+    </article>
+  </main>
+  <aside class="toc" aria-labelledby="toc-title" hidden>
+    <p class="toc-title" id="toc-title">On this page</p>
+    <ol></ol>
+  </aside>
+</div>

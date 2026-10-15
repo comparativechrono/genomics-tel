@@ -1,0 +1,12 @@
+{%- comment -%}
+  Works out whether ads are switched on, from the adsense settings in _config.yml.
+  ads_live:  a publisher ID is set, so the AdSense code is loaded.
+  ads_shown: ads are live, or placeholders are switched on to preview where they go.
+  page_ads:  this page may carry ad units (pages can opt out with `ads: false`).
+{%- endcomment -%}
+{%- assign ads_live = false -%}
+{%- if site.adsense.publisher_id and site.adsense.publisher_id != "" -%}{%- assign ads_live = true -%}{%- endif -%}
+{%- assign ads_shown = ads_live -%}
+{%- if site.adsense.show_placeholders -%}{%- assign ads_shown = true -%}{%- endif -%}
+{%- assign page_ads = true -%}
+{%- if page.ads == false -%}{%- assign page_ads = false -%}{%- endif -%}

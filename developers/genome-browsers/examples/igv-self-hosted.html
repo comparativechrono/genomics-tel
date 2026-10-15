@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>igv.js: a 20 kb region around HBB, with every file hosted next to the page</title>
+  <script src="https://cdn.jsdelivr.net/npm/igv@3.8.9/dist/igv.min.js"
+          integrity="sha384-J2SJJANecDBpqn++zIO/AJY/Fpk64lYDp43ibq7bmQONxd9b80ZpvLKBrKdCtYIu"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; font-size: 14px; color: #3b4659; }
+  </style>
+</head>
+<body>
+  <h1>A 20 kb slice of chromosome 11 around HBB</h1>
+  <p>Position 1 of <code>HBB_region</code> is GRCh38 chr11:5,217,001, so add 5,217,000 to convert. Try typing HBD in the search box.</p>
+  <div id="igv"></div>
+
+  <script>
+    const DATA = "data/";                        // the folder next to this page
+
+    igv.createBrowser(document.getElementById("igv"), {
+      reference: {
+        id: "hbb-region",
+        name: "HBB region (GRCh38 chr11:5,217,001-5,237,000)",
+        fastaURL: DATA + "hbb-region.fa",
+        indexURL: DATA + "hbb-region.fa.fai",
+        wholeGenomeView: false
+      },
+      loadDefaultGenomes: false,                 // do not fetch IGV's list of hosted genomes
+      search: false,                             // do not send unknown names to IGV's search service
+      locus: "HBB_region:8,000-10,600",          // start with coordinates: names are searchable once tracks load
+      tracks: [
+        {
+          name: "Genes (RefSeq Select)",
+          url: DATA + "hbb-region.gff3",
+          format: "gff3",
+          indexed: false,                        // a small file, read whole
+          displayMode: "EXPANDED",
+          searchableFields: ["name", "gene"]     // so HBB, HBD or NM_000518.5 can be typed in the search box
+        },
+        {
+          name: "Variants (ClinVar, with four fictional people)",
+          type: "variant",
+          format: "vcf",
+          url: DATA + "hbb-variants.vcf.gz",
+          indexURL: DATA + "hbb-variants.vcf.gz.tbi",
+          height: 90
+        }
+      ],
+      roi: [{
+        name: "Sickle-cell variant (rs334)",
+        color: "rgba(220, 0, 0, 0.25)",
+        features: [{ chr: "HBB_region", start: 10001, end: 10002 }]
+      }],
+      showSampleNames: true
+    });
+  </script>
+</body>
+</html>

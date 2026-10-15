@@ -1,0 +1,27 @@
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="wordmark" href="{{ '/' | relative_url }}">
+      <svg class="wordmark-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <rect class="nt-a" x="2" y="5" width="3.6" height="14" rx="1.8"/>
+        <rect class="nt-c" x="7.5" y="2" width="3.6" height="20" rx="1.8"/>
+        <rect class="nt-g" x="13" y="7" width="3.6" height="10" rx="1.8"/>
+        <rect class="nt-t" x="18.4" y="4" width="3.6" height="16" rx="1.8"/>
+      </svg>
+      <span class="wordmark-text">genomics.tel</span>
+    </a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <ul>
+        <li><a class="nav-teach" href="{{ '/educators/' | relative_url }}"{% if page.side == 'educators' %} aria-current="true"{% endif %}>For educators</a></li>
+        <li><a class="nav-build" href="{{ '/developers/' | relative_url }}"{% if page.side == 'developers' %} aria-current="true"{% endif %}>For developers</a></li>
+        <li><a href="{{ '/sites/' | relative_url }}"{% if page.url == '/sites/' %} aria-current="page"{% endif %}>Our sites</a></li>
+        <li><a href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>About</a></li>
+      </ul>
+    </nav>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode">
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.6A8.4 8.4 0 0 1 9.4 4a8.4 8.4 0 1 0 10.6 10.6z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+    </button>
+  </div>
+</header>

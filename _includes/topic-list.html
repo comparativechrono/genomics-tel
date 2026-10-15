@@ -1,0 +1,7 @@
+{%- comment -%} The eight topics for one side. Usage: include topic-list.html side="educators" {%- endcomment -%}
+<ul class="topic-list">
+  {%- for t in site.data.topics %}
+  {%- if include.side == 'educators' %}{% assign t_title = t.teach_title %}{% assign t_text = t.teach %}{% else %}{% assign t_title = t.build_title %}{% assign t_text = t.build %}{% endif %}
+  <li><a class="topic-link" href="{{ '/' | append: include.side | append: '/' | append: t.slug | append: '/' | relative_url }}"><span class="topic-name">{{ t_title }}</span><span>{{ t_text }}</span></a></li>
+  {%- endfor %}
+</ul>

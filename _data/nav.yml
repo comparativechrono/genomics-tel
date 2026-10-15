@@ -1,0 +1,22 @@
+# Pages that apply to every topic, listed above the topics in each side's menu.
+# `pair` links a page to its counterpart on the other side, if there is one.
+
+educators:
+  - title: Overview
+    url: /educators/
+  - title: Planning a session
+    url: /educators/planning/
+  - title: Genomic data and ethics
+    url: /educators/data-and-ethics/
+  - title: Accessibility
+    url: /educators/accessibility/
+    pair: /developers/accessibility/
+
+developers:
+  - title: Overview
+    url: /developers/
+  - title: Getting started
+    url: /developers/getting-started/
+  - title: Accessibility
+    url: /developers/accessibility/
+    pair: /educators/accessibility/

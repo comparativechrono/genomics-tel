@@ -1,0 +1,60 @@
+# The eight topics. Each topic has two pages, one for each side of the site:
+#   educators/<slug>.md          (how to teach with the tool)
+#   developers/<slug>/index.md   (how to build it into a page, with live examples)
+# The home page, the two overview pages and the side menus are built from this list.
+
+- slug: genome-browsers
+  name: Genome browsers
+  teach_title: Teaching with genome browsers
+  build_title: Embedding genome browsers
+  teach: Show where a gene or variant sits, what surrounds it, and how the evidence is stacked up in tracks.
+  build: Put igv.js or JBrowse 2 in a page, load your own tracks, and link to UCSC and Ensembl.
+
+- slug: sequences
+  name: Sequences and alignments
+  teach_title: Teaching with sequences and alignments
+  build_title: Showing sequences and alignments
+  teach: Read sequences, compare them across species, and see why some positions never change.
+  build: Show sequences and multiple alignments with Nightingale, or in a few lines of SVG.
+
+- slug: structures
+  name: 3D structures
+  teach_title: Teaching with 3D structures
+  build_title: Embedding 3D structure viewers
+  teach: Find a variant in the folded protein, and read AlphaFold confidence properly.
+  build: Embed Mol*, 3Dmol.js or NGL, load PDB and AlphaFold models, and highlight residues.
+
+- slug: networks
+  name: Networks
+  teach_title: Teaching with networks
+  build_title: Drawing networks with Cytoscape.js
+  teach: Explore interactions and pathways without reading meaning into the layout.
+  build: Draw interactive networks with Cytoscape.js and load them from STRING or Cytoscape.
+
+- slug: galaxy
+  name: Galaxy
+  teach_title: Teaching with Galaxy
+  build_title: Working with Galaxy
+  teach: Run real analyses in class with nothing to install, and keep a record of every step.
+  build: Link into Galaxy, list training tutorials live, and set up a class with BioBlend.
+
+- slug: r-and-python
+  name: R and Python in the browser
+  teach_title: Teaching with R and Python in the browser
+  build_title: Running R and Python in a page
+  teach: Let students write and run code from the first minute, on any computer.
+  build: Run R with webR and Python with Pyodide in a page, or publish a JupyterLite site.
+
+- slug: trees
+  name: Phylogenetic trees
+  teach_title: Teaching with phylogenetic trees
+  build_title: Drawing phylogenetic trees
+  teach: Teach students to read a tree by its branching, not by the order of its tips.
+  build: Draw trees from Newick files with phylotree.js or d3, and link to Nextstrain.
+
+- slug: charts
+  name: Charts of genomic data
+  teach_title: Teaching with charts of genomic data
+  build_title: Charting genomic data
+  teach: Read Manhattan plots, volcano plots and heatmaps, and know what their thresholds mean.
+  build: Make interactive Manhattan plots, volcano plots and heatmaps with Vega-Lite.

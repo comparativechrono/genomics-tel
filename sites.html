@@ -1,0 +1,23 @@
+---
+title: Our sites
+lede: Teaching sites, tools and course materials we have made. They are all free to use, and the code for each is on GitHub.
+permalink: /sites/
+---
+{%- for group in site.data.sites %}
+<h2 id="{{ group.group | slugify }}">{{ group.group }}</h2>
+<p>{{ group.intro }}</p>
+<ul class="site-list">
+  {%- for s in group.items %}
+  <li class="site-item">
+    <h3>{% if s.url %}<a href="{{ s.url }}">{{ s.name }}</a>{% else %}<a href="{{ s.github }}">{{ s.name }}</a>{% endif %}</h3>
+    <p class="site-meta">For {{ s.for }}</p>
+    <p>{{ s.description }}</p>
+    {%- if s.notes %}<p class="site-meta">{{ s.notes }}</p>{% endif %}
+    <p class="site-links">
+      {%- if s.url %}<a href="{{ s.url }}">Open the site<span class="visually-hidden">: {{ s.name }}</span></a>{% endif %}
+      {%- if s.github %}<a href="{{ s.github }}">{% if s.url %}Code on GitHub{% else %}Open on GitHub{% endif %}<span class="visually-hidden"> for {{ s.name }}</span></a>{% endif %}
+    </p>
+  </li>
+  {%- endfor %}
+</ul>
+{%- endfor %}

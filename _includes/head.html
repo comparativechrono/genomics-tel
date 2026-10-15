@@ -1,0 +1,17 @@
+{%- include ads-flags.html -%}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  /* Apply a saved light/dark choice before the page paints (see assets/js/site.js) */
+  (function (d) { var t = null; try { t = localStorage.getItem('gt-theme'); } catch (e) {} if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t); })(document.documentElement);
+</script>
+<link rel="preload" href="{{ '/assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+<link rel="icon" href="{{ '/assets/img/favicon.svg' | relative_url }}" type="image/svg+xml">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1726" media="(prefers-color-scheme: dark)">
+{% seo %}
+{%- if ads_live and page_ads %}
+<meta name="google-adsense-account" content="{{ site.adsense.publisher_id }}">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsense.publisher_id }}" crossorigin="anonymous"></script>
+{%- endif %}

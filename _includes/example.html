@@ -1,0 +1,45 @@
+{%- comment -%}
+  A live example with its code, both from the same file.
+
+  Usage in a page: include example.html file="examples/igv-basic.html" title="A genome browser on one gene"
+
+  file     path of a standalone HTML file, relative to the page (required)
+  title    what the example shows (required)
+  height   height of the live view in pixels (default 460)
+  caption  a sentence or two under the example (Markdown allowed)
+  load     "click" to wait for a click before loading (for large downloads)
+  note     text shown before a "click" example loads
+  open     false to start with the code folded away
+
+  Example files must not contain two opening curly braces, or a curly brace
+  followed by a percent sign, because Jekyll reads the file as a template when
+  it shows the code. tools/check.py tests for this.
+{%- endcomment -%}
+{%- assign ex_name = include.file | split: '/' | last -%}
+{%- assign ex_id = ex_name | replace: '.html', '' -%}
+<figure class="example" id="example-{{ ex_id }}">
+  <div class="example-bar">
+    <p class="example-title">{{ include.title }}</p>
+    <p class="example-links">
+      <a href="{{ include.file }}" target="_blank" rel="noopener">Open in a new tab<span class="visually-hidden">: {{ include.title }}</span></a>
+      <a href="{{ include.file }}" download>Download<span class="visually-hidden"> {{ ex_name }}</span></a>
+    </p>
+  </div>
+  <div class="example-stage" style="--stage-h: {{ include.height | default: 460 }}px">
+    {%- if include.load == "click" %}
+    <div class="example-start">
+      <p>{{ include.note | default: "This example downloads its software when it starts, so it waits for you." }}</p>
+      <button type="button" class="button" data-load-example="{{ include.file }}" data-title="Live example: {{ include.title | escape }}">Load the example</button>
+    </div>
+    {%- else %}
+    <iframe src="{{ include.file }}" title="Live example: {{ include.title | escape }}" loading="lazy" allow="fullscreen; clipboard-write"></iframe>
+    {%- endif %}
+  </div>
+  {%- if include.caption %}
+  <figcaption class="example-caption">{{ include.caption | markdownify }}</figcaption>
+  {%- endif %}
+  <details class="example-code"{% unless include.open == false %} open{% endunless %}>
+    <summary>Code <span class="example-file">{{ ex_name }}</span></summary>
+{% capture ex_src %}{% include_relative {{ include.file }} %}{% endcapture %}{% highlight html %}{{ ex_src }}{% endhighlight %}
+  </details>
+</figure>

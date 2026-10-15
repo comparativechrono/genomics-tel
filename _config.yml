@@ -1,0 +1,87 @@
+# ─────────────────────────────────────────────────────────────
+#  genomics.tel — site settings
+#  GitHub Pages builds the site from this repository with Jekyll.
+#  After editing this file, push to GitHub and the site rebuilds.
+# ─────────────────────────────────────────────────────────────
+
+title: genomics.tel
+tagline: Interactive genomics for teaching
+description: >-
+  Guides for educators and developers on teaching with interactive genomics:
+  genome browsers, sequences and alignments, 3D structures, networks, Galaxy,
+  R and Python in the browser, phylogenetic trees and charts, with live
+  examples and code you can copy.
+lang: en-GB
+
+# Leave url and baseurl unset. GitHub Pages fills them in: the site is at
+# https://comparativechrono.github.io/genomics-tel/ until the custom domain is
+# attached, and at https://www.genomics.tel/ afterwards. Links are written so
+# that both work.
+
+repository: comparativechrono/genomics-tel
+
+owner:
+  name: Tim Hearn
+  website: https://comparativechrono.org
+  github: https://github.com/comparativechrono
+  email: tjh70@cam.ac.uk
+
+# ─── Google AdSense ──────────────────────────────────────────
+# Leave publisher_id empty and no ad code is loaded anywhere.
+# When AdSense approves the site, paste the IDs from AdSense → Ads → By ad unit:
+#   publisher_id: ca-pub-1234567890123456
+#   slots: the data-ad-slot number of each display ad unit
+# show_placeholders marks where ads will appear (grey boxes, nothing loaded),
+# for checking the layout before launch. Set it to false once ads are live.
+adsense:
+  publisher_id: ""
+  slots:
+    in_article: ""
+    end_of_article: ""
+  show_placeholders: true
+
+# ─── Build settings (no need to change) ──────────────────────
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    disable: false
+  auto_ids: true
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+permalink: pretty
+
+# No theme: the site's own layouts and styles are in _layouts and assets.
+theme: null
+
+exclude:
+  - README.md
+  - CONTRIBUTING.md
+  - LICENSE.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - tools
+  - node_modules
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
+  - scope:
+      path: "educators"
+    values:
+      layout: guide
+      side: educators
+  - scope:
+      path: "developers"
+    values:
+      layout: guide
+      side: developers

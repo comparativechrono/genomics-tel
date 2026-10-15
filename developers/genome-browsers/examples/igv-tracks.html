@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>igv.js: public tracks, navigation buttons and a highlighted variant</title>
+  <script src="https://cdn.jsdelivr.net/npm/igv@3.8.9/dist/igv.min.js"
+          integrity="sha384-J2SJJANecDBpqn++zIO/AJY/Fpk64lYDp43ibq7bmQONxd9b80ZpvLKBrKdCtYIu"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 8px; }
+    button, input { font: inherit; font-size: 14px; padding: 4px 9px; }
+    form { display: inline-flex; gap: 6px; align-items: center; }
+    #status { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #3b4659; margin: 0 0 6px; }
+  </style>
+</head>
+<body>
+  <h1>HBB with transcripts, ClinVar and conservation</h1>
+
+  <div class="controls" role="group" aria-label="Places to go">
+    <button type="button" data-locus="HBB">HBB gene</button>
+    <button type="button" data-locus="chr11:5,226,930-5,227,071">HBB exon 1</button>
+    <button type="button" data-locus="chr11:5,226,982-5,227,022">Sickle-cell variant</button>
+    <button type="button" data-locus="chr11:5,225,000-5,310,000">β-globin cluster</button>
+    <form id="goto">
+      <label for="where">Gene or position</label>
+      <input id="where" value="HBD" size="18">
+      <button type="submit">Go</button>
+    </form>
+  </div>
+  <div class="controls" role="group" aria-label="Extra tracks">
+    <button type="button" id="add-ccre">Add ENCODE regulatory elements</button>
+    <button type="button" id="add-1kg">Add 1000 Genomes genotypes (slow to draw)</button>
+  </div>
+  <p id="status" aria-live="polite">Loading…</p>
+  <div id="igv"></div>
+
+  <script>
+    const UCSC = "https://hgdownload.soe.ucsc.edu";
+
+    // GRCh38 defined from UCSC's public files, so the page does not depend on IGV's genome list.
+    // The MANE files make gene names searchable.
+    const reference = {
+      id: "hg38",
+      name: "Human (GRCh38/hg38)",
+      twoBitURL: UCSC + "/goldenPath/hg38/bigZips/hg38.2bit",
+      chromSizesURL: UCSC + "/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+      cytobandURL: UCSC + "/goldenPath/hg38/database/cytoBandIdeo.txt.gz",
+      chromosomeOrder: "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY",
+      maneBbURL: UCSC + "/gbdb/hg38/mane/mane.1.0.bb",
+      maneTrixURL: UCSC + "/gbdb/hg38/mane/mane.1.0.ix"
+    };
+
+    const tracks = [
+      {
+        name: "MANE Select transcripts",
+        url: UCSC + "/gbdb/hg38/mane/mane.1.0.bb",
+        format: "bigBed",
+        displayMode: "EXPANDED",
+        labelField: "geneName2",            // label transcripts with the gene name
+        color: "#1f4e9c"
+      },
+      {
+        name: "ClinVar short variants",     // UCSC updates this file every week at the same address
+        url: UCSC + "/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
+        format: "bigBed",
+        displayMode: "SQUISHED",
+        visibilityWindow: 500000            // only fetch when 500 kb or less is in view
+      },
+      {
+        name: "Conservation (phyloP, 100 vertebrates)",
+        url: UCSC + "/goldenPath/hg38/phyloP100way/hg38.phyloP100way.bw",
+        format: "bigWig",
+        color: "#2b8a3e",
+        altColor: "#c92a2a",
+        min: -4,
+        max: 8,
+        height: 60
+      }
+    ];
+
+    // Regions of interest use 0-based starts: this shades the single base chr11:5,227,002
+    const roi = [{
+      name: "HbS: rs334, chr11:5,227,002 T>A",
+      color: "rgba(220, 0, 0, 0.25)",
+      features: [{ chr: "chr11", start: 5227001, end: 5227002 }]
+    }];
+
+    igv.createBrowser(document.getElementById("igv"), {
+      reference,
+      loadDefaultGenomes: false,
+      locus: "HBB",
+      tracks,
+      roi
+    }).then(function (browser) {
+      const status = document.getElementById("status");
+      // locuschange fires whenever the view moves, with one "frame" per region on screen
+      browser.on("locuschange", frames => {
+        status.textContent = "Showing " + frames.map(f => f.getLocusString()).join(", ");
+      });
+      status.textContent = "Showing " + browser.currentLoci();
+
+      document.querySelectorAll("button[data-locus]").forEach(b =>
+        b.addEventListener("click", () => browser.search(b.dataset.locus)));
+
+      document.getElementById("goto").addEventListener("submit", e => {
+        e.preventDefault();
+        browser.search(document.getElementById("where").value);
+      });
+
+      document.getElementById("add-ccre").addEventListener("click", async e => {
+        e.target.disabled = true;
+        await browser.loadTrack({
+          name: "ENCODE candidate regulatory elements",
+          url: UCSC + "/gbdb/hg38/encode3/ccre/encodeCcreCombined.bb",
+          format: "bigBed",
+          displayMode: "COLLAPSED"
+        });
+      });
+
+      // A public VCF with its tabix index: 3,202 people from the 1000 Genomes 30x panel
+      const KG = "https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/" +
+                 "20220422_3202_phased_SNV_INDEL_SV/1kGP_high_coverage_Illumina.chr11.filtered.SNV_INDEL_SV_phased_panel.vcf.gz";
+      document.getElementById("add-1kg").addEventListener("click", async e => {
+        e.target.disabled = true;
+        await browser.loadTrack({
+          name: "1000 Genomes 30x (3,202 people)",
+          type: "variant",
+          format: "vcf",
+          url: KG,
+          indexURL: KG + ".tbi",
+          displayMode: "SQUISHED",
+          visibilityWindow: 20000,          // only fetch when 20 kb or less is in view
+          height: 250
+        });
+      });
+    });
+  </script>
+</body>
+</html>

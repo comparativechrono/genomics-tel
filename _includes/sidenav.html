@@ -1,0 +1,21 @@
+{%- comment -%} The menu down the side of guide pages, for one side of the site. {%- endcomment -%}
+{%- assign side = page.side -%}
+{%- assign general = site.data.nav[side] -%}
+{%- if side == 'educators' -%}{%- assign side_name = 'For educators' -%}{%- else -%}{%- assign side_name = 'For developers' -%}{%- endif -%}
+<nav class="sidenav" aria-label="{{ side_name }}">
+  <details class="sidenav-details" data-sidenav open>
+    <summary class="sidenav-summary">{{ side_name }}</summary>
+    <ul class="sidenav-list">
+      {%- for item in general %}
+      <li><a href="{{ item.url | relative_url }}"{% if page.url == item.url %} aria-current="page"{% endif %}>{{ item.title }}</a></li>
+      {%- endfor %}
+    </ul>
+    <p class="sidenav-heading" id="sidenav-topics-{{ side }}">Topics</p>
+    <ul class="sidenav-list" aria-labelledby="sidenav-topics-{{ side }}">
+      {%- for t in site.data.topics %}
+      {%- assign t_url = '/' | append: side | append: '/' | append: t.slug | append: '/' %}
+      <li><a href="{{ t_url | relative_url }}"{% if page.url == t_url %} aria-current="page"{% endif %}>{{ t.name }}</a></li>
+      {%- endfor %}
+    </ul>
+  </details>
+</nav>

@@ -1,0 +1,14 @@
+{%- comment -%}
+  The two sides of a topic, shown at the top of each topic page.
+  Expects `topic` (an entry from _data/topics.yml) and page.side.
+{%- endcomment -%}
+<nav class="strands" aria-label="Both sides of this topic">
+  <a class="strand strand--teach" href="{{ '/educators/' | append: topic.slug | append: '/' | relative_url }}"{% if page.side == 'educators' %} aria-current="page"{% endif %}>
+    <span class="strand-side">For educators</span>
+    <span class="strand-title">{{ topic.teach_title }}</span>
+  </a>
+  <a class="strand strand--build" href="{{ '/developers/' | append: topic.slug | append: '/' | relative_url }}"{% if page.side == 'developers' %} aria-current="page"{% endif %}>
+    <span class="strand-side">For developers</span>
+    <span class="strand-title">{{ topic.build_title }}</span>
+  </a>
+</nav>
