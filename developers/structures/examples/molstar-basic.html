@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mol*: a 3D viewer open at haemoglobin</title>
+  <!-- Mol* 5.12.0 from jsDelivr: one stylesheet and one script. The integrity hashes stop changed files from running. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/molstar@5.12.0/build/viewer/molstar.css"
+        integrity="sha384-RIontCdJN53gEl2fmiHN+4bscIBvaUaOiCeeGktXqmFqdEBF+COnSdt9O4IKFSvq"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/molstar@5.12.0/build/viewer/molstar.js"
+          integrity="sha384-Mx9hwknXam3/nCj5WsEpyvr6nqiUp8vVLEh0ZG9OXpFepTFhVKTdEOJ4JG0XjMLf"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    /* Mol* fills its container, so the container needs a height and a position */
+    #viewer { position: relative; height: 400px; }
+  </style>
+</head>
+<body>
+  <h1>Human haemoglobin (PDB 4HHB)</h1>
+  <div id="viewer" role="region" aria-label="Interactive 3D model of human deoxyhaemoglobin, PDB entry 4HHB"></div>
+
+  <script>
+    molstar.Viewer.create("viewer", {
+      layoutIsExpanded: false,     // stay inside the page rather than filling the window
+      layoutShowControls: false,   // no side panels or sequence
+      viewportShowAnimation: false
+    }).then(viewer => viewer.loadPdb("4hhb"));   // fetches https://models.rcsb.org/4hhb.bcif
+  </script>
+</body>
+</html>

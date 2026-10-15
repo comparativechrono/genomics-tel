@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3Dmol.js: haemoglobin with the sickle-cell residue labelled, without writing JavaScript</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    p { margin: 6px 0 0; font-size: 14px; color: #3b4659; }
+    /* 3Dmol.js needs a positioned container with a size */
+    .viewer_3Dmoljs { position: relative; height: 400px; }
+  </style>
+</head>
+<body>
+  <h1>Haemoglobin (PDB 4HHB), with no JavaScript written</h1>
+
+  <!-- Every element with the class viewer_3Dmoljs becomes a viewer, set up by its data- attributes.
+       data-selectN chooses atoms and data-styleN says how to draw them, applied in order.
+       A style replaces the earlier style of those atoms, so style 2 repeats the cartoon.
+       data-labelresN labels each chosen residue with its name and number. -->
+  <div class="viewer_3Dmoljs" role="img"
+       aria-label="Haemoglobin with alpha chains in grey, beta chains in blue, haem groups in orange, and glutamate 6 of each beta chain as labelled red spheres"
+       data-pdb="4HHB"
+       data-backgroundcolor="0xffffff"
+       data-style="cartoon:color=#b8b8b8"
+       data-select1="chain:B,D" data-style1="cartoon:color=#4a7fc1"
+       data-select2="chain:B,D;resi:6" data-style2="cartoon:color=#4a7fc1;sphere:color=#d7263d"
+       data-labelres2="fontSize:14;fontColor:black;backgroundColor:white;backgroundOpacity:0.85;inFront:true"
+       data-select3="resn:HEM" data-style3="stick:colorscheme=orangeCarbon"></div>
+  <p>α chains grey, β chains blue, haem orange. The red spheres are glutamate 6 of each β chain.</p>
+
+  <!-- 3Dmol.js 2.5.5. Loaded after the viewer element; it finds the element and draws it. -->
+  <script src="https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js"
+          integrity="sha384-OsczYbldvrHgslr9fFp/i4GiLSeuw9l+QIlv99ITw8soOwXcoGeflFMLg+CU/X1d"
+          crossorigin="anonymous"></script>
+</body>
+</html>

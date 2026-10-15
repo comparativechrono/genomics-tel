@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vega-Lite: a volcano plot with cut-offs you can move</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@6.4.0/build/vega.min.js"
+          integrity="sha384-VKdcJr3ZaBIJMbVcopTAI/JEuUkSY6qnwVu9iLuw0DnQ9gQ1JjsfZJhXFQAgNi43"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4.3/build/vega-lite.min.js"
+          integrity="sha384-9/70gNCfOu6G7xXvkdreMfuqAEsoaGJVXV2BN/JLRXkSmcGvnMqtsRx8HZtUWAvI"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.3.0/build/vega-embed.min.js"
+          integrity="sha384-Muy1QRxYFeNrA1zShc1KtN4OfipkR/61gt+HWqN57c1Zxu3Oe16TsilsruVVjfKL"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 0 0 6px; font-size: 14px; }
+    .controls div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+    label { white-space: nowrap; }
+    select, input { font: inherit; max-width: 100%; }
+    output { font-variant-numeric: tabular-nums; min-width: 9.5em; }
+    #status { font-weight: 600; }
+    #chart { width: 100%; }
+    summary { cursor: pointer; font-weight: 600; }
+    .scroll { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 13px; margin: 6px 0; }
+    th, td { padding: 3px 12px 3px 0; text-align: left; border-bottom: 1px solid #dde2ea; white-space: nowrap; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .credit { font-size: 13px; color: #3b4659; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Differential expression in mouse luminal cells: pregnant against lactating</h1>
+  <div class="controls">
+    <div>
+      <label for="lfc">Fold-change cut-off</label>
+      <input type="range" id="lfc" min="0" max="3" step="0.01" value="0.58">
+      <output id="lfc-out" for="lfc"></output>
+    </div>
+    <div>
+      <label for="pcut">p-value cut-off</label>
+      <select id="pcut"><option>0.05</option><option selected>0.01</option><option>0.001</option></select>
+    </div>
+    <div>
+      <label for="ptype">Use</label>
+      <select id="ptype">
+        <option value="adj" selected>adjusted p-values (false discovery rate)</option>
+        <option value="raw">raw p-values, not adjusted</option>
+      </select>
+    </div>
+  </div>
+  <p id="status" role="status" aria-live="polite">Loading the results table (1.1 MB)…</p>
+  <div id="chart"></div>
+  <details>
+    <summary>The 10 genes with the smallest adjusted p-values, as a table</summary>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Gene</th><th>Name</th><th class="num">log₂ fold change</th><th class="num">Adjusted p</th></tr></thead>
+        <tbody id="top"></tbody>
+      </table>
+    </div>
+  </details>
+  <p class="credit">Data: limma-voom results from the Galaxy Training Network's “RNA-seq genes to pathways” training data
+    (Doyle M, Zenodo, <a href="https://doi.org/10.5281/zenodo.2596382" target="_blank" rel="noopener">doi:10.5281/zenodo.2596382</a>, CC BY 4.0),
+    from Fu NY et al. (2015) <i>Nature Cell Biology</i> 17: 365–375. Five of the nine columns, stored next to this page.</p>
+
+  <script>
+    // A copy of the columns this page needs, stored next to it (see data/README.txt). To read the full
+    // table straight from Zenodo, use this address instead; "?download=1" links do not allow use from other sites:
+    // https://zenodo.org/api/records/2596382/files/limma-voom_luminalpregnant-luminallactate/content
+    const URL = "data/gtn-luminal-pregnant-lactating.tsv";
+    const lfc = document.getElementById("lfc"), pcut = document.getElementById("pcut"), ptype = document.getElementById("ptype");
+    const status = document.getElementById("status");
+
+    function describeCut() {
+      const v = +lfc.value;
+      document.getElementById("lfc-out").textContent = "|log₂FC| > " + v.toFixed(2) + " (" + (2 ** v).toFixed(1) + "-fold)";
+    }
+    describeCut();
+
+    fetch(URL).then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(async text => {
+      // vega.read parses the tab-separated table; parse: "auto" turns numbers into numbers
+      const genes = vega.read(text, { type: "tsv", parse: "auto" }).map(r => ({
+        gene: r.SYMBOL !== "NA" ? r.SYMBOL : "Entrez " + r.ENTREZID,
+        name: r.GENENAME, lfc: r.logFC, p: r["P.Value"], fdr: r["adj.P.Val"]   // names with dots need brackets
+      }));
+
+      const spec = {
+        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+        description: "Volcano plot of " + genes.length.toLocaleString("en-GB") + " mouse genes. Each point is a gene: across, the log2 fold change " +
+          "between luminal cells of pregnant and lactating mice; up, minus log10 of the p-value. Genes past both cut-offs are coloured: " +
+          "red when higher in pregnancy, blue when higher in lactation.",
+        width: "container", height: 330,
+        // Parameters: the page changes these with view.signal() when the controls change
+        params: [ { name: "lfcCut", value: +lfc.value }, { name: "pCut", value: +pcut.value }, { name: "useAdj", value: true } ],
+        data: { values: genes },
+        transform: [
+          { calculate: "useAdj ? datum.fdr : datum.p", as: "pUsed" },
+          { calculate: "-log(datum.pUsed) / LN10", as: "y" },               // Vega has no log10, so divide by ln(10)
+          { calculate: "datum.pUsed < pCut && datum.lfc > lfcCut ? 'Higher in pregnancy' : " +
+                       "datum.pUsed < pCut && datum.lfc < -lfcCut ? 'Higher in lactation' : 'Not past both cut-offs'", as: "group" }
+        ],
+        layer: [
+          { mark: { type: "circle", size: 14, opacity: 0.75, aria: false },
+            encoding: {
+              x: { field: "lfc", type: "quantitative", title: "log₂ fold change (pregnant − lactating)", axis: { tickMinStep: 1 } },
+              y: { field: "y", type: "quantitative", title: "−log₁₀(p)" },
+              color: { field: "group", type: "nominal", title: null,
+                       legend: { orient: "top", columns: { expr: "width < 420 ? 2 : 3" } },   // wrap on phones
+                       scale: { domain: ["Higher in lactation", "Not past both cut-offs", "Higher in pregnancy"],
+                                range: ["#2a78d6", "#b9b8b0", "#e34948"] } },
+              tooltip: [ { field: "gene", title: "Gene" }, { field: "name", title: "Name" },
+                         { field: "lfc", title: "log₂ fold change", format: ".2f" },
+                         { field: "p", title: "Raw p", format: ".2e" }, { field: "fdr", title: "Adjusted p", format: ".2e" } ] } },
+          { // label the three genes furthest out on each side (fold change times -log10 p), placed towards the middle
+            transform: [ { filter: "datum.group !== 'Not past both cut-offs'" },
+                         { calculate: "abs(datum.lfc) * datum.y", as: "score" },
+                         { window: [ { op: "row_number", as: "rank" } ], groupby: ["group"], sort: [ { field: "score", order: "descending" } ] },
+                         { filter: "datum.rank <= 3" } ],
+            mark: { type: "text", dy: -6, fontSize: 11, fontStyle: "italic", color: "#172033",
+                    align: { expr: "datum.lfc > 0 ? 'right' : 'left'" }, dx: { expr: "datum.lfc > 0 ? -3 : 3" } },
+            encoding: { x: { field: "lfc", type: "quantitative" }, y: { field: "y", type: "quantitative" },
+                        text: { field: "gene" }, description: { field: "gene" } } },
+          { // the two fold-change cut-offs, recalculated whenever lfcCut changes
+            data: { values: [ { side: -1 }, { side: 1 } ] },
+            transform: [ { calculate: "datum.side * lfcCut", as: "x" } ],
+            mark: { type: "rule", strokeDash: [4, 4], color: "#3b4659", aria: false },
+            encoding: { x: { field: "x", type: "quantitative" } } },
+          { // the p-value cut-off, with a label saying which kind of p-value it is
+            data: { values: [ { } ] },
+            transform: [ { calculate: "-log(pCut) / LN10", as: "y" },
+                         { calculate: "(useAdj ? 'adjusted p = ' : 'raw p = ') + pCut", as: "label" } ],
+            layer: [
+              { mark: { type: "rule", strokeDash: [4, 4], color: "#3b4659", aria: false },
+                encoding: { y: { field: "y", type: "quantitative" } } },
+              { mark: { type: "text", align: "right", baseline: "bottom", x: "width", dy: -3, fontSize: 11, color: "#172033", aria: false },
+                encoding: { y: { field: "y", type: "quantitative" }, text: { field: "label" } } } ] }
+        ],
+        config: { font: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
+      };
+      const { view } = await vegaEmbed("#chart", spec, { actions: false });
+
+      // Count the genes past both cut-offs, for the status line (and for screen readers)
+      function count() {
+        const cut = +lfc.value, alpha = +pcut.value, adj = ptype.value === "adj";
+        let up = 0, down = 0;
+        for (const g of genes) {
+          if ((adj ? g.fdr : g.p) >= alpha) continue;
+          if (g.lfc > cut) up++;
+          else if (g.lfc < -cut) down++;
+        }
+        status.textContent = (up + down).toLocaleString("en-GB") + " of " + genes.length.toLocaleString("en-GB") +
+          " genes pass both cut-offs: " + up.toLocaleString("en-GB") + " higher in pregnancy and " +
+          down.toLocaleString("en-GB") + " higher in lactation.";
+      }
+      function update() {
+        count();
+        view.signal("lfcCut", +lfc.value).signal("pCut", +pcut.value).signal("useAdj", ptype.value === "adj").runAsync();
+      }
+      lfc.addEventListener("input", describeCut);    // move the readout while dragging…
+      lfc.addEventListener("change", update);        // …and redraw 15,804 points when the slider is let go
+      pcut.addEventListener("change", update);
+      ptype.addEventListener("change", update);
+      count();
+
+      // The text version: the ten genes with the smallest adjusted p-values
+      const tbody = document.getElementById("top");
+      genes.slice().sort((a, b) => a.fdr - b.fdr).slice(0, 10).forEach(g => {
+        const row = tbody.insertRow();
+        [g.gene, g.name, g.lfc.toFixed(2), g.fdr.toExponential(1)].forEach((text, i) => {
+          const cell = row.insertCell();
+          cell.textContent = text;
+          if (i >= 2) cell.className = "num";
+        });
+      });
+    }).catch(err => {
+      status.textContent = "The results table did not load (" + err.message + ").";
+    });
+  </script>
+</body>
+</html>

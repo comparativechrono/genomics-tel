@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One network, six layouts</title>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.34.3/dist/cytoscape.min.js"
+          integrity="sha384-qPKQxl9uMXOw7vSTUDAnpUilhLuulovw6P5Z4db4bqxW5VhumS7przEmHX0iM0Oc"
+          crossorigin="anonymous"></script>
+  <!-- fcose needs layout-base, then cose-base, then cytoscape-fcose, in this order -->
+  <script src="https://cdn.jsdelivr.net/npm/layout-base@2.0.1/layout-base.js"
+          integrity="sha384-5E2lB9AIGE6LRCnOOSTnZRlYZFZ01iMeN2fw97Z1r4Z/kXALxKw2AC+ZzQqoeDsG"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cose-base@2.2.0/cose-base.js"
+          integrity="sha384-RswRBkrMsPUYpJLbZ1CVA08zbNzAkykE2oGJTujBwfjWNdfxv2WVjLJNqv1LhAOp"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-fcose@2.2.0/cytoscape-fcose.js"
+          integrity="sha384-uk5Wbjq1+KqUdHO30w7N7GrEGdzBhaJeW9o/ANF6v9+yx3M/cBmoX51C000JNCUf"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 4px; }
+    p { margin: 0 0 6px; }
+    .note { font-size: 14px; color: #3b4659; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    button[aria-pressed="true"] { background: #172033; color: #fff; border: 1px solid #172033; border-radius: 3px; }
+    #about { min-height: 3em; font-size: 14px; }
+    #cy { height: 360px; border: 1px solid #c3cbd8; border-radius: 6px; }
+    #degrees { font-size: 14px; color: #3b4659; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>The same ten proteins, drawn six ways</h1>
+  <p class="note">Ten proteins and the 31 links between them in STRING 12.5 (combined score at least 0.7). Only the positions change.</p>
+
+  <div class="toolbar" role="group" aria-label="Layouts">
+    <button type="button" data-layout="fcose">fcose</button>
+    <button type="button" data-layout="cose">cose</button>
+    <button type="button" data-layout="concentric">concentric</button>
+    <button type="button" data-layout="breadthfirst">breadthfirst</button>
+    <button type="button" data-layout="circle">circle</button>
+    <button type="button" data-layout="random">random</button>
+  </div>
+  <p id="about" aria-live="polite"></p>
+  <div id="cy" role="img" aria-label="Network of ten proteins. The line under the network gives each protein's number of links."></div>
+  <p id="degrees"></p>
+
+  <script>
+    const PROTEINS = ["TP53", "MDM2", "MDM4", "ATM", "CHEK2", "CDKN1A", "BAX", "BBC3", "CDKN2A", "EP300"];
+    // [protein, protein, STRING combined score], from data/string-p53-network.json
+    const LINKS = [
+      ["MDM2", "BAX", 0.732], ["MDM2", "CHEK2", 0.994], ["MDM2", "ATM", 0.995], ["MDM2", "EP300", 0.999],
+      ["MDM2", "TP53", 0.999], ["MDM2", "MDM4", 0.999], ["MDM2", "CDKN1A", 0.999], ["MDM2", "CDKN2A", 0.999],
+      ["EP300", "ATM", 0.72], ["EP300", "CDKN2A", 0.794], ["EP300", "CDKN1A", 0.991], ["EP300", "TP53", 0.999],
+      ["TP53", "BBC3", 0.982], ["TP53", "ATM", 0.999], ["TP53", "BAX", 0.999], ["TP53", "MDM4", 0.999],
+      ["TP53", "CHEK2", 0.999], ["TP53", "CDKN1A", 0.999], ["TP53", "CDKN2A", 0.999], ["ATM", "CDKN2A", 0.829],
+      ["ATM", "CDKN1A", 0.861], ["ATM", "MDM4", 0.976], ["ATM", "CHEK2", 0.999], ["BAX", "CDKN1A", 0.732],
+      ["BAX", "BBC3", 0.914], ["MDM4", "CDKN1A", 0.895], ["MDM4", "CHEK2", 0.968], ["MDM4", "CDKN2A", 0.972],
+      ["CHEK2", "CDKN1A", 0.85], ["CDKN1A", "BBC3", 0.798], ["CDKN1A", "CDKN2A", 0.961]
+    ];
+
+    // What the positions mean in each layout
+    const LAYOUTS = {
+      fcose: { options: { name: "fcose", randomize: true, nodeRepulsion: 9000, idealEdgeLength: 90 },
+               about: "fcose (an extension): linked proteins pull together and all proteins push apart, starting from random positions. Press it again: the picture changes, the links do not." },
+      cose: { options: { name: "cose", randomize: true },
+              about: "cose (built in): another layout of pulling and pushing, also from a random start. Distances between proteins are not measurements." },
+      concentric: { options: { name: "concentric", concentric: node => node.degree(), minNodeSpacing: 20 },
+                    about: "concentric (built in): rings by number of links, most in the middle. Here position does show something, because we told it to." },
+      breadthfirst: { options: { name: "breadthfirst", roots: "#TP53", spacingFactor: 1.1 },
+                      about: "breadthfirst (built in): rows by the number of steps from TP53, which we chose as the root. Every other protein is one step away." },
+      circle: { options: { name: "circle" },
+                about: "circle (built in): the proteins in the order of our list, round a circle. The positions mean nothing." },
+      random: { options: { name: "random" },
+                about: "random (built in): positions picked at random. The links are the same as in every other layout." }
+    };
+
+    const cy = cytoscape({
+      container: document.getElementById("cy"),
+      elements: [
+        ...PROTEINS.map(id => ({ data: { id } })),
+        ...LINKS.map(([a, b, score]) => ({ data: { id: a + "-" + b, source: a, target: b, score } }))
+      ],
+      style: [
+        { selector: "node", style: {
+            "label": "data(id)", "font-size": 12, "color": "#172033", "text-valign": "center",
+            "width": 56, "height": 56, "background-color": "#e9dff3", "border-width": 2, "border-color": "#7b3fa0" } },
+        { selector: "edge", style: {
+            "curve-style": "straight", "line-color": "#8a93a3", "width": "mapData(score, 0.7, 1, 1, 4)" } }
+      ],
+      layout: { name: "preset" },      // positions are set by the first button press below
+      userZoomingEnabled: false,       // let the mouse wheel scroll the page
+      autounselectify: true
+    });
+
+    const motion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const buttons = document.querySelectorAll("button[data-layout]");
+
+    function use(name) {
+      const layout = LAYOUTS[name];
+      cy.layout({ ...layout.options, animate: motion, animationDuration: 500, padding: 24 }).run();
+      document.getElementById("about").textContent = layout.about;
+      buttons.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.layout === name)));
+    }
+    buttons.forEach(b => b.addEventListener("click", () => use(b.dataset.layout)));
+
+    // The number of links is a property of the network, so it is the same in every layout
+    document.getElementById("degrees").textContent = "Links per protein, the same in every layout: " +
+      cy.nodes().sort((x, y) => y.degree() - x.degree()).map(n => n.id() + " " + n.degree()).join(", ") + ".";
+
+    use("fcose");
+  </script>
+</body>
+</html>

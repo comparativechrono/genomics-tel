@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The p53–MDM2 feedback loop, with a source for every interaction</title>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.34.3/dist/cytoscape.min.js"
+          integrity="sha384-qPKQxl9uMXOw7vSTUDAnpUilhLuulovw6P5Z4db4bqxW5VhumS7przEmHX0iM0Oc"
+          crossorigin="anonymous"></script>
+  <!-- The dagre layout. Version 4 includes the dagre library and registers itself with Cytoscape.js. -->
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@4.0.1/dist/cytoscape-dagre.min.js"
+          integrity="sha384-CIu9EFddQ0GplFvevqHZ1sIPo1IRXFvxHd0A6jaJ3m052fy+mDfer/ItnvIS5uY3"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 4px; }
+    h2 { font-size: 0.95rem; margin: 10px 0 4px; }
+    p { margin: 0 0 6px; }
+    .key { font-size: 13px; color: #3b4659; }
+    /* minmax(0, ...) lets a column shrink below the width of its content, so nothing pushes it past the screen edge */
+    .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 14px; }
+    @media (max-width: 600px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+    #cy { height: 420px; border: 1px solid #c3cbd8; border-radius: 6px; }
+    @media (min-width: 601px) { #cy { height: 450px; } }
+    button, input { font: inherit; font-size: 14px; }
+    button { padding: 4px 9px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    #details { border-left: 4px solid #0072b2; padding: 2px 0 2px 10px; font-size: 14px; min-height: 4.5em; }
+    #details h3 { font-size: 0.95rem; margin: 0 0 4px; }
+    #details ul { margin: 4px 0 0; padding-left: 1.1rem; }
+    #details li { margin-bottom: 4px; }
+    fieldset { margin: 10px 0 0; border: 1px solid #c3cbd8; border-radius: 6px; padding: 4px 10px 6px; font-size: 14px; }
+    fieldset label { display: block; }
+    legend { font-weight: 600; padding: 0 4px; }
+    #molecules { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+    #molecules button[aria-pressed="true"] { outline: 3px solid #172033; outline-offset: 1px; }
+    details { margin-top: 10px; font-size: 14px; }
+    summary { cursor: pointer; font-weight: 600; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin-top: 6px; }
+    caption { text-align: left; color: #3b4659; padding-bottom: 4px; }
+    th, td { border: 1px solid #dde2ea; padding: 4px 6px; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>DNA damage, p53 and the p53–MDM2 feedback loop</h1>
+  <p class="key">Arrowhead: activates. Flat bar: inhibits. Dashed line: switches on the gene. Solid line: acts on the protein.</p>
+
+  <div class="layout">
+    <div>
+      <div id="cy" role="img"
+           aria-label="Pathway diagram of the response to DNA damage through ATM, CHK2, p53 and MDM2. The table under the diagram gives the same information."></div>
+      <div class="toolbar">
+        <button type="button" id="fit">Fit to view</button>
+        <button type="button" id="png">Download PNG</button>
+      </div>
+    </div>
+    <div>
+      <div id="details" aria-live="polite">
+        <p>Click a molecule in the diagram, or use the buttons below, to see its interactions and the papers behind them.</p>
+      </div>
+      <fieldset>
+        <legend>Show interactions by mechanism</legend>
+        <label><input type="checkbox" name="mech" value="phosphorylation" checked> Phosphorylation</label>
+        <label><input type="checkbox" name="mech" value="transcription" checked> Switching on a gene</label>
+        <label><input type="checkbox" name="mech" value="binding" checked> Binding or degradation</label>
+        <label><input type="checkbox" name="mech" value="other" checked> Other</label>
+      </fieldset>
+      <h2 id="molecules-heading">Molecules</h2>
+      <ul id="molecules" aria-labelledby="molecules-heading"></ul>
+    </div>
+  </div>
+
+  <details>
+    <summary>Table of interactions (the same information as the diagram)</summary>
+    <div class="table-wrap">
+      <table>
+        <caption>All 12 interactions in the diagram, with the papers that support them</caption>
+        <thead><tr><th scope="col">From</th><th scope="col">Effect</th><th scope="col">To</th><th scope="col">How</th><th scope="col">Sources</th></tr></thead>
+        <tbody id="edge-table"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <script>
+    // ----- The data: everything below is built from these three lists -----
+
+    // Papers, by PubMed ID. Each one was checked in PubMed.
+    const PAPERS = {
+      12556884: "Bakkenist and Kastan (2003) Nature 421:499",
+      10973490: "Matsuoka et al. (2000) PNAS 97:10389",
+      9733514:  "Banin et al. (1998) Science 281:1674",
+      9733515:  "Canman et al. (1998) Science 281:1677",
+      10710310: "Hirao et al. (2000) Science 287:1824",
+      10673500: "Chehab et al. (2000) Genes Dev 14:278",
+      11331603: "Maya et al. (2001) Genes Dev 15:1067",
+      8440237:  "Barak et al. (1993) EMBO J 12:461",
+      8319905:  "Wu et al. (1993) Genes Dev 7:1126",
+      1535557:  "Momand et al. (1992) Cell 69:1237",
+      9153395:  "Haupt et al. (1997) Nature 387:296",
+      9153396:  "Kubbutat et al. (1997) Nature 387:299",
+      9450543:  "Honda et al. (1997) FEBS Lett 420:25",
+      8242752:  "el-Deiry et al. (1993) Cell 75:817",
+      8242751:  "Harper et al. (1993) Cell 75:805",
+      7739542:  "Ohtsubo et al. (1995) Mol Cell Biol 15:2612",
+      7834749:  "Miyashita and Reed (1995) Cell 80:293",
+      8358790:  "Oltvai et al. (1993) Cell 74:609"
+    };
+
+    // Molecules. "kind" sets the shape: stimulus, protein, complex or outcome.
+    const nodes = [
+      { id: "damage",    label: "DNA damage",      kind: "stimulus", info: "DNA double-strand breaks, for example after ionising radiation." },
+      { id: "ATM",       label: "ATM",             kind: "protein",  info: "A protein kinase activated by double-strand breaks. It phosphorylates CHK2, p53 and MDM2." },
+      { id: "CHEK2",     label: "CHK2 (CHEK2)",    kind: "protein",  info: "A checkpoint kinase activated by ATM. It phosphorylates p53 on serine 20." },
+      { id: "TP53",      label: "p53 (TP53)",      kind: "protein",  info: "A transcription factor. When it is stabilised, it switches on genes for cell-cycle arrest and apoptosis." },
+      { id: "MDM2",      label: "MDM2",            kind: "protein",  info: "An E3 ubiquitin ligase. It binds p53, blocks its activity and marks it for degradation. The MDM2 gene is itself switched on by p53." },
+      { id: "CDKN1A",    label: "p21 (CDKN1A)",    kind: "protein",  info: "An inhibitor of cyclin-dependent kinases, switched on by p53." },
+      { id: "CDK2",      label: "CDK2–cyclin E",   kind: "complex",  info: "The kinase complex that takes the cell from G1 into S phase." },
+      { id: "BAX",       label: "BAX",             kind: "protein",  info: "A BCL-2 family protein that promotes apoptosis, switched on by p53." },
+      { id: "g1s",       label: "G1/S transition", kind: "outcome",  info: "Entry into S phase. It is blocked when CDK2–cyclin E is inhibited, so the cell stops in G1." },
+      { id: "apoptosis", label: "Apoptosis",       kind: "outcome",  info: "Programmed cell death." }
+    ];
+
+    // Interactions. effect: activates or inhibits. mech: how. refs: PubMed IDs of the papers that support it.
+    const edges = [
+      { id: "e1",  source: "damage", target: "ATM",       effect: "activates", mech: "other",           refs: [12556884],
+        detail: "ATM molecules phosphorylate each other on serine 1981, and the inactive dimers separate" },
+      { id: "e2",  source: "ATM",    target: "CHEK2",     effect: "activates", mech: "phosphorylation", refs: [10973490],
+        detail: "phosphorylation of threonine 68" },
+      { id: "e3",  source: "ATM",    target: "TP53",      effect: "activates", mech: "phosphorylation", refs: [9733514, 9733515],
+        detail: "phosphorylation of serine 15" },
+      { id: "e4",  source: "CHEK2",  target: "TP53",      effect: "activates", mech: "phosphorylation", refs: [10710310, 10673500],
+        detail: "phosphorylation of serine 20, which stabilises p53" },
+      { id: "e5",  source: "ATM",    target: "MDM2",      effect: "inhibits",  mech: "phosphorylation", refs: [11331603],
+        detail: "phosphorylation of serine 395, which reduces the degradation of p53" },
+      { id: "e6",  source: "TP53",   target: "MDM2",      effect: "activates", mech: "transcription",   refs: [8440237, 8319905],
+        detail: "p53 switches on the MDM2 gene" },
+      { id: "e7",  source: "MDM2",   target: "TP53",      effect: "inhibits",  mech: "binding",         refs: [1535557, 9153395, 9153396, 9450543],
+        detail: "MDM2 binds p53, blocks its activity and tags it with ubiquitin for degradation" },
+      { id: "e8",  source: "TP53",   target: "CDKN1A",    effect: "activates", mech: "transcription",   refs: [8242752],
+        detail: "p53 switches on the gene for p21 (also called WAF1 or CIP1)" },
+      { id: "e9",  source: "CDKN1A", target: "CDK2",      effect: "inhibits",  mech: "binding",         refs: [8242751],
+        detail: "p21 binds and inhibits the G1 cyclin-dependent kinases" },
+      { id: "e10", source: "CDK2",   target: "g1s",       effect: "activates", mech: "other",           refs: [7739542],
+        detail: "cyclin E is needed for the G1-to-S transition" },
+      { id: "e11", source: "TP53",   target: "BAX",       effect: "activates", mech: "transcription",   refs: [7834749],
+        detail: "p53 switches on the BAX gene directly" },
+      { id: "e12", source: "BAX",    target: "apoptosis", effect: "activates", mech: "other",           refs: [8358790],
+        detail: "BAX speeds up programmed cell death" }
+    ];
+
+    // ----- The diagram -----
+    const cy = cytoscape({
+      container: document.getElementById("cy"),
+      elements: [
+        ...nodes.map(n => ({ data: n })),
+        ...edges.map(e => ({ data: e }))
+      ],
+      style: [
+        { selector: "node", style: {
+            "label": "data(label)", "font-size": 14, "color": "#172033",
+            "text-valign": "center", "text-halign": "center",
+            "shape": "round-rectangle", "height": 30,
+            "width": node => 18 + 8 * node.data("label").length,   // fit the box to its label ("width: label" is deprecated)
+            "background-color": "#f4f6fa", "border-width": 1.5, "border-color": "#3b4659" } },
+        { selector: 'node[kind = "stimulus"]', style: {
+            "shape": "star", "width": 52, "height": 52, "background-color": "#ffd966", "border-color": "#8a6d00",
+            "text-halign": "right", "text-margin-x": 6 } },
+        { selector: 'node[kind = "complex"]', style: { "background-color": "#ece6f5", "border-color": "#6b4fa0" } },
+        { selector: 'node[kind = "outcome"]', style: { "shape": "hexagon", "background-color": "#ffffff", "border-style": "dashed" } },
+        { selector: "edge", style: {
+            "curve-style": "bezier", "width": 2.5, "arrow-scale": 1.3,
+            "line-color": "#0072b2", "target-arrow-color": "#0072b2", "target-arrow-shape": "triangle" } },
+        // Blue and vermilion rather than green and red, and the arrowheads differ too, so the meaning survives colour blindness and greyscale
+        { selector: 'edge[effect = "inhibits"]', style: {
+            "line-color": "#d55e00", "target-arrow-color": "#d55e00", "target-arrow-shape": "tee" } },
+        { selector: 'edge[mech = "transcription"]', style: { "line-style": "dashed" } },
+        { selector: "node:selected", style: { "border-width": 3.5, "border-color": "#172033", "background-color": "#fff3c4" } },
+        { selector: ".faded", style: { "opacity": 0.15 } },
+        { selector: ".filtered", style: { "display": "none" } }
+      ],
+      // dagre puts the nodes in rows that follow the arrows: the stimulus at the top, outcomes at the bottom
+      layout: { name: "dagre", rankDir: "TB", nodeSep: 30, rankSep: 30, padding: 20 },
+      userZoomingEnabled: false        // the whole pathway fits, so let the mouse wheel scroll the page
+    });
+    cy.edges().unselectify();          // only molecules can be selected
+
+    // ----- Details of one molecule, with its neighbours highlighted -----
+    const byId = id => nodes.find(n => n.id === id);
+    const sources = refs => refs.map(id =>
+      `<a href="https://pubmed.ncbi.nlm.nih.gov/${id}/" target="_blank" rel="noopener">${PAPERS[id]}</a>`).join("; ");
+    const panel = document.getElementById("details");
+
+    function showNode(node) {
+      cy.batch(() => {
+        cy.elements().removeClass("faded").unselect();
+        cy.elements().not(node.closedNeighborhood()).addClass("faded");   // keep the node, its edges and its neighbours
+        node.select();
+      });
+      const d = node.data();
+      // Leave out filtered edges. Select them by class: ":visible" can be out of date straight after a class change.
+      const items = node.connectedEdges().not(".filtered").map(e => {
+        const x = e.data();
+        return `<li>${byId(x.source).label} ${x.effect} ${byId(x.target).label}: ${x.detail}. ${sources(x.refs)}</li>`;
+      }).join("");
+      panel.innerHTML = `<h3>${d.label}</h3><p>${d.info}</p>` +
+        (items ? `<ul>${items}</ul>` : "<p>None of its interactions match the mechanisms ticked.</p>");
+      document.querySelectorAll("#molecules button").forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.id === d.id)));
+    }
+
+    function clearHighlight() {
+      cy.elements().removeClass("faded").unselect();
+      document.querySelectorAll("#molecules button").forEach(b => b.setAttribute("aria-pressed", "false"));
+    }
+
+    cy.on("tap", "node", event => showNode(event.target));
+    cy.on("tap", event => { if (event.target === cy) clearHighlight(); });   // a click on the background
+
+    // Keyboard users cannot click the canvas, so each molecule also gets a real button
+    const list = document.getElementById("molecules");
+    for (const n of nodes) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.id = n.id;
+      button.textContent = n.label;
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => showNode(cy.getElementById(n.id)));
+      const li = document.createElement("li");
+      li.appendChild(button);
+      list.appendChild(li);
+    }
+
+    // ----- Filter the edges by mechanism -----
+    document.querySelectorAll('input[name="mech"]').forEach(box => box.addEventListener("change", () => {
+      cy.edges(`[mech = "${box.value}"]`).toggleClass("filtered", !box.checked);
+      const selected = cy.nodes(":selected");
+      if (selected.nonempty()) showNode(selected);     // update the list of interactions
+    }));
+
+    // ----- Fit, and save a picture -----
+    document.getElementById("fit").addEventListener("click", () => cy.fit(undefined, 20));
+    document.getElementById("png").addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = cy.png({ full: true, scale: 2, bg: "#ffffff" });   // the whole network, at twice screen resolution, on white
+      a.download = "p53-pathway.png";
+      a.click();
+    });
+
+    // ----- The text version, from the same lists -----
+    document.getElementById("edge-table").innerHTML = edges.map(e =>
+      `<tr><td>${byId(e.source).label}</td><td>${e.effect}</td><td>${byId(e.target).label}</td>` +
+      `<td>${e.detail}</td><td>${sources(e.refs)}</td></tr>`).join("");
+  </script>
+</body>
+</html>

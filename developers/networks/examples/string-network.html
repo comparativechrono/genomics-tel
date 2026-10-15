@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A protein network from STRING, with its evidence</title>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.34.3/dist/cytoscape.min.js"
+          integrity="sha384-qPKQxl9uMXOw7vSTUDAnpUilhLuulovw6P5Z4db4bqxW5VhumS7przEmHX0iM0Oc"
+          crossorigin="anonymous"></script>
+  <!-- The fcose layout needs layout-base, then cose-base, then cytoscape-fcose, in this order -->
+  <script src="https://cdn.jsdelivr.net/npm/layout-base@2.0.1/layout-base.js"
+          integrity="sha384-5E2lB9AIGE6LRCnOOSTnZRlYZFZ01iMeN2fw97Z1r4Z/kXALxKw2AC+ZzQqoeDsG"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cose-base@2.2.0/cose-base.js"
+          integrity="sha384-RswRBkrMsPUYpJLbZ1CVA08zbNzAkykE2oGJTujBwfjWNdfxv2WVjLJNqv1LhAOp"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-fcose@2.2.0/cytoscape-fcose.js"
+          integrity="sha384-uk5Wbjq1+KqUdHO30w7N7GrEGdzBhaJeW9o/ANF6v9+yx3M/cBmoX51C000JNCUf"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    p { margin: 0 0 6px; }
+    form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 14px; margin: 0 0 6px; font-size: 14px; }
+    form label { display: flex; flex-direction: column; gap: 2px; }
+    button, input, select, textarea { font: inherit; font-size: 14px; }
+    button { padding: 4px 9px; }
+    input[type="number"] { width: 5em; }
+    #status { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #3b4659; min-height: 1.4em; }
+    /* minmax(0, ...) lets a column shrink below the width of its content, so nothing pushes it past the screen edge */
+    .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 14px; }
+    @media (max-width: 600px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+    #cy { height: 380px; border: 1px solid #c3cbd8; border-radius: 6px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    #details { border-left: 4px solid #7b3fa0; padding: 2px 0 2px 10px; font-size: 14px; min-height: 4.5em; }
+    #details h3 { font-size: 0.95rem; margin: 0 0 4px; }
+    fieldset { margin: 10px 0 0; border: 1px solid #c3cbd8; border-radius: 6px; padding: 4px 10px 6px; font-size: 14px; }
+    fieldset label { display: block; }
+    legend { font-weight: 600; padding: 0 4px; }
+    .swatch { display: inline-block; width: 2em; vertical-align: middle; margin: 0 4px; border-top: 3px solid #7b3fa0; }
+    .swatch.db { border-top: 3px dashed #1f77b4; }
+    .swatch.other { border-top: 3px dotted #6b6b6b; }
+    details { margin-top: 10px; font-size: 14px; }
+    summary { cursor: pointer; font-weight: 600; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin-top: 6px; }
+    caption { text-align: left; color: #3b4659; padding-bottom: 4px; }
+    th, td { border: 1px solid #dde2ea; padding: 3px 6px; text-align: left; }
+    td.n { text-align: right; font-variant-numeric: tabular-nums; }
+    .credit { font-size: 13px; color: #3b4659; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Who does p53 interact with? Evidence from STRING</h1>
+
+  <form id="query">
+    <label>Proteins (gene symbols)
+      <textarea id="ids" rows="3" cols="30" spellcheck="false">TP53 MDM2 MDM4 ATM CHEK2 CDKN1A BAX BBC3 CDKN2A EP300</textarea></label>
+    <label>Network
+      <select id="type">
+        <option value="functional" selected>functional</option>
+        <option value="physical">physical</option>
+      </select></label>
+    <label>Minimum score
+      <select id="score">
+        <option>0.15</option><option>0.4</option><option selected>0.7</option><option>0.9</option>
+      </select></label>
+    <label>Partners to add
+      <input id="add" type="number" min="0" max="20" value="0"></label>
+    <button type="submit">Load network</button>
+  </form>
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <div class="layout">
+    <div>
+      <div id="cy" role="img" aria-label="Protein network from STRING. The table under the network lists the same links and their scores."></div>
+      <div class="toolbar">
+        <button type="button" id="relayout">Run the layout again</button>
+        <button type="button" id="png">Download PNG</button>
+      </div>
+    </div>
+    <div>
+      <div id="details" aria-live="polite"><p>Click a protein to read STRING's description of it and see its partners.</p></div>
+      <fieldset>
+        <legend>Show links supported by</legend>
+        <label><input type="checkbox" name="ev" value="exp" checked><span class="swatch"></span>experiments</label>
+        <label><input type="checkbox" name="ev" value="db" checked><span class="swatch db"></span>curated databases</label>
+        <label><input type="checkbox" name="ev" value="other" checked><span class="swatch other"></span>other evidence only</label>
+      </fieldset>
+      <p class="credit">Line width shows the combined score. A link counts as supported by experiments or databases when that score alone is at least 0.4.</p>
+    </div>
+  </div>
+
+  <details>
+    <summary>Table of links and their evidence</summary>
+    <div class="table-wrap">
+      <table>
+        <caption>Links returned by STRING, highest combined score first (scores from 0 to 1)</caption>
+        <thead><tr><th scope="col">Protein</th><th scope="col">Protein</th><th scope="col">Combined</th>
+          <th scope="col">Experiments</th><th scope="col">Databases</th><th scope="col">Text mining</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </details>
+  <p class="credit">Data: <a href="https://string-db.org/" target="_blank" rel="noopener">STRING</a> 12.5, under CC BY 4.0.
+    Szklarczyk et al. (2025) <a href="https://doi.org/10.1093/nar/gkae1113" target="_blank" rel="noopener">Nucleic Acids Research 53:D730</a>.</p>
+
+  <script>
+    const STRING = "https://version-12-5.string-db.org";   // a fixed version, so the answers do not change under you
+    const CALLER = "www.genomics.tel";                     // STRING asks callers to say who they are
+    const SPECIES = 9606;                                  // NCBI taxon ID for human
+    const EVIDENCE = 0.4;                                  // our choice: a channel "supports" a link from this score up
+
+    const statusLine = document.getElementById("status");
+    const panel = document.getElementById("details");
+    const motion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const esc = text => String(text).replace(/[&<>"]/g, c => "&#" + c.charCodeAt(0) + ";");   // the replies are data, not HTML
+
+    // Wheel and pinch zoom stay on here: with added partners, a network can be too dense to read without zooming
+    const cy = cytoscape({
+      container: document.getElementById("cy"),
+      style: [
+        { selector: "node", style: {
+            "label": "data(label)", "font-size": 12, "color": "#172033", "text-valign": "center",
+            "width": 54, "height": 54, "background-color": "#e9dff3", "border-width": 2, "border-color": "#7b3fa0" } },
+        { selector: "node[?first]", style: { "background-color": "#7b3fa0", "color": "#ffffff" } },        // the first protein in the list
+        { selector: "node[!query]", style: { "background-color": "#ffffff", "border-style": "dashed" } },  // partners STRING added
+        { selector: "edge", style: {
+            "curve-style": "straight", "width": "mapData(score, 0.4, 1, 1, 6)",
+            "line-color": "#6b6b6b", "line-style": "dotted", "opacity": 0.9 } },
+        { selector: "edge[?db]", style: { "line-color": "#1f77b4", "line-style": "dashed" } },
+        { selector: "edge[?exp]", style: { "line-color": "#7b3fa0", "line-style": "solid" } },
+        { selector: "node:selected", style: { "border-color": "#172033", "border-width": 4 } },
+        { selector: ".faded", style: { "opacity": 0.12 } },
+        { selector: ".filtered", style: { "display": "none" } }
+      ]
+    });
+    cy.edges().unselectify();
+
+    // ----- Asking STRING -----
+    async function ask(method, params) {
+      const query = new URLSearchParams({ ...params, species: SPECIES, caller_identity: CALLER });
+      const stop = new AbortController();
+      const timer = setTimeout(() => stop.abort(), 20000);          // give up after 20 seconds
+      try {
+        const reply = await fetch(STRING + "/api/json/" + method + "?" + query, { signal: stop.signal });
+        const json = await reply.json();
+        if (!reply.ok || !Array.isArray(json)) throw new Error((json[0] && json[0].Error) || "HTTP " + reply.status);
+        return json;
+      } catch (err) {
+        throw err.name === "AbortError" ? new Error("no answer in 20 seconds") : err;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function fromString(names, type, score, add) {
+      // 1. Match the names to STRING proteins. Names STRING does not know are left out of the reply.
+      //    Several identifiers go in one parameter, separated by %0D (a carriage return).
+      const found = await ask("get_string_ids", { identifiers: names.join("\r"), limit: 1 });
+      if (!found.length) {
+        const err = new Error("STRING did not recognise any of these names.");
+        err.keepEmpty = true;
+        throw err;
+      }
+      await wait(1000);                                            // STRING asks for one second between calls
+
+      // 2. The links among these proteins. required_score runs from 0 to 1000.
+      const params = { identifiers: found.map(p => p.stringId).join("\r"),
+                       required_score: Math.round(score * 1000), network_type: type };
+      if (add > 0) params.add_nodes = add;
+      const links = await ask("network", params);
+
+      // 3. Descriptions of any partners STRING added (it adds 10 by itself when given one protein)
+      const known = new Set(found.map(p => p.stringId));
+      const extra = [...new Set(links.flatMap(l => [l.stringId_A, l.stringId_B]))].filter(id => !known.has(id));
+      let added = [];
+      if (extra.length) {
+        await wait(1000);
+        added = await ask("get_string_ids", { identifiers: extra.join("\r"), limit: 1 });
+      }
+      return { found, added, links };
+    }
+
+    // The saved copy in data/: the same two calls for the starting list, made on 15 October 2026
+    async function savedCopy() {
+      const [found, links] = await Promise.all(["data/string-p53-ids.json", "data/string-p53-network.json"]
+        .map(file => fetch(file).then(r => r.json())));
+      return { found, added: [], links };
+    }
+
+    // ----- Drawing the reply -----
+    function draw({ found, added, links }) {
+      const proteins = [...found.map(p => ({ ...p, query: true })), ...added.map(p => ({ ...p, query: false }))];
+      cy.elements().remove();
+      cy.add(proteins.map(p => ({ data: {
+        id: p.stringId, label: p.preferredName, about: p.annotation,
+        query: p.query, first: p.query && p.queryIndex === 0 } })));
+      cy.add(links.map(l => ({ data: {
+        id: l.stringId_A + "~" + l.stringId_B, source: l.stringId_A, target: l.stringId_B,
+        a: l.preferredName_A, b: l.preferredName_B,
+        score: l.score, escore: l.escore, dscore: l.dscore, tscore: l.tscore,
+        exp: l.escore >= EVIDENCE, db: l.dscore >= EVIDENCE } })));
+      applyFilter();
+      runLayout();
+      panel.innerHTML = "<p>Click a protein to read STRING's description of it and see its partners.</p>";
+
+      document.getElementById("rows").innerHTML = [...links].sort((x, y) => y.score - x.score).map(l =>
+        `<tr><td>${esc(l.preferredName_A)}</td><td>${esc(l.preferredName_B)}</td><td class="n">${l.score.toFixed(3)}</td>` +
+        `<td class="n">${l.escore.toFixed(2)}</td><td class="n">${l.dscore.toFixed(2)}</td><td class="n">${l.tscore.toFixed(2)}</td></tr>`).join("");
+    }
+
+    // fcose starts from random positions, so every run gives a different picture of the same links
+    function runLayout() {
+      cy.layout({ name: "fcose", randomize: true, animate: motion, animationDuration: 600,
+                  nodeRepulsion: 9000, idealEdgeLength: 90, padding: 20 }).run();
+    }
+
+    function applyFilter() {
+      const on = {};
+      document.querySelectorAll('input[name="ev"]').forEach(box => { on[box.value] = box.checked; });
+      cy.batch(() => cy.edges().forEach(e => {
+        const d = e.data();
+        const show = (on.exp && d.exp) || (on.db && d.db) || (on.other && !d.exp && !d.db);
+        e.toggleClass("filtered", !show);
+      }));
+    }
+    document.querySelectorAll('input[name="ev"]').forEach(box => box.addEventListener("change", applyFilter));
+
+    cy.on("tap", "node", event => {
+      const n = event.target;
+      cy.batch(() => {
+        cy.elements().addClass("faded");
+        n.closedNeighborhood().removeClass("faded");
+      });
+      const partners = n.connectedEdges().not(".filtered").connectedNodes().not(n).map(m => m.data("label")).sort();
+      panel.innerHTML = `<h3>${esc(n.data("label"))}</h3><p>${esc(n.data("about"))}</p>` +
+        `<p><strong>Partners shown:</strong> ${esc(partners.join(", ") || "none")}</p>` +
+        `<p><a href="${STRING}/cgi/network?identifiers=${encodeURIComponent(n.id())}&amp;species=${SPECIES}" target="_blank" rel="noopener">Open ${esc(n.data("label"))} in STRING</a></p>`;
+    });
+    cy.on("tap", event => { if (event.target === cy) cy.elements().removeClass("faded").unselect(); });
+
+    document.getElementById("relayout").addEventListener("click", runLayout);
+    document.getElementById("png").addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = cy.png({ full: true, scale: 2, bg: "#ffffff" });
+      a.download = "string-network.png";
+      a.click();
+    });
+
+    // ----- Loading -----
+    async function load(event) {
+      if (event) event.preventDefault();
+      const names = document.getElementById("ids").value.split(/[\s,;]+/).filter(Boolean);
+      const type = document.getElementById("type").value;
+      const score = Number(document.getElementById("score").value);
+      const add = Math.max(0, Math.min(20, Number(document.getElementById("add").value) || 0));
+      try {
+        if (new URLSearchParams(location.search).has("offline")) throw new Error("you asked for the saved copy");
+        statusLine.textContent = "Asking STRING…";
+        const reply = await fromString(names, type, score, add);
+        draw(reply);
+        // Say which names STRING did not know, and which it read as a different protein
+        const matched = new Set(reply.found.map(p => p.queryIndex));
+        const missing = names.filter((name, i) => !matched.has(i));
+        const renamed = reply.found.filter(p => p.preferredName.toUpperCase() !== p.queryItem.toUpperCase())
+                                   .map(p => p.queryItem + " as " + p.preferredName);
+        const count = (n, word) => n + " " + word + (n === 1 ? "" : "s");
+        statusLine.textContent = `STRING 12.5, ${type} network, score at least ${score}: ` +
+          `${count(cy.nodes().length, "protein")} and ${count(cy.edges().length, "link")}.` +
+          (missing.length ? ` Not found: ${missing.join(", ")}.` : "") +
+          (renamed.length ? ` Read ${renamed.join(", ")}.` : "");
+      } catch (err) {
+        if (err.keepEmpty) { cy.elements().remove(); statusLine.textContent = err.message; return; }
+        console.warn("Showing the saved copy:", err.message);
+        try {
+          draw(await savedCopy());
+          statusLine.textContent = `Showing the saved copy from 15 October 2026 (${err.message}): ` +
+            "the starting ten proteins, functional network, score at least 0.7.";
+        } catch (copyErr) {     // the saved copy needs a web server: browsers will not read it from a file on disk
+          statusLine.textContent = `STRING did not answer (${err.message}), and the saved copy could not be read either.`;
+        }
+      }
+    }
+    document.getElementById("query").addEventListener("submit", load);
+    load();
+  </script>
+</body>
+</html>

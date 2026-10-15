@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phylocanvas.gl: 972 Zika virus genomes on a WebGL canvas</title>
+  <!-- One self-contained bundle (it includes deck.gl). It defines the global "phylocanvas". -->
+  <script src="https://cdn.jsdelivr.net/npm/@phylocanvas/phylocanvas.gl@1.64.1/dist/bundle.min.js"
+          integrity="sha384-v3Yue+7espDjAVbW0OWPsjQFnzPWn0CHxnb4UT8mam6xUrIGUqscnYf16G+W1K7A"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; font-size: 14px; color: #3b4659; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+    button { font: inherit; font-size: 14px; padding: 3px 9px; }
+    button[aria-pressed="true"] { background: #1f4e9c; color: #fff; border: 1px solid #1f4e9c; border-radius: 3px; }
+    #status { color: #172033; }
+    #tree { border: 1px solid #c3cbd8; }
+    .legend { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+    .legend span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+  </style>
+</head>
+<body>
+  <h1>972 Zika virus genomes, drawn by Phylocanvas.gl</h1>
+  <p>Scroll over the tree to zoom and drag to move it. Branch lengths are in years.</p>
+  <div class="controls" role="group" aria-label="Layout">
+    <button type="button" data-type="rc" aria-pressed="true">Rectangular</button>
+    <button type="button" data-type="cr">Circular</button>
+    <button type="button" data-type="rd">Radial</button>
+  </div>
+  <p id="status" role="status" aria-live="polite">Loading the dataset from nextstrain.org…</p>
+  <div id="tree" role="img" aria-label="Time tree of 972 Zika virus genomes, coloured by region; the regions and their counts are listed below"></div>
+  <ul class="legend" id="legend"></ul>
+
+  <script>
+    const DATASET = "https://nextstrain.org/zika@2024-01-01";     // the dated dataset used in the other examples
+    const COLOURS = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7"];
+    const box = document.getElementById("tree");
+    const status = document.getElementById("status");
+
+    // Nextstrain's nested JSON to Newick. Each branch length is the number of years between a node and its
+    // parent, so this is a time tree. Tip names become IDs, which must be unique, and a few repeat here.
+    function toNewick(node, parentDate, tips) {
+      const date = node.node_attrs.num_date.value;
+      const length = Math.max(0, date - parentDate).toFixed(5);
+      if (node.children) return "(" + node.children.map(c => toNewick(c, date, tips)).join(",") + "):" + length;
+      let id = node.name.replace(/[^A-Za-z0-9_.-]/g, "_");     // keep characters that mean something in Newick out
+      while (tips.has(id)) id += "_";
+      tips.set(id, node.node_attrs.region?.value ?? "unknown");
+      return id + ":" + length;
+    }
+
+    async function main() {
+      const response = await fetch(DATASET, { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const data = await response.json();
+
+      const tips = new Map();                                  // tip ID -> region
+      const newick = toNewick(data.tree, data.tree.node_attrs.num_date.value, tips) + ";";
+      const regions = [...new Set(tips.values())].sort();
+      const colourOf = r => COLOURS[regions.indexOf(r) % COLOURS.length];
+      const styles = {};
+      for (const [id, r] of tips) styles[id] = { fillColour: colourOf(r) };   // one style per tip ID
+
+      const tree = new phylocanvas.PhylocanvasGL(box, {
+        source: newick,
+        size: { width: Math.max(300, Math.min(780, box.clientWidth)), height: 400 },
+        type: phylocanvas.TreeTypes.Rectangular,
+        interactive: true,              // scroll to zoom, drag to pan, click a tip to select it
+        nodeSize: 6,
+        showLeafLabels: false,          // 972 names do not fit; zoom in and turn them on if you need them
+        padding: 12,
+        styles
+      }, [ phylocanvas.plugins.scalebar ]);
+
+      document.querySelectorAll("button[data-type]").forEach(b => b.addEventListener("click", () => {
+        tree.setTreeType(b.dataset.type);                // also resets the zoom
+        document.querySelectorAll("button[data-type]").forEach(x => x.setAttribute("aria-pressed", x === b));
+      }));
+      window.addEventListener("resize", () => tree.resize(Math.max(300, Math.min(780, box.clientWidth)), 400));
+
+      const count = r => [...tips.values()].filter(v => v === r).length;
+      document.getElementById("legend").innerHTML = regions
+        .map(r => `<li><span style="background:${colourOf(r)}"></span>${r} (${count(r)})</li>`).join("");
+      status.textContent = `${tips.size} genomes from the Nextstrain Zika dataset of 1 January 2024.`;
+    }
+
+    // Phylocanvas.gl needs WebGL. Without it (some locked-down or remote desktops) the box would stay blank.
+    const test = document.createElement("canvas");
+    if (test.getContext("webgl2") || test.getContext("webgl")) {
+      main().catch(err => { status.textContent = "Could not draw the tree (" + err.message + ")."; });
+    } else {
+      status.textContent = "This browser cannot draw WebGL graphics, which Phylocanvas.gl needs. Try another browser or computer.";
+    }
+  </script>
+</body>
+</html>

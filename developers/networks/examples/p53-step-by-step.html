@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Step by step: the p53–MDM2 feedback loop</title>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.34.3/dist/cytoscape.min.js"
+          integrity="sha384-qPKQxl9uMXOw7vSTUDAnpUilhLuulovw6P5Z4db4bqxW5VhumS7przEmHX0iM0Oc"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@4.0.1/dist/cytoscape-dagre.min.js"
+          integrity="sha384-CIu9EFddQ0GplFvevqHZ1sIPo1IRXFvxHd0A6jaJ3m052fy+mDfer/ItnvIS5uY3"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 4px; }
+    p { margin: 0 0 6px; }
+    .key { font-size: 13px; color: #3b4659; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 8px; }
+    button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    #count { font-size: 14px; color: #3b4659; margin-left: 4px; }
+    #narration { min-height: 4.6em; }
+    #step-text { font-weight: 600; }
+    #ask { color: #3b4659; }
+    #cy { height: 430px; border: 1px solid #c3cbd8; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Step by step: DNA damage, p53 and the p53–MDM2 feedback loop</h1>
+  <p class="key">Arrowhead: activates. Flat bar: inhibits. Dashed line: switches on the gene. Solid line: acts on the protein.</p>
+
+  <div class="toolbar" role="group" aria-label="Steps">
+    <button type="button" id="prev">Previous step</button>
+    <button type="button" id="next">Next step</button>
+    <button type="button" id="all">Show the whole pathway</button>
+    <span id="count"></span>
+  </div>
+  <div id="narration" aria-live="polite">
+    <p id="step-text"></p>
+    <p id="ask"></p>
+  </div>
+  <div id="cy" role="img"
+       aria-label="Pathway diagram that grows one step at a time. The text above the diagram describes each step."></div>
+
+  <script>
+    // The same pathway as p53-pathway.html, without the sources (see that file for them)
+    const nodes = [
+      { id: "damage", label: "DNA damage", kind: "stimulus" },
+      { id: "ATM", label: "ATM" },
+      { id: "CHEK2", label: "CHK2 (CHEK2)" },
+      { id: "TP53", label: "p53 (TP53)" },
+      { id: "MDM2", label: "MDM2" },
+      { id: "CDKN1A", label: "p21 (CDKN1A)" },
+      { id: "CDK2", label: "CDK2–cyclin E", kind: "complex" },
+      { id: "BAX", label: "BAX" },
+      { id: "g1s", label: "G1/S transition", kind: "outcome" },
+      { id: "apoptosis", label: "Apoptosis", kind: "outcome" }
+    ];
+    const edges = [
+      { id: "e1",  source: "damage", target: "ATM",       effect: "activates", mech: "other" },
+      { id: "e2",  source: "ATM",    target: "CHEK2",     effect: "activates", mech: "phosphorylation" },
+      { id: "e3",  source: "ATM",    target: "TP53",      effect: "activates", mech: "phosphorylation" },
+      { id: "e4",  source: "CHEK2",  target: "TP53",      effect: "activates", mech: "phosphorylation" },
+      { id: "e5",  source: "ATM",    target: "MDM2",      effect: "inhibits",  mech: "phosphorylation" },
+      { id: "e6",  source: "TP53",   target: "MDM2",      effect: "activates", mech: "transcription" },
+      { id: "e7",  source: "MDM2",   target: "TP53",      effect: "inhibits",  mech: "binding" },
+      { id: "e8",  source: "TP53",   target: "CDKN1A",    effect: "activates", mech: "transcription" },
+      { id: "e9",  source: "CDKN1A", target: "CDK2",      effect: "inhibits",  mech: "binding" },
+      { id: "e10", source: "CDK2",   target: "g1s",       effect: "activates", mech: "other" },
+      { id: "e11", source: "TP53",   target: "BAX",       effect: "activates", mech: "transcription" },
+      { id: "e12", source: "BAX",    target: "apoptosis", effect: "activates", mech: "other" }
+    ];
+
+    // Each step lists the elements it adds, what to say, and a question to answer before going on
+    const STEPS = [
+      { show: ["damage", "ATM", "e1"],
+        text: "1. DNA double-strand breaks activate the protein kinase ATM.",
+        ask: "Before you go on: ATM is a kinase. What does a kinase do to the proteins it acts on?" },
+      { show: ["CHEK2", "TP53", "e2", "e3", "e4"],
+        text: "2. ATM phosphorylates the kinase CHK2 and p53, and CHK2 also phosphorylates p53. Phosphorylated p53 is more stable, so it builds up.",
+        ask: "Before you go on: something keeps p53 low in an undamaged cell. What kind of protein could do that?" },
+      { show: ["MDM2", "e7", "e5"],
+        text: "3. MDM2 binds p53, blocks its activity and tags it for degradation. ATM phosphorylates MDM2, which weakens this.",
+        ask: "Before you go on: predict what would happen to the amount of p53 in a cell with no MDM2." },
+      { show: ["e6"],
+        text: "4. p53 switches on the MDM2 gene. The more p53 there is, the more of its own inhibitor it makes: a negative feedback loop.",
+        ask: "Follow the loop from p53 to MDM2 and back. What happens to p53 once ATM stops signalling?" },
+      { show: ["CDKN1A", "CDK2", "g1s", "e8", "e9", "e10"],
+        text: "5. p53 switches on p21, which inhibits CDK2–cyclin E. The cell needs CDK2–cyclin E to enter S phase, so it stops in G1.",
+        ask: "Count the flat bars on the path from p53 to the G1/S transition. Does p53 speed up or hold back entry into S phase?" },
+      { show: ["BAX", "apoptosis", "e11", "e12"],
+        text: "6. p53 also switches on BAX, a protein that promotes apoptosis (programmed cell death).",
+        ask: "Find the dashed lines. Which three genes does p53 switch on, and what does each one lead to?" }
+    ];
+
+    const cy = cytoscape({
+      container: document.getElementById("cy"),
+      elements: [...nodes.map(n => ({ data: n })), ...edges.map(e => ({ data: e }))],
+      style: [
+        { selector: "node", style: {
+            "label": "data(label)", "font-size": 14, "color": "#172033", "text-valign": "center",
+            "shape": "round-rectangle", "height": 30, "width": node => 18 + 8 * node.data("label").length,
+            "background-color": "#f4f6fa", "border-width": 1.5, "border-color": "#3b4659" } },
+        { selector: 'node[kind = "stimulus"]', style: {
+            "shape": "star", "width": 52, "height": 52, "background-color": "#ffd966", "border-color": "#8a6d00",
+            "text-halign": "right", "text-margin-x": 6 } },
+        { selector: 'node[kind = "complex"]', style: { "background-color": "#ece6f5", "border-color": "#6b4fa0" } },
+        { selector: 'node[kind = "outcome"]', style: { "shape": "hexagon", "background-color": "#ffffff", "border-style": "dashed" } },
+        { selector: "edge", style: {
+            "curve-style": "bezier", "width": 2.5, "arrow-scale": 1.3,
+            "line-color": "#0072b2", "target-arrow-color": "#0072b2", "target-arrow-shape": "triangle" } },
+        { selector: 'edge[effect = "inhibits"]', style: { "line-color": "#d55e00", "target-arrow-color": "#d55e00", "target-arrow-shape": "tee" } },
+        { selector: 'edge[mech = "transcription"]', style: { "line-style": "dashed" } },
+        // What the latest step added: a yellow glow under it
+        { selector: ".new", style: { "underlay-color": "#ffd400", "underlay-opacity": 0.35, "underlay-padding": 5 } },
+        { selector: ".hidden", style: { "display": "none" } }
+      ],
+      // The layout runs once, on the whole pathway, so nodes stay in place as the steps add them
+      layout: { name: "dagre", rankDir: "TB", nodeSep: 30, rankSep: 30 },
+      maxZoom: 1.25,                   // stops the first step, with only two nodes, filling the box
+      userZoomingEnabled: false,       // let the mouse wheel scroll the page
+      autoungrabify: true,             // nodes cannot be dragged out of place
+      autounselectify: true
+    });
+
+    const motion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let step = 0;
+
+    function showStep(k) {
+      step = Math.max(1, Math.min(STEPS.length, k));
+      const shown = new Set(STEPS.slice(0, step).flatMap(s => s.show));
+      const newest = new Set(STEPS[step - 1].show);
+      cy.batch(() => {                 // one redraw for all the changes
+        cy.elements().forEach(el => {
+          el.toggleClass("hidden", !shown.has(el.id()));
+          el.toggleClass("new", newest.has(el.id()));
+        });
+      });
+      // Zoom to what is shown. Select by class: ":visible" can be out of date straight after cy.batch().
+      cy.animate({ fit: { eles: cy.elements().not(".hidden"), padding: 30 }, duration: motion ? 400 : 0 });
+      document.getElementById("step-text").textContent = STEPS[step - 1].text;
+      document.getElementById("ask").textContent = STEPS[step - 1].ask;
+      document.getElementById("count").textContent = "Step " + step + " of " + STEPS.length;
+    }
+
+    document.getElementById("next").addEventListener("click", () => showStep(step + 1));
+    document.getElementById("prev").addEventListener("click", () => showStep(step - 1));
+    document.getElementById("all").addEventListener("click", () => {
+      showStep(STEPS.length);
+      cy.elements().removeClass("new");
+      document.getElementById("step-text").textContent = "The whole pathway: a negative feedback loop between p53 and MDM2, and two outcomes of p53 activity.";
+    });
+
+    cy.ready(() => showStep(1));
+  </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cytoscape.js: p53 and three of its partners</title>
+  <!-- Cytoscape.js 3.34.3 from jsDelivr. The integrity hash stops a changed file from running. -->
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.34.3/dist/cytoscape.min.js"
+          integrity="sha384-qPKQxl9uMXOw7vSTUDAnpUilhLuulovw6P5Z4db4bqxW5VhumS7przEmHX0iM0Oc"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    /* Cytoscape.js draws into this box, so it must have a height */
+    #cy { height: 300px; border: 1px solid #c3cbd8; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>p53 and three of its partners</h1>
+  <div id="cy" role="img"
+       aria-label="Network diagram: p53 switches on MDM2, p21 and BAX, and MDM2 inhibits p53."></div>
+
+  <script>
+    const cy = cytoscape({
+      container: document.getElementById("cy"),
+
+      // Elements: nodes and edges. A node needs a unique id; an edge needs a source and a target.
+      // Any other field in data, such as label or effect, is yours to use.
+      elements: [
+        { data: { id: "TP53", label: "p53" } },
+        { data: { id: "MDM2", label: "MDM2" } },
+        { data: { id: "CDKN1A", label: "p21" } },
+        { data: { id: "BAX", label: "BAX" } },
+        { data: { source: "TP53", target: "MDM2" } },
+        { data: { source: "TP53", target: "CDKN1A" } },
+        { data: { source: "TP53", target: "BAX" } },
+        { data: { source: "MDM2", target: "TP53", effect: "inhibits" } }
+      ],
+
+      // Style: rules like CSS. The selector picks elements; data(label) reads a field.
+      style: [
+        { selector: "node", style: {
+            "label": "data(label)", "text-valign": "center", "font-size": 14, "color": "#172033",
+            "shape": "round-rectangle", "width": 64, "height": 32,
+            "background-color": "#f4f6fa", "border-width": 1.5, "border-color": "#3b4659" } },
+        { selector: "edge", style: {
+            "curve-style": "bezier", "width": 2.5,                 // bezier curves keep the two edges between p53 and MDM2 apart
+            "line-color": "#0072b2", "target-arrow-color": "#0072b2", "target-arrow-shape": "triangle" } },
+        { selector: 'edge[effect = "inhibits"]', style: {      // only edges whose data has effect: "inhibits"
+            "line-color": "#d55e00", "target-arrow-color": "#d55e00", "target-arrow-shape": "tee" } }
+      ],
+
+      // Layout: where the nodes go. "cose" is built in: linked nodes pull together, all nodes push apart.
+      layout: { name: "cose", animate: false, padding: 30 },
+
+      userZoomingEnabled: false        // the mouse wheel scrolls the page instead of zooming the network
+    });
+  </script>
+</body>
+</html>

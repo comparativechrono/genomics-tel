@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nextstrain in a page: Zika virus, fixed at the dataset of 1 January 2024</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; font-size: 14px; color: #3b4659; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+    button { font: inherit; font-size: 14px; padding: 3px 9px; }
+    button[aria-pressed="true"] { background: #1f4e9c; color: #fff; border: 1px solid #1f4e9c; border-radius: 3px; }
+    code { font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+    iframe { display: block; width: 100%; height: 470px; border: 1px solid #c3cbd8; }
+  </style>
+</head>
+<body>
+  <h1>Zika virus in Nextstrain, as the dataset stood on 1 January 2024</h1>
+  <div class="controls" role="group" aria-label="Choose a view">
+    <button type="button" data-view="d=tree&amp;c=region" aria-pressed="true">Time tree by region</button>
+    <button type="button" data-view="d=tree&amp;m=div&amp;c=region">Divergence tree</button>
+    <button type="button" data-view="d=tree&amp;l=radial&amp;c=country">Radial, by country</button>
+    <button type="button" data-view="d=tree,map&amp;c=region">Tree and map</button>
+  </div>
+  <p>Address: <code id="address"></code></p>
+  <iframe id="nextstrain" title="Nextstrain: Zika virus phylogeny" allow="fullscreen"></iframe>
+  <p><a id="open" target="_blank" rel="noopener">Open this view on nextstrain.org</a></p>
+
+  <script>
+    // "@2024-01-01" asks for the dataset as it was on that date, so the tree students see does not
+    // change during the course. Without it, nextstrain.org/zika shows the latest build.
+    const DATASET = "https://nextstrain.org/zika@2024-01-01";
+    // onlyPanels hides Nextstrain's header and footer; sidebar=closed gives the tree more room
+    const FOR_FRAME = "onlyPanels&sidebar=closed";
+
+    const frame = document.getElementById("nextstrain");
+    const buttons = document.querySelectorAll("button[data-view]");
+
+    function show(button) {
+      const view = button.dataset.view;              // d = panels, c = colour by, m = x axis, l = layout
+      frame.src = DATASET + "?" + view + "&" + FOR_FRAME;
+      document.getElementById("address").textContent = frame.src;
+      document.getElementById("open").href = DATASET + "?" + view;
+      buttons.forEach(b => b.setAttribute("aria-pressed", b === button));
+    }
+    buttons.forEach(b => b.addEventListener("click", () => show(b)));
+    show(buttons[0]);
+  </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vega-Lite: sequencing depth across CFTR exons in gnomAD genomes and exomes</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@6.4.0/build/vega.min.js"
+          integrity="sha384-VKdcJr3ZaBIJMbVcopTAI/JEuUkSY6qnwVu9iLuw0DnQ9gQ1JjsfZJhXFQAgNi43"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4.3/build/vega-lite.min.js"
+          integrity="sha384-9/70gNCfOu6G7xXvkdreMfuqAEsoaGJVXV2BN/JLRXkSmcGvnMqtsRx8HZtUWAvI"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.3.0/build/vega-embed.min.js"
+          integrity="sha384-Muy1QRxYFeNrA1zShc1KtN4OfipkR/61gt+HWqN57c1Zxu3Oe16TsilsruVVjfKL"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 4px; }
+    p { margin: 0 0 6px; }
+    #status { font-size: 14px; color: #3b4659; }
+    #chart { width: 100%; }
+    summary { cursor: pointer; font-weight: 600; }
+    .scroll { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 13px; margin: 6px 0; }
+    th, td { padding: 3px 12px 3px 0; text-align: left; border-bottom: 1px solid #dde2ea; white-space: nowrap; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .credit { font-size: 13px; color: #3b4659; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Sequencing depth across <i>CFTR</i> exons 4 to 9: genomes against exomes</h1>
+  <p id="status" role="status" aria-live="polite">Asking the UCSC API for gnomAD's coverage: three requests, one a second…</p>
+  <div id="chart"></div>
+  <details>
+    <summary>Average depth across each exon, as a table</summary>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Exon</th><th>Position on chr7 (GRCh38)</th><th class="num">Genomes</th><th class="num">Exomes</th></tr></thead>
+        <tbody id="exons"></tbody>
+      </table>
+    </div>
+  </details>
+  <p class="credit">Data: gnomAD mean depth per base, genomes v3.0.1 and exomes v4.0 (Karczewski KJ et al. 2020, <i>Nature</i> 581: 434–443;
+    Chen S et al. 2024, <i>Nature</i> 625: 92–100), and the RefSeq Select transcript NM_000492.4, read from the UCSC Genome Browser's API.</p>
+
+  <script>
+    // 12 kb of chromosome 7 around CFTR exons 4 to 9. The UCSC API counts from 0, like BED files.
+    const CHROM = "chr7", START = 117530500, END = 117542500;
+    const API = "https://api.genome.ucsc.edu/getData/track?genome=hg38;chrom=" + CHROM + ";start=" + START + ";end=" + END + ";track=";
+    const GENOMES = "Genomes (gnomAD v3.0.1)", EXOMES = "Exomes (gnomAD v4.0)";
+    const status = document.getElementById("status");
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function getTrack(track) {
+      const r = await fetch(API + track);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return (await r.json())[track];                  // the rows sit under the track's own name
+    }
+
+    (async () => {
+      // UCSC asks for no more than one request a second, so fetch the three tracks in turn
+      const genome = await getTrack("gnomad3MeanCoverage");
+      await pause(1000);
+      const exome = await getTrack("gnomad4ExomeMeanCoverage");
+      await pause(1000);
+      const [tx] = await getTrack("ncbiRefSeqSelect");
+
+      // One row per base, counted from 1 as genome browsers show it. Exome depth exists only near exons;
+      // elsewhere it is null, which breaks the exome line instead of joining across the gap.
+      const exomeAt = new Map(exome.map(d => [d.start, d.value]));
+      const rows = genome.map(d => ({ pos: d.start + 1, genome: d.value, exome: exomeAt.get(d.start) ?? null }));
+      rows.forEach(r => { r.exomeText = r.exome === null ? "not captured" : r.exome.toFixed(1); });
+
+      // Exons from the transcript record: comma-separated starts (from 0) and ends
+      const starts = tx.exonStarts.split(",").filter(Boolean).map(Number);
+      const ends = tx.exonEnds.split(",").filter(Boolean).map(Number);
+      const exons = starts.map((s, i) => ({
+        exon: tx.strand === "+" ? i + 1 : starts.length - i,      // number exons along the gene
+        from: s + 1, to: ends[i] }))
+        .filter(e => e.to > START && e.from <= END);
+
+      const x = { field: "pos", type: "quantitative", title: "Position on chromosome 7 (GRCh38)",
+                  // every layer that uses x needs this same domain, or the exon bands pull the axis back to 0
+                  scale: { domain: [START + 1, END], nice: false, zero: false }, axis: { format: ",d", tickCount: 5 } };
+      // both lines share one axis title; different titles would be joined together
+      const depth = field => ({ field, type: "quantitative", title: "Mean depth (reads per base)" });
+      const colour = { scale: { domain: [GENOMES, EXOMES], range: ["#2a78d6", "#eb6834"] }, title: null, legend: { orient: "top" } };
+
+      const spec = {
+        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+        description: "Line chart of the mean sequencing depth per base across 12,000 bases of CFTR, exons 4 to 9. " +
+          "In genomes the depth is flat at about 31 reads per base. In exomes there is depth only around the six exons, between about 20 and 36.",
+        width: "container", height: 260,
+        layer: [
+          { data: { values: exons },                     // exons as grey bands, labelled at the top of the plot
+            transform: [ { calculate: "(width < 560 ? '' : 'exon ') + datum.exon", as: "label" } ],   // just the number on phones
+            layer: [
+              { mark: { type: "rect", color: "#e8ecf3", aria: false },
+                encoding: { x: Object.assign({}, x, { field: "from" }), x2: { field: "to" } } },
+              { mark: { type: "text", y: 0, dy: 3, dx: 2, align: "left", baseline: "top", fontSize: 11, color: "#3b4659", aria: false },
+                encoding: { x: Object.assign({}, x, { field: "from" }), text: { field: "label" } } } ] },
+          { data: { values: rows },
+            layer: [
+              { mark: { type: "line", strokeWidth: 1.5, aria: false },
+                encoding: { x, y: depth("genome"), color: Object.assign({ datum: GENOMES }, colour) } },
+              { mark: { type: "line", strokeWidth: 1.5, aria: false },
+                encoding: { x, y: depth("exome"), color: Object.assign({ datum: EXOMES }, colour) } },
+              { // an invisible line at every base: the one nearest the pointer appears, with both depths in its tooltip
+                params: [ { name: "hover", select: { type: "point", encodings: ["x"], nearest: true, on: "pointerover", clear: "pointerout" } } ],
+                mark: { type: "rule", color: "#172033", aria: false },
+                encoding: { x, opacity: { condition: { param: "hover", empty: false, value: 0.4 }, value: 0 },
+                  tooltip: [ { field: "pos", title: "Position", format: ",d" }, { field: "genome", title: "Genomes", format: ".1f" },
+                             { field: "exomeText", title: "Exomes" } ] } } ] }
+        ],
+        config: { font: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
+      };
+      await vegaEmbed("#chart", spec, { actions: false });
+
+      // The text version: average depth across each exon
+      const mean = values => values.reduce((a, b) => a + b, 0) / values.length;
+      const tbody = document.getElementById("exons");
+      exons.forEach(e => {
+        const inside = rows.filter(r => r.pos >= e.from && r.pos <= e.to);
+        const ex = inside.filter(r => r.exome !== null).map(r => r.exome);
+        const row = tbody.insertRow();
+        [e.exon, e.from.toLocaleString("en-GB") + "–" + e.to.toLocaleString("en-GB"),
+         mean(inside.map(r => r.genome)).toFixed(1), ex.length ? mean(ex).toFixed(1) : "not captured"]
+          .forEach((text, i) => {
+            const cell = row.insertCell();
+            cell.textContent = text;
+            if (i >= 2) cell.className = "num";
+          });
+      });
+      status.textContent = rows.length.toLocaleString("en-GB") + " bases from " + CHROM + ":" + (START + 1).toLocaleString("en-GB") +
+        " to " + END.toLocaleString("en-GB") + ". Grey bands mark " + exons.length + " exons of " + tx.name + ".";
+    })().catch(err => {
+      status.textContent = "The UCSC API did not answer (" + err.message + "). Try again in a minute.";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pyodide: Python code boxes, with the HBB coding sequence</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 10px; }
+    .py-box { border: 1px solid #c3cbd8; border-radius: 6px; padding: 8px 10px 10px; margin: 0 0 12px; }
+    .py-box label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .py-box textarea { width: 100%; box-sizing: border-box; font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #172033;
+                       padding: 6px 8px; border: 1px solid #8a94a6; border-radius: 4px; resize: vertical;
+                       white-space: pre; overflow-wrap: normal; overflow-x: auto; tab-size: 4; }
+    .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 12px; border-radius: 4px; border: 1px solid #5c677a; background: #f4f6fa; color: #172033; cursor: pointer; }
+    button.run { background: #2b56c9; border-color: #2b56c9; color: #fff; }
+    button:disabled { opacity: 0.55; cursor: default; }
+    button:focus-visible, textarea:focus-visible, pre:focus-visible { outline: 3px solid #b35a00; outline-offset: 2px; }
+    .state { font-size: 13px; color: #3b4659; }
+    pre.out { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; background: #f4f6fa; border: 1px solid #dde2ea; border-radius: 4px;
+              padding: 6px 8px; margin: 0; white-space: pre; overflow-x: auto; }
+    pre.out:empty { display: none; }
+    pre.out .err { color: #a40000; }
+    .figs img { display: block; max-width: 100%; height: auto; margin-top: 8px; background: #fff; }
+  </style>
+</head>
+<body>
+  <h1>The β-globin gene, HBB, in Python</h1>
+  <p>Edit the code and press <b>Run</b>, or <kbd>Ctrl</kbd>+<kbd>Enter</kbd>. Python runs in your browser, in the background.
+     It downloads (about 6 MB) when you first click in a box, and box 4 fetches Biopython and matplotlib. The boxes share
+     one Python session, so run them in order.</p>
+
+  <div class="py-box">
+    <label for="py1">1. The HBB coding sequence: length and GC content</label>
+    <textarea id="py1" spellcheck="false"># Human HBB coding sequence, RefSeq NM_000518.5 bases 51-494: start codon to stop codon
+hbb = (
+    "ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAG"
+    "TTGGTGGTGAGGCCCTGGGCAGGCTGCTGGTGGTCTACCCTTGGACCCAGAGGTTCTTTGAGTCCTTTGG"
+    "GGATCTGTCCACTCCTGATGCTGTTATGGGCAACCCTAAGGTGAAGGCTCATGGCAAGAAAGTGCTCGGT"
+    "GCCTTTAGTGATGGCCTGGCTCACCTGGACAACCTCAAGGGCACCTTTGCCACACTGAGTGAGCTGCACT"
+    "GTGACAAGCTGCACGTGGATCCTGAGAACTTCAGGCTCCTGGGCAACGTGCTGGTCTGTGTGCTGGCCCA"
+    "TCACTTTGGCAAAGAATTCACCCCACCAGTGCAGGCTGCCTATCAGAAAGTGGTGGCTGGTGTGGCTAAT"
+    "GCCCTGGCCCACAAGTATCACTAA"
+)
+gc = (hbb.count("G") + hbb.count("C")) / len(hbb)
+print(len(hbb), "bases,", len(hbb) // 3, "codons")
+print(f"GC content: {gc:.1%}")</textarea>
+  </div>
+
+  <div class="py-box">
+    <label for="py2">2. Reverse complement and translation, by hand</label>
+    <textarea id="py2" spellcheck="false"># The other strand, read 5' to 3': complement every base, then reverse
+pairs = str.maketrans("ACGT", "TGCA")
+other_strand = hbb.translate(pairs)[::-1]
+print("Reverse complement:", other_strand[:30], "...")
+
+# The standard genetic code (NCBI table 1), codons listed in TCAG order
+codons = [a + b + c for a in "TCAG" for b in "TCAG" for c in "TCAG"]
+genetic_code = dict(zip(codons, "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"))
+
+def to_protein(dna):
+    return "".join(genetic_code[dna[i:i + 3]] for i in range(0, len(dna) - 2, 3))
+
+protein = to_protein(hbb)
+print("Protein:", protein)          # * marks the stop codon</textarea>
+  </div>
+
+  <div class="py-box">
+    <label for="py3">3. The sickle-cell variant, c.20A&gt;T. Then try c.19G&gt;A (HbC) or c.79G&gt;A (HbE).</label>
+    <textarea id="py3" spellcheck="false">position, new_base = 20, "T"        # HGVS counts from 1; Python counts from 0
+variant = hbb[:position - 1] + new_base + hbb[position:]
+codon = (position - 1) // 3          # the codon that holds the base, counted from 0
+before = hbb[3 * codon:3 * codon + 3]
+after = variant[3 * codon:3 * codon + 3]
+print(f"Codon {codon + 1}: {before} -> {after}")
+print(f"Amino acid: {protein[codon]} -> {to_protein(variant)[codon]}")</textarea>
+  </div>
+
+  <div class="py-box" data-plot-alt="Bar chart of the GC content at the first, second and third positions of the codons of HBB. The values printed above the chart give the same information as text.">
+    <label for="py4">4. Packages: Biopython checks your translation, and matplotlib draws a chart</label>
+    <textarea id="py4" spellcheck="false">from Bio.Seq import Seq
+from Bio.SeqUtils import gc_fraction
+import matplotlib.pyplot as plt
+
+print("Biopython agrees:", Seq(hbb).translate() == protein)
+
+# GC content at the first, second and third base of every codon
+by_position = [gc_fraction(hbb[i::3]) for i in range(3)]
+print("GC at codon positions 1, 2, 3:", [round(x, 2) for x in by_position])
+
+fig, ax = plt.subplots(figsize=(5, 3))
+ax.bar(["1st", "2nd", "3rd"], by_position, color="#2b56c9")
+ax.set(xlabel="Position in the codon", ylabel="GC fraction", ylim=(0, 1),
+       title="HBB: GC content by codon position")
+plt.show()</textarea>
+  </div>
+
+  <!-- The Python worker. It is kept in this page, and started from a Blob, so that this one file is all you need. -->
+  <script type="text/plain" id="py-worker">
+    // Pyodide 314.0.7 (Python 3.14.2), pinned. Since 314.0.0 it must run in a module worker.
+    import { loadPyodide } from 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.mjs';
+
+    let runId = null;
+    const post = (msg) => self.postMessage({ id: runId, ...msg });
+    const decoders = { stdout: new TextDecoder(), stderr: new TextDecoder() };
+    const writer = (name) => ({
+      write: (buf) => { post({ type: name, text: decoders[name].decode(buf, { stream: true }) }); return buf.length; }
+    });
+
+    const ready = (async () => {
+      const pyodide = await loadPyodide({ env: { MPLBACKEND: 'Agg' } });
+      pyodide.setStdout(writer('stdout'));
+      pyodide.setStderr(writer('stderr'));
+      pyodide.setStdin({ error: true });     // input() cannot wait for typing here, so it raises an error
+      await pyodide.runPythonAsync(`
+        import sys, io, json, traceback
+        from pyodide.code import eval_code_async
+
+        def _figures():
+            """the open matplotlib figures as SVG (text stays text), then close them"""
+            if 'matplotlib.pyplot' not in sys.modules:
+                return []
+            import matplotlib.pyplot as plt
+            svgs = []
+            for num in plt.get_fignums():
+                buf = io.StringIO()
+                plt.figure(num).savefig(buf, format='svg', bbox_inches='tight')
+                svgs.append(buf.getvalue())
+            plt.close('all')
+            return svgs
+
+        async def _run(code):
+            ok = True
+            try:
+                value = await eval_code_async(code, globals(), filename='<box>')
+                if value is not None:
+                    print(repr(value))     # show the value of the last line, as a notebook does
+            except BaseException as e:
+                ok = False
+                # show only the lines of the student's own code, not Pyodide's
+                tb = traceback.TracebackException.from_exception(e)
+                tb.stack = traceback.StackSummary.from_list([f for f in tb.stack if f.filename == '<box>'])
+                print(''.join(tb.format()), end='', file=sys.stderr)
+            return json.dumps(dict(ok=ok, figures=_figures()))
+      `);
+      return { pyodide, run: pyodide.globals.get('_run') };
+    })();
+
+    self.onmessage = async ({ data }) => {
+      if (data.type === 'interrupt-buffer') {       // only sent where the page is cross-origin isolated
+        ready.then(({ pyodide }) => pyodide.setInterruptBuffer(data.buffer), () => {});
+        return;
+      }
+      runId = data.id;
+      try {
+        const { pyodide, run } = await ready;
+        // download the packages the code imports (numpy, matplotlib, biopython…) before running it
+        await pyodide.loadPackagesFromImports(data.code, { messageCallback: (text) => post({ type: 'status', text }) });
+        if (/matplotlib|pyplot/.test(data.code)) {
+          await pyodide.runPythonAsync(
+            "import matplotlib.pyplot as plt\nplt.rcParams['svg.fonttype'] = 'none'\nplt.show = lambda *a, **k: None");
+        }
+        post({ type: 'started' });                  // the page's time limit counts from here
+        const result = JSON.parse(await run(data.code));
+        for (const svg of result.figures) post({ type: 'svg', svg });
+        post({ type: 'done', ok: result.ok });
+      } catch (e) {
+        post({ type: 'stderr', text: String(e.message || e) + '\n' });
+        post({ type: 'done', ok: false });
+      }
+    };
+  </script>
+
+  <script type="module">
+    /* Runnable Python code boxes, with Pyodide 314.0.7 in a Web Worker, so that the page keeps responding while
+       Python works. Every .py-box that holds a <textarea> gets Run, Stop and Reset buttons and an output area.
+       All the boxes share one Python session, which starts the first time someone runs or edits a box.
+       Option: <div class="py-box" data-plot-alt="…"> describes the box's chart for screen readers. */
+    const TIME_LIMIT = 60;     // seconds of running before the code is stopped (downloads do not count)
+    const workerSource = document.getElementById('py-worker').textContent;
+    // A page opened from a file cannot start a module worker from a blob: address, but it can from a data: address
+    const workerUrl = location.protocol === 'file:'
+      ? 'data:text/javascript;charset=utf-8,' + encodeURIComponent(workerSource)
+      : URL.createObjectURL(new Blob([workerSource], { type: 'text/javascript' }));
+    // Stop can interrupt Python, and keep its variables, only where the page is cross-origin isolated.
+    // Everywhere else (GitHub Pages, for example), Stop ends the worker and the next Run starts a new Python.
+    const interrupt = self.crossOriginIsolated ? new Uint8Array(new SharedArrayBuffer(1)) : null;
+    let worker = null, current = null, nextId = 0;
+
+    function startWorker() {
+      if (worker) return;
+      worker = new Worker(workerUrl, { type: 'module' });
+      if (interrupt) worker.postMessage({ type: 'interrupt-buffer', buffer: interrupt });
+      worker.onmessage = ({ data }) => {
+        if (!current || data.id !== current.id) return;
+        if (data.type === 'done') current.finish(data.ok);
+        else current.onMessage(data);
+      };
+      worker.onerror = (e) => {                     // the worker itself failed, for example Pyodide could not be downloaded
+        e.preventDefault();
+        worker.terminate();
+        worker = null;                              // the next Run starts a new one
+        const job = current;
+        if (job) {
+          job.onMessage({ type: 'stderr', text: 'Python could not start. Check the internet connection and try again.\n' });
+          job.finish(false);
+        }
+      };
+    }
+
+    function runPython(code, onMessage) {
+      startWorker();
+      if (interrupt) interrupt[0] = 0;
+      const id = ++nextId;
+      return new Promise((resolve) => {
+        let timer = null;
+        current = {
+          id,
+          onMessage: (m) => {
+            if (m.type === 'started') timer = setTimeout(() => stop('Stopped after ' + TIME_LIMIT + ' s.'), TIME_LIMIT * 1000);
+            else onMessage(m);
+          },
+          finish: (ok) => { clearTimeout(timer); current = null; resolve(ok); }
+        };
+        worker.postMessage({ id, code });
+      });
+    }
+
+    function stop(why) {
+      if (!current) return;
+      if (interrupt) { interrupt[0] = 2; return; }  // 2 is SIGINT: Python raises KeyboardInterrupt
+      const job = current;
+      worker.terminate();
+      worker = null;
+      startWorker();
+      job.onMessage({ type: 'stderr', text: '\n' + why + ' Python was restarted, so run the boxes above this one again.\n' });
+      job.finish(false);
+    }
+
+    let busy = Promise.resolve();                   // boxes run one at a time, in the order they were asked
+    for (const box of document.querySelectorAll('.py-box')) {
+      const ta = box.querySelector('textarea');
+      const original = ta.value;
+      ta.rows = Math.max(3, original.split('\n').length + 1);    // show all of the code
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.innerHTML = '<button type="button" class="run">Run</button><button type="button" class="stop" disabled>Stop</button>' +
+                      '<button type="button" class="reset">Reset</button><span class="state" role="status" aria-live="polite"></span>';
+      const out = document.createElement('pre');
+      out.className = 'out';
+      out.tabIndex = 0;                // long output scrolls sideways, so it must be reachable by keyboard
+      out.setAttribute('aria-label', 'Output');
+      const figs = document.createElement('div');
+      figs.className = 'figs';
+      box.append(bar, out, figs);
+      const [runButton, stopButton, resetButton] = bar.querySelectorAll('button');
+      const state = bar.querySelector('.state');
+
+      const run = () => {
+        if (runButton.disabled) return;
+        runButton.disabled = true;
+        out.textContent = '';
+        figs.replaceChildren();
+        state.textContent = worker ? 'Waiting…' : 'Starting Python (first time only)…';
+        busy = busy.then(async () => {
+          stopButton.disabled = false;
+          const t0 = performance.now();
+          const ok = await runPython(ta.value, (m) => {
+            if (m.type === 'status') state.textContent = m.text;          // "Loading numpy…"
+            else if (m.type === 'svg') {
+              const img = new Image();
+              img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(m.svg);
+              img.alt = box.dataset.plotAlt || 'Chart made by the Python code above';
+              figs.append(img);
+            } else {
+              const span = document.createElement('span');
+              if (m.type === 'stderr') span.className = 'err';
+              span.textContent = m.text;
+              out.append(span);
+            }
+          });
+          state.textContent = (ok ? 'Done' : 'Stopped with an error') + ' (' + ((performance.now() - t0) / 1000).toFixed(1) + ' s).';
+          stopButton.disabled = true;
+          runButton.disabled = false;
+        });
+      };
+
+      runButton.addEventListener('click', run);
+      stopButton.addEventListener('click', () => stop('Stopped.'));
+      resetButton.addEventListener('click', () => { ta.value = original; ta.focus(); });
+      ta.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
+      });
+      ta.addEventListener('focus', startWorker, { once: true });   // start downloading Python as soon as someone starts to edit
+    }
+  </script>
+</body>
+</html>

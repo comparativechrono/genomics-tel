@@ -260,7 +260,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 2.5rem 0; }
 .prose li { margin-bottom: 0.35em; }
 .prose li > ul, .prose li > ol { margin: 0.35em 0 0.4em; }
 .prose blockquote { margin: 1.5em 0; padding: 0.2em 0 0.2em 1.1em; border-left: 3px solid var(--line-2); color: var(--ink-2); }
-.prose :not(pre) > code { background: var(--paper-2); border: 1px solid var(--line); border-radius: 5px; padding: 0.08em 0.32em; font-size: 0.86em; }
+.prose :not(pre) > code { background: var(--paper-2); border: 1px solid var(--line); border-radius: 5px; padding: 0.08em 0.32em; font-size: 0.86em; overflow-wrap: anywhere; }
 .prose a code { color: inherit; }
 .prose dl { margin: 0 0 1.2em; }
 .prose dt { font-weight: 700; margin-top: 0.8em; }
@@ -315,6 +315,7 @@ pre.highlight, figure.highlight pre { margin: 0; padding: 1rem 1.1rem; overflow:
 }
 .copy-button:hover { opacity: 1; color: var(--ink); }
 .copy-button.is-done { color: var(--teach); border-color: var(--teach); }
+.has-copy pre { padding-top: 2.6rem; }
 
 /* ─── Live examples ─── */
 .example { margin: 2.2rem 0 2.6rem; border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden; background: var(--paper); box-shadow: var(--shadow); }

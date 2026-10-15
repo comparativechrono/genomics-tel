@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vega-Lite: a Manhattan plot of FinnGen results for alcohol use disorder</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@6.4.0/build/vega.min.js"
+          integrity="sha384-VKdcJr3ZaBIJMbVcopTAI/JEuUkSY6qnwVu9iLuw0DnQ9gQ1JjsfZJhXFQAgNi43"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4.3/build/vega-lite.min.js"
+          integrity="sha384-9/70gNCfOu6G7xXvkdreMfuqAEsoaGJVXV2BN/JLRXkSmcGvnMqtsRx8HZtUWAvI"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.3.0/build/vega-embed.min.js"
+          integrity="sha384-Muy1QRxYFeNrA1zShc1KtN4OfipkR/61gt+HWqN57c1Zxu3Oe16TsilsruVVjfKL"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 4px; }
+    p { margin: 0 0 6px; }
+    #status { font-size: 14px; color: #3b4659; }
+    #chart { width: 100%; }
+    summary { cursor: pointer; font-weight: 600; margin-top: 4px; }
+    .scroll { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 13px; margin: 6px 0; }
+    th, td { padding: 3px 12px 3px 0; text-align: left; border-bottom: 1px solid #dde2ea; white-space: nowrap; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .credit { font-size: 13px; color: #3b4659; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Genome-wide association with alcohol use disorder (FinnGen R13)</h1>
+  <p id="status" role="status" aria-live="polite">Loading FinnGen's results (145 kB)…</p>
+  <div id="chart"></div>
+  <details>
+    <summary>The lead variants that pass p = 5 × 10⁻⁸, as a table</summary>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Variant</th><th>Nearest gene</th><th>Position (GRCh38)</th><th class="num">p</th><th class="num">Effect (beta)</th><th class="num">Frequency of the alternative allele</th></tr></thead>
+        <tbody id="leads"></tbody>
+      </table>
+    </div>
+  </details>
+  <p class="credit">Data: FinnGen release R13, endpoint AUD_SWEDISH (alcohol use disorder, Swedish definition): 29,711 cases and 470,475 controls.
+    We acknowledge the participants and investigators of the FinnGen study. Kurki MI et al. (2023) <i>Nature</i> 613: 508–518.</p>
+
+  <script>
+    const URL = "https://r13.finngen.fi/api/manhattan/pheno/AUD_SWEDISH";
+    const THRESHOLD = 5e-8;                          // the usual genome-wide significance line
+
+    // GRCh38 chromosome lengths (UCSC hg38.chrom.sizes). FinnGen calls chromosome X "23".
+    const LENGTH = { 1: 248956422, 2: 242193529, 3: 198295559, 4: 190214555, 5: 181538259, 6: 170805979,
+      7: 159345973, 8: 145138636, 9: 138394717, 10: 133797422, 11: 135086622, 12: 133275309, 13: 114364328,
+      14: 107043718, 15: 101991189, 16: 90338345, 17: 83257441, 18: 80373285, 19: 58617616, 20: 64444167,
+      21: 46709983, 22: 50818468, 23: 156040895 };
+
+    // A chart has one x axis, so lay the chromosomes end to end: each starts where the last one ended.
+    const start = {};
+    let genome = 0;
+    for (let c = 1; c <= 23; c++) { start[c] = genome; genome += LENGTH[c]; }
+    const name = c => (+c === 23 ? "X" : String(c));
+    const along = (c, pos) => (start[+c] + pos) / 1e6;          // position along the whole genome, in Mb
+
+    async function getJSON(url, timeoutMs = 20000) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+      try {
+        const r = await fetch(url, { signal: ctrl.signal });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return await r.json();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    getJSON(URL).then(async d => {
+      // FinnGen's server (PheWeb) lists the strongest variants one by one...
+      const listed = d.unbinned_variants.map(v => {
+        const id = v.rsids !== "NA" ? v.rsids : name(v.chrom) + ":" + v.pos + ":" + v.ref + ":" + v.alt;
+        const gene = v.nearest_genes !== "NA" ? v.nearest_genes : "none listed";
+        return {
+          x: along(v.chrom, v.pos), mlogp: v.mlogp, odd: +v.chrom % 2, id, gene,
+          chrom: name(v.chrom), pos: v.pos, p: v.pval, beta: v.beta, af: v.af_alt,
+          lead: v.peak && v.pval < THRESHOLD,                    // the top variant of each peak
+          desc: id + ", nearest gene " + gene + ", chromosome " + name(v.chrom) + " position " + v.pos + ", p = " + v.pval.toExponential(1)
+        };
+      });
+      // ...and sends everything else already summarised in 3 Mb bins, as single values and ranges of -log10(p)
+      const binDots = d.variant_bins.flatMap(b =>
+        b.neglog10_pvals.map(m => ({ x: along(b.chrom, b.pos), mlogp: m, odd: +b.chrom % 2 })));
+      const binRanges = d.variant_bins.flatMap(b =>
+        b.neglog10_pval_extents.map(([lo, hi]) => ({ x: along(b.chrom, b.pos), lo, hi, odd: +b.chrom % 2 })));
+      const chroms = Object.keys(LENGTH).map(c => ({ chrom: name(c), mid: (start[c] + LENGTH[c] / 2) / 1e6, mb: LENGTH[c] / 1e6 }));
+      const top = listed.reduce((a, b) => (b.p < a.p ? b : a));
+
+      const x = { field: "x", type: "quantitative", title: "Chromosome",
+                  scale: { domain: [0, genome / 1e6], nice: false, zero: false },
+                  axis: { labels: false, ticks: false, grid: false, titlePadding: 20 } };
+      const colour = { field: "odd", type: "nominal", legend: null,
+                       scale: { domain: [1, 0], range: ["#2a78d6", "#eb6834"] } };   // odd blue, even orange
+      const line = -Math.log10(THRESHOLD);                      // 7.3
+
+      const spec = {
+        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+        description: "Manhattan plot of FinnGen genome-wide association results for alcohol use disorder. " +
+          "The strongest signal is on chromosome 4 at " + top.id + " near " + top.gene + ", p = " + top.p.toExponential(1) +
+          ". 19 lead variants pass the genome-wide significance line at p = 5e-8.",
+        width: "container", height: 300,
+        layer: [
+          { data: { values: binRanges },               // aria: false keeps thousands of background marks away from screen readers
+            mark: { type: "rule", strokeWidth: 2, aria: false },
+            encoding: { x, color: colour, y: { field: "lo", type: "quantitative" }, y2: { field: "hi" } } },
+          { data: { values: binDots },
+            mark: { type: "circle", size: 10, opacity: 0.9, aria: false },
+            encoding: { x, color: colour, y: { field: "mlogp", type: "quantitative" } } },
+          { data: { values: listed },
+            // nearest: the tooltip follows the closest point, so the pointer need not land exactly on a dot
+            params: [ { name: "near", select: { type: "point", nearest: true, on: "pointerover", clear: "pointerout" } } ],
+            mark: { type: "circle", opacity: 0.9 },
+            encoding: {
+              x, color: colour,
+              y: { field: "mlogp", type: "quantitative", title: "−log₁₀(p)" },
+              size: { condition: { param: "near", empty: false, value: 90 }, value: 26 },
+              description: { field: "desc" },              // what a screen reader announces for each point
+              tooltip: [
+                { field: "id", title: "Variant" }, { field: "gene", title: "Nearest gene" },
+                { field: "chrom", title: "Chromosome" }, { field: "pos", title: "Position", format: "," },
+                { field: "p", title: "p", format: ".2e" }, { field: "beta", title: "Effect (beta)", format: ".3f" },
+                { field: "af", title: "Alt. allele frequency", format: ".3f" } ] } },
+          { data: { values: [ { y: line } ] },
+            mark: { type: "rule", strokeDash: [6, 4], color: "#172033", aria: false },
+            encoding: { y: { field: "y", type: "quantitative" } } },
+          { data: { values: [ { y: line } ] },
+            mark: { type: "text", align: "right", baseline: "bottom", dy: -3, x: "width", fontSize: 11, color: "#172033", aria: false },
+            encoding: { y: { field: "y", type: "quantitative" }, text: { value: "p = 5 × 10⁻⁸" } } },
+          { data: { values: [ top ] },                     // label only the highest point
+            mark: { type: "text", align: "left", dx: 7, fontSize: 11, color: "#172033", aria: false },
+            encoding: { x, y: { field: "mlogp", type: "quantitative" }, text: { value: top.id + " (" + top.gene + ")" } } },
+          { data: { values: chroms },
+            // Hide the label of any chromosome narrower than 13 pixels, so that labels do not overlap on small screens
+            transform: [ { calculate: "datum.mb / " + genome / 1e6 + " * width >= 13 ? datum.chrom : ''", as: "label" } ],
+            mark: { type: "text", y: "height", dy: 9, baseline: "top", fontSize: 10, color: "#3b4659", aria: false },
+            encoding: { x: { field: "mid", type: "quantitative" }, text: { field: "label" } } }
+        ],
+        config: { font: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
+      };
+      await vegaEmbed("#chart", spec, { actions: false });
+
+      // The table is the text version of the chart: one row for the top variant of each peak past the line
+      const tbody = document.getElementById("leads");
+      listed.filter(v => v.lead).sort((a, b) => a.p - b.p).forEach(v => {
+        const row = tbody.insertRow();
+        [v.id, v.gene, v.chrom + ":" + v.pos.toLocaleString("en-GB"), v.p.toExponential(1), v.beta.toFixed(3), v.af.toFixed(3)]
+          .forEach((text, i) => {
+            const cell = row.insertCell();
+            cell.textContent = text;                       // textContent, so data can never inject HTML
+            if (i >= 3) cell.className = "num";
+          });
+      });
+      document.getElementById("status").textContent =
+        listed.length.toLocaleString("en-GB") + " variants listed one by one, " +
+        binDots.length.toLocaleString("en-GB") + " binned values. " + tbody.rows.length + " peaks pass p = 5 × 10⁻⁸.";
+    }).catch(err => {
+      document.getElementById("status").textContent =
+        "FinnGen's server did not answer (" + err.message + "). Try again later.";
+    });
+  </script>
+</body>
+</html>

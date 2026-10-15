@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plotly.js: zoom into the peaks of a Manhattan plot</title>
+  <!-- Plotly's "cartesian" bundle has the common chart types: 1.5 MB, about 500 kB to download.
+       The full plotly.min.js is 4.8 MB. -->
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-cartesian-dist-min@4.1.1/plotly-cartesian.min.js"
+          integrity="sha384-zc4SwKObGL/W0M3RUI09UPWjlgIZHfbwMgcZO6713mRh78tfUmIQKhzCyE2LIiUg"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+    button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    #status { font-size: 14px; color: #3b4659; min-height: 1.5em; }
+    figure { margin: 0; }
+    #chart { width: 100%; height: 330px; }
+    figcaption, .credit { font-size: 13px; color: #3b4659; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Zoom into the peaks: alcohol use disorder in FinnGen R13</h1>
+  <div class="controls" role="group" aria-label="Places to go">
+    <button type="button" data-chrom="0">Whole genome</button>
+    <button type="button" data-chrom="4" data-pos="99318162">Chromosome 4: ADH1B</button>
+    <button type="button" data-chrom="6" data-pos="19313150">Chromosome 6: 19.3 Mb</button>
+    <button type="button" data-chrom="2" data-pos="143468633">Chromosome 2: ARHGAP15</button>
+    <button type="button" data-chrom="18" data-pos="37402280">Chromosome 18: CELF4</button>
+  </div>
+  <p id="status" role="status" aria-live="polite">Loading FinnGen's results (145 kB)…</p>
+  <figure>
+    <div id="chart"></div>
+    <figcaption>Drag across the chart to zoom in, double-click to zoom out, or use the buttons. The line is p = 5 × 10⁻⁸.</figcaption>
+  </figure>
+  <p class="credit">Data: FinnGen release R13, endpoint AUD_SWEDISH: 29,711 cases and 470,475 controls.
+    We acknowledge the participants and investigators of the FinnGen study. Kurki MI et al. (2023) <i>Nature</i> 613: 508–518.</p>
+
+  <script>
+    const URL = "https://r13.finngen.fi/api/manhattan/pheno/AUD_SWEDISH";
+    const LENGTH = { 1: 248956422, 2: 242193529, 3: 198295559, 4: 190214555, 5: 181538259, 6: 170805979,
+      7: 159345973, 8: 145138636, 9: 138394717, 10: 133797422, 11: 135086622, 12: 133275309, 13: 114364328,
+      14: 107043718, 15: 101991189, 16: 90338345, 17: 83257441, 18: 80373285, 19: 58617616, 20: 64444167,
+      21: 46709983, 22: 50818468, 23: 156040895 };              // GRCh38; FinnGen calls X "23"
+    const start = {};
+    let genome = 0;
+    for (let c = 1; c <= 23; c++) { start[c] = genome; genome += LENGTH[c]; }
+    const name = c => (+c === 23 ? "X" : String(c));
+    const along = (c, pos) => (start[+c] + pos) / 1e6;          // Mb along the whole genome
+    const chromAt = mb => { let c = 1; while (c < 23 && mb * 1e6 >= start[c + 1]) c++; return c; };
+    const COLOURS = { 1: "#2a78d6", 0: "#eb6834" };              // odd chromosomes blue, even orange
+    const chart = document.getElementById("chart"), status = document.getElementById("status");
+
+    fetch(URL).then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(d => {
+      const listed = d.unbinned_variants.map(v => ({
+        x: along(v.chrom, v.pos), y: v.mlogp, odd: +v.chrom % 2, p: v.pval,
+        id: v.rsids !== "NA" ? v.rsids : name(v.chrom) + ":" + v.pos + ":" + v.ref + ":" + v.alt,
+        gene: v.nearest_genes !== "NA" ? v.nearest_genes : "none listed", where: "chr" + name(v.chrom) + ":" + v.pos.toLocaleString("en-GB") }));
+
+      // Plotly wants one array per axis for each "trace". Three traces for each colour:
+      const traces = [];
+      for (const odd of [1, 0]) {
+        const bins = d.variant_bins.filter(b => +b.chrom % 2 === odd);
+        // binned ranges of -log10(p) as vertical strokes; a null between strokes stops Plotly joining them
+        const rx = [], ry = [];
+        bins.forEach(b => b.neglog10_pval_extents.forEach(([lo, hi]) => { rx.push(along(b.chrom, b.pos), along(b.chrom, b.pos), null); ry.push(lo, hi, null); }));
+        traces.push({ type: "scatter", mode: "lines", x: rx, y: ry, line: { color: COLOURS[odd], width: 2 }, hoverinfo: "skip", showlegend: false });
+        const dots = bins.flatMap(b => b.neglog10_pvals.map(m => [along(b.chrom, b.pos), m]));
+        traces.push({ type: "scatter", mode: "markers", x: dots.map(p => p[0]), y: dots.map(p => p[1]),
+                      marker: { color: COLOURS[odd], size: 3 }, hoverinfo: "skip", showlegend: false });
+        const v = listed.filter(v => v.odd === odd);
+        traces.push({ type: "scatter", mode: "markers", x: v.map(v => v.x), y: v.map(v => v.y), showlegend: false,
+          marker: { color: COLOURS[odd], size: 5 },
+          customdata: v.map(v => [v.id, v.gene, v.where, v.p]),
+          // <extra></extra> hides the trace name that Plotly adds to every hover label
+          hovertemplate: "<b>%{customdata[0]}</b><br>Nearest gene: %{customdata[1]}<br>%{customdata[2]}<br>p = %{customdata[3]:.2e}<extra></extra>" });
+      }
+
+      const line = -Math.log10(5e-8);
+      const layout = {
+        hovermode: "closest", dragmode: "zoom",
+        xaxis: { title: { text: "Chromosome" }, range: [0, genome / 1e6], showgrid: false, zeroline: false },
+        yaxis: { title: { text: "−log<sub>10</sub>(p)" }, range: [0, 24.5], fixedrange: true, zeroline: false },   // zoom along the genome only
+        shapes: [ { type: "line", xref: "paper", x0: 0, x1: 1, y0: line, y1: line, line: { dash: "dash", width: 1, color: "#172033" } } ],
+        margin: { t: 10, r: 10, b: 50, l: 55 },
+        font: { family: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
+      };
+      const config = {
+        responsive: true,
+        displayModeBar: true,        // always show the toolbar, so keyboard users can find its buttons
+        displaylogo: false,          // no link to Plotly's website
+        showSendToCloud: false,      // no "Share chart" button, which would upload the chart to Plotly's cloud service
+        modeBarButtonsToRemove: ["select2d", "lasso2d"]
+      };
+      return Plotly.newPlot(chart, traces, layout, config).then(() => {
+
+        // Label the x axis by chromosome for wide views, and by position for close-ups
+        function ticksFor([a, b]) {
+          if (b - a > 400) {
+            // label chromosomes at their middles, leaving out any less than 14 pixels wide on screen
+            const pxPerMb = (chart.clientWidth - 65) / (b - a);
+            const shown = Object.keys(LENGTH).filter(c => (LENGTH[c] / 1e6) * pxPerMb >= 14);
+            return { tickvals: shown.map(c => (start[c] + LENGTH[c] / 2) / 1e6), ticktext: shown.map(name) };
+          }
+          const step = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50].find(s => (b - a) / s <= 6);
+          const tickvals = [], ticktext = [];
+          for (let c = 1; c <= 23; c++) {                        // round numbers within each chromosome in view
+            const s = start[c] / 1e6, e = s + LENGTH[c] / 1e6;
+            if (e < a || s > b) continue;
+            for (let t = Math.ceil((Math.max(a, s) - s) / step) * step; s + t <= Math.min(b, e); t += step) {
+              tickvals.push(s + t);
+              ticktext.push(name(c) + ":" + t.toFixed(step < 1 ? 1 : 0) + " Mb");
+            }
+          }
+          return { tickvals, ticktext };
+        }
+
+        // Say in words what the view shows, for everyone and for screen readers
+        function describe() {
+          const [a, b] = chart.layout.xaxis.range;
+          const inView = listed.filter(v => v.x >= a && v.x <= b);
+          const [c1, c2] = [chromAt(Math.max(a, 0)), chromAt(Math.min(b, genome / 1e6 - 1e-6))];
+          const where = b - a > 400 ? "the whole genome" :
+            "chromosome " + name(c1) + (c1 === c2 ? ", " + (a - start[c1] / 1e6).toFixed(1) + " to " + (b - start[c1] / 1e6).toFixed(1) + " Mb" : " to " + name(c2));
+          const best = inView.reduce((m, v) => (!m || v.p < m.p ? v : m), null);
+          status.textContent = "Showing " + where + ": " + inView.length.toLocaleString("en-GB") + " variants listed. " +
+            (best ? "The strongest is " + best.id + " (nearest gene " + best.gene + "), p = " + best.p.toExponential(1) + "." : "");
+          const ticks = ticksFor([a, b]);
+          Plotly.relayout(chart, { "xaxis.tickvals": ticks.tickvals, "xaxis.ticktext": ticks.ticktext });
+        }
+
+        chart.on("plotly_relayout", ev => {
+          if (Object.keys(ev).some(k => k.startsWith("xaxis.range") || k === "xaxis.autorange")) describe();
+        });
+        document.querySelectorAll("button[data-chrom]").forEach(btn => btn.addEventListener("click", () => {
+          const c = +btn.dataset.chrom;
+          const range = c ? [along(c, +btn.dataset.pos) - 1, along(c, +btn.dataset.pos) + 1]     // 2 Mb around the variant
+                          : [0, genome / 1e6];
+          Plotly.relayout(chart, { "xaxis.range": range });
+        }));
+        describe();
+      });
+    }).catch(err => {
+      status.textContent = "FinnGen's server did not answer (" + err.message + "). Try again later.";
+    });
+  </script>
+</body>
+</html>

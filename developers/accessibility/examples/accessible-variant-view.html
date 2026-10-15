@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>An accessible canvas view: variants in HBB with buttons, spoken feedback and a table</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; }
+    figure { margin: 0 0 10px; }
+    canvas { display: block; width: 100%; height: 170px; border: 1px solid #c3cbd8; border-radius: 6px; cursor: pointer; }
+    .key { display: block; margin-top: 2px; }
+    figcaption { font-size: 13px; color: #3b4659; margin-top: 4px; }
+    .shape { display: inline-block; width: 1em; text-align: center; }
+    .pathogenic { color: #eb6834; }
+    .benign { color: #2a78d6; }
+    .group-label { font-weight: 600; font-size: 14px; margin: 0 0 4px; }
+    .choices { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 8px; padding: 0; }
+    .choices button { font: inherit; font-size: 14px; min-height: 32px; padding: 3px 10px; border: 1px solid #5c677a; border-radius: 6px; background: #fff; color: #172033; cursor: pointer; }
+    .choices button[aria-pressed="true"] { background: #172033; border-color: #172033; color: #fff; }
+    .choices button[aria-pressed="true"] .shape { color: inherit; }
+    button:focus-visible { outline: 3px solid #2b56c9; outline-offset: 2px; }
+    #feedback { min-height: 3em; margin: 0 0 6px; padding: 6px 10px; border-left: 4px solid #2b56c9; background: #f4f6fa; }
+    #feedback:empty { min-height: 0; padding: 0; border: 0; }   /* still in the page, so it is announced once filled */
+    #motion { font-size: 13px; color: #3b4659; }
+    .table-title { font-weight: 600; font-size: 14px; margin: 4px 0; }
+    .table-box { overflow-x: auto; }
+    .table-box:focus-visible { outline: 3px solid #2b56c9; outline-offset: 2px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { text-align: left; vertical-align: top; padding: 3px 8px; border-bottom: 1px solid #dde2ea; white-space: nowrap; }
+    td:nth-child(5) { white-space: normal; min-width: 9em; }
+    tr.selected td { background: #fff1e6; font-weight: 600; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  </style>
+</head>
+<body>
+  <h1>Seven ClinVar variants in the HBB gene</h1>
+  <p>Choose a variant with a button, or click it in the picture. The picture, the message below the buttons and the table give the same information.</p>
+
+  <figure>
+    <!-- A canvas is a single image to a screen reader, so it gets a short summary here.
+         The details live in real HTML below: buttons, a live message and a table. -->
+    <canvas id="view" role="img" aria-describedby="view-caption"
+            aria-label="Diagram of the HBB gene with its three exons and seven ClinVar variants, five pathogenic and two benign. The buttons and the table below give the same information."></canvas>
+    <figcaption id="view-caption">HBB on GRCh38, chr11:5,225,464-5,227,071. The gene is read from right to left (reverse strand). Tall boxes are coding sequence.
+      <span class="key"><span class="shape pathogenic" aria-hidden="true">▲</span> pathogenic or likely pathogenic
+      <span class="shape benign" aria-hidden="true">●</span> benign</span></figcaption>
+  </figure>
+
+  <p class="group-label" id="choices-label">Variants, in order along the chromosome</p>
+  <ul class="choices" id="choices" aria-labelledby="choices-label"></ul>
+
+  <!-- The live region is in the page from the start, and empty: screen readers announce later changes to it -->
+  <p id="feedback" role="status" aria-live="polite"></p>
+  <p id="motion"></p>
+
+  <p class="table-title" id="table-title">The same variants as a table (ClinVar release of 4 October 2026)</p>
+  <!-- On a phone the table scrolls sideways: tabindex lets keyboard users scroll it too -->
+  <div class="table-box" role="region" aria-labelledby="table-title" tabindex="0">
+    <table aria-labelledby="table-title">
+      <thead>
+        <tr><th scope="col">Variant</th><th scope="col">GRCh38 position and change</th><th scope="col">In HBB</th><th scope="col">Protein</th><th scope="col">Known as</th><th scope="col">ClinVar</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Real ClinVar records, as in this site's HBB teaching data (GRCh38; change given on the forward strand)
+    const VARIANTS = [
+      { id: "rs1609812",  pos: 5225911, change: "G>A", c: "c.316-185C>T", p: "p.?",        where: "intron 2", name: "IVS-II-666 C>T",            short: "IVS-II-666", clinvar: "Benign" },
+      { id: "rs11549407", pos: 5226774, change: "G>A", c: "c.118C>T",     p: "p.Gln40Ter", where: "exon 2",   name: "codon 39 nonsense, β0-thalassaemia", short: "Codon 39", clinvar: "Pathogenic" },
+      { id: "rs35004220", pos: 5226820, change: "C>T", c: "c.93-21G>A",   p: "p.?",        where: "intron 1", name: "IVS-I-110, β+-thalassaemia", short: "IVS-I-110",  clinvar: "Pathogenic" },
+      { id: "rs33950507", pos: 5226943, change: "C>T", c: "c.79G>A",      p: "p.Glu27Lys", where: "exon 1",   name: "HbE",                         short: "HbE",        clinvar: "Pathogenic" },
+      { id: "rs334",      pos: 5227002, change: "T>A", c: "c.20A>T",      p: "p.Glu7Val",  where: "exon 1",   name: "HbS, the sickle-cell variant", short: "HbS",       clinvar: "Pathogenic" },
+      { id: "rs33930165", pos: 5227003, change: "C>T", c: "c.19G>A",      p: "p.Glu7Lys",  where: "exon 1",   name: "HbC",                         short: "HbC",        clinvar: "Pathogenic/Likely pathogenic" },
+      { id: "rs713040",   pos: 5227013, change: "A>G", c: "c.9T>C",       p: "p.His3=",    where: "exon 1",   name: "synonymous change",           short: "His3His",    clinvar: "Benign" }
+    ];
+    // RefSeq NM_000518.5 on GRCh38, numbered in the gene's direction
+    const GENE = { start: 5225464, end: 5227071 };
+    const EXONS = [
+      { n: 3, start: 5225464, end: 5225726, cdsStart: 5225598, cdsEnd: 5225726 },
+      { n: 2, start: 5226577, end: 5226799, cdsStart: 5226577, cdsEnd: 5226799 },
+      { n: 1, start: 5226930, end: 5227071, cdsStart: 5226930, cdsEnd: 5227021 }
+    ];
+    // Blue and orange stay distinct with the common kinds of colour blindness; shape repeats the meaning
+    const COLOUR = { pathogenic: "#eb6834", benign: "#2a78d6", ink: "#172033", muted: "#5c677a", rule: "#8a94a6" };
+    const pathogenic = v => /pathogenic/i.test(v.clinvar) && !/benign/i.test(v.clinvar);
+    const fmt = n => n.toLocaleString("en-GB");
+
+    const canvas = document.getElementById("view");
+    const ctx = canvas.getContext("2d");
+    const feedback = document.getElementById("feedback");
+    const motionNote = document.getElementById("motion");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const WHOLE = { start: GENE.start - 70, end: GENE.end + 70 };
+    let view = Object.assign({}, WHOLE);
+    let selected = null;
+    let frame = 0;
+
+    // Screen position of a base, in the current view or in another stretch of the chromosome
+    const toX = (pos, width, area = view) => 14 + (pos - area.start) / (area.end - area.start) * (width - 28);
+
+    // Put markers that would overlap on separate rows, as genome browsers do in "expanded" mode
+    function layout(width, area) {
+      const rowEnds = [];
+      return VARIANTS.map(v => {
+        const x = toX(v.pos, width, area);
+        let row = rowEnds.findIndex(end => x - end > 16);
+        if (row === -1) { row = rowEnds.length; rowEnds.push(x); } else { rowEnds[row] = x; }
+        return { v, x, y: 112 + row * 20 };
+      });
+    }
+
+    // Text drawn over lines gets a white patch behind it, so it stays readable
+    function label(text, x, y) {
+      const w = ctx.measureText(text).width;
+      const left = ctx.textAlign === "center" ? x - w / 2 : x;
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(left - 3, y - 8, w + 6, 16);
+      ctx.restore();
+      ctx.fillText(text, x, y);
+    }
+
+    function draw() {
+      const width = canvas.clientWidth;
+      // Make room for every row of markers in the most crowded view, the whole gene, so the height never jumps
+      const lowest = Math.max(...layout(width, WHOLE).map(m => m.y));
+      const height = lowest + 18;
+      if (canvas.style.height !== height + "px") canvas.style.height = height + "px";
+      const ratio = window.devicePixelRatio || 1;            // draw at the screen's real resolution
+      if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      ctx.font = "12px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = 1;
+
+      // Ruler: about one labelled tick per 110 pixels
+      const span = view.end - view.start;
+      const step = [10, 20, 50, 100, 200, 500, 1000, 2000].find(s => span / s <= Math.max(2, width / 110));
+      ctx.strokeStyle = COLOUR.rule;
+      ctx.fillStyle = COLOUR.muted;
+      ctx.textAlign = "center";
+      ctx.beginPath(); ctx.moveTo(14, 24); ctx.lineTo(width - 14, 24); ctx.stroke();
+      for (let t = Math.ceil(view.start / step) * step; t <= view.end; t += step) {
+        const x = toX(t, width);
+        ctx.beginPath(); ctx.moveTo(x, 20); ctx.lineTo(x, 28); ctx.stroke();
+        if (x > 36 && x < width - 36) ctx.fillText(fmt(t), x, 11);
+      }
+
+      // The selected variant gets a dashed guide line up to the ruler
+      const markers = layout(width);
+      const chosen = selected && markers.find(m => m.v.id === selected.id);
+      if (chosen) {
+        ctx.strokeStyle = COLOUR.ink;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath(); ctx.moveTo(chosen.x, 30); ctx.lineTo(chosen.x, chosen.y - 12); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // The gene: a line for the introns, short boxes for untranslated sequence, tall boxes for coding sequence
+      const y = 64;
+      const g1 = Math.max(0, toX(GENE.start - 0.5, width)), g2 = Math.min(width, toX(GENE.end + 0.5, width));
+      ctx.strokeStyle = COLOUR.ink;
+      ctx.fillStyle = COLOUR.ink;
+      if (g2 > g1) {
+        ctx.beginPath(); ctx.moveTo(g1, y); ctx.lineTo(g2, y); ctx.stroke();
+        for (let x = g1 + 24; x < g2 - 8; x += 48) {          // arrowheads point the way the gene is read
+          ctx.beginPath(); ctx.moveTo(x + 3, y - 4); ctx.lineTo(x - 2, y); ctx.lineTo(x + 3, y + 4); ctx.stroke();
+        }
+        ctx.textAlign = "left";
+        ctx.fillText("HBB", Math.max(14, toX(GENE.start, width)), 42);
+      }
+      for (const e of EXONS) {
+        const x1 = toX(e.start - 0.5, width), x2 = toX(e.end + 0.5, width);
+        if (x2 < 0 || x1 > width) continue;
+        ctx.fillRect(x1, y - 5, x2 - x1, 10);
+        const c1 = toX(e.cdsStart - 0.5, width), c2 = toX(e.cdsEnd + 0.5, width);
+        ctx.fillRect(c1, y - 11, c2 - c1, 22);
+        ctx.textAlign = "center";
+        label("exon " + e.n, (Math.max(x1, 30) + Math.min(x2, width - 30)) / 2, y + 24);
+      }
+
+      // Variants: shape and colour both carry the ClinVar classification
+      const zoomedIn = span < 600;
+      for (const m of markers) {
+        if (m.x < -10 || m.x > width + 10) continue;
+        const isSelected = m === chosen;
+        ctx.fillStyle = pathogenic(m.v) ? COLOUR.pathogenic : COLOUR.benign;
+        ctx.beginPath();
+        if (pathogenic(m.v)) { ctx.moveTo(m.x, m.y - 7); ctx.lineTo(m.x + 7, m.y + 6); ctx.lineTo(m.x - 7, m.y + 6); ctx.closePath(); }
+        else { ctx.arc(m.x, m.y, 6, 0, 2 * Math.PI); }
+        ctx.fill();
+        ctx.strokeStyle = COLOUR.ink;
+        ctx.stroke();
+        if (isSelected) { ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(m.x, m.y, 11, 0, 2 * Math.PI); ctx.stroke(); ctx.lineWidth = 1; }
+        if (isSelected || zoomedIn) {
+          ctx.fillStyle = COLOUR.ink;
+          ctx.textAlign = "left";
+          ctx.fillText(m.v.short, m.x + (isSelected ? 15 : 10), m.y);
+        }
+      }
+    }
+
+    // Move the view. Sliding helps people follow the change, but motion can make others unwell,
+    // so it is skipped when the device asks for reduced motion.
+    function moveTo(target) {
+      cancelAnimationFrame(frame);
+      if (reduceMotion.matches) { view = Object.assign({}, target); draw(); return; }
+      const from = Object.assign({}, view), started = performance.now(), duration = 450;
+      const stepFrame = now => {
+        const t = Math.min(1, (now - started) / duration);
+        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        view = { start: from.start + (target.start - from.start) * ease, end: from.end + (target.end - from.end) * ease };
+        draw();
+        if (t < 1) frame = requestAnimationFrame(stepFrame);
+      };
+      frame = requestAnimationFrame(stepFrame);
+    }
+
+    function select(id) {
+      selected = VARIANTS.find(v => v.id === id) || null;
+      document.querySelectorAll("#choices button[data-id]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.id === id)));
+      document.querySelectorAll("#rows tr").forEach(tr => {
+        const on = tr.dataset.id === id;
+        tr.classList.toggle("selected", on);
+        tr.querySelector(".state").textContent = on ? " (selected)" : "";
+      });
+      if (selected) {
+        moveTo({ start: selected.pos - 80, end: selected.pos + 80 });
+        // One short message per action: "polite" waits until the screen reader has finished speaking
+        feedback.textContent = selected.short + " (" + selected.id + "), chr11:" + fmt(selected.pos) + " " + selected.change +
+          ", " + selected.c + " in " + selected.where + (selected.p === "p.?" ? "" : ", " + selected.p) +
+          ". ClinVar: " + selected.clinvar + ". The picture now shows 160 bases around it.";
+      } else {
+        moveTo(WHOLE);
+        feedback.textContent = "The picture shows the whole gene, chr11:" + fmt(GENE.start) + "-" + fmt(GENE.end) + ".";
+      }
+    }
+
+    // Keyboard route: one real button per variant, plus one to zoom out
+    const list = document.getElementById("choices");
+    for (const v of VARIANTS) {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.id = v.id;
+      b.setAttribute("aria-pressed", "false");
+      const shape = document.createElement("span");
+      shape.className = "shape " + (pathogenic(v) ? "pathogenic" : "benign");
+      shape.setAttribute("aria-hidden", "true");
+      shape.textContent = pathogenic(v) ? "▲" : "●";
+      b.append(shape, " " + v.short);
+      b.addEventListener("click", () => select(v.id));
+      li.append(b);
+      list.append(li);
+    }
+    const whole = document.createElement("li");
+    whole.innerHTML = '<button type="button" id="whole">Show the whole gene</button>';
+    list.append(whole);
+    document.getElementById("whole").addEventListener("click", () => select(null));
+
+    // Text alternative: the same records as a table
+    const rows = document.getElementById("rows");
+    for (const v of VARIANTS) {
+      const tr = document.createElement("tr");
+      tr.dataset.id = v.id;
+      for (const text of [v.id, "chr11:" + fmt(v.pos) + " " + v.change, v.c + " (" + v.where + ")", v.p, v.name, v.clinvar]) {
+        const td = document.createElement("td");
+        td.textContent = text;
+        tr.append(td);
+      }
+      const state = document.createElement("span");
+      state.className = "state visually-hidden";
+      tr.cells[0].append(state);
+      rows.append(tr);
+    }
+
+    // Pointer route: a click selects the nearest variant within 15 pixels
+    canvas.addEventListener("click", e => {
+      const box = canvas.getBoundingClientRect();
+      const px = e.clientX - box.left, py = e.clientY - box.top;
+      let best = null, distance = 15;
+      for (const m of layout(canvas.clientWidth)) {
+        const d = Math.hypot(m.x - px, m.y - py);
+        if (d < distance) { best = m; distance = d; }
+      }
+      if (best) select(best.v.id);
+    });
+
+    function describeMotion() {
+      motionNote.textContent = reduceMotion.matches
+        ? "Your device asks for reduced motion, so the picture jumps to each variant instead of sliding."
+        : "The picture slides to each variant. With reduced motion turned on in your device's settings, it jumps instead.";
+    }
+    reduceMotion.addEventListener("change", describeMotion);
+    describeMotion();
+    new ResizeObserver(draw).observe(canvas);
+    draw();
+  </script>
+</body>
+</html>

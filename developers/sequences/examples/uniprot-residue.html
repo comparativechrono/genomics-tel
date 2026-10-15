@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UniProt REST API: what UniProt records about one residue</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    h2 { font-size: 0.95rem; margin: 10px 0 4px; }
+    p { margin: 0 0 6px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 8px; }
+    .controls span { display: inline-flex; align-items: center; gap: 6px; }
+    button, input { font: inherit; font-size: 14px; padding: 4px 9px; }
+    #acc { width: 7.5em; }
+    #pos { width: 5em; }
+    #status { min-height: 1.5em; font-weight: 600; }
+    #source { font: 12px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #3b4659; overflow-wrap: anywhere; margin: 4px 0 0; }
+    table { border-collapse: collapse; font-size: 14px; margin: 2px 0 8px; width: 100%; }
+    caption { text-align: left; font-weight: 600; padding: 0 0 4px; }
+    th, td { text-align: left; vertical-align: top; padding: 3px 8px; border-bottom: 1px solid #dde2ea; }
+    th { border-bottom: 2px solid #c3cbd8; }
+    .seq { font: 14px/1.3 ui-monospace, Menlo, Consolas, monospace; margin: 0; }
+    .block { display: inline-block; margin: 0 10px 6px 0; }
+    .block small { display: block; font-size: 11px; color: #5b6576; }
+    mark { background: #ffc078; outline: 2px solid #e8590c; }
+  </style>
+</head>
+<body>
+  <h1>What UniProt records about one residue</h1>
+  <p>The page asks the UniProt REST API for one entry, then lists every feature that covers the residue you choose.</p>
+
+  <form id="lookup" class="controls">
+    <span><label for="acc">UniProt accession</label><input id="acc" value="P68871" autocomplete="off" spellcheck="false"></span>
+    <span><label for="pos">Residue</label><input id="pos" type="number" min="1" value="7"></span>
+    <button type="submit">Look up</button>
+  </form>
+  <div class="controls" role="group" aria-label="Examples">
+    <button type="button" data-acc="P68871" data-pos="7">Human β-globin, residue 7</button>
+    <button type="button" data-acc="P68871" data-pos="64">Human β-globin, residue 64</button>
+    <button type="button" data-acc="P02062" data-pos="63">Horse β-globin, residue 63</button>
+  </div>
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <div id="result" hidden>
+    <h2 id="entry"></h2>
+    <p id="residue"></p>
+    <table>
+      <caption id="caption"></caption>
+      <thead><tr><th scope="col">Feature</th><th scope="col">Residues</th><th scope="col">Details</th></tr></thead>
+      <tbody id="features"></tbody>
+    </table>
+    <h2>Sequence, in blocks of ten</h2>
+    <p class="seq" id="sequence"></p>
+    <p id="source"></p>
+  </div>
+
+  <script>
+    const AA = { A: "Ala", R: "Arg", N: "Asn", D: "Asp", C: "Cys", Q: "Gln", E: "Glu", G: "Gly", H: "His", I: "Ile",
+                 L: "Leu", K: "Lys", M: "Met", F: "Phe", P: "Pro", S: "Ser", T: "Thr", W: "Trp", Y: "Tyr", V: "Val" };
+    // UniProt's documented pattern for accessions, such as P68871 or A0A024R161
+    const ACCESSION = /^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$/;
+    // Ask only for the fields the page shows: about 106 kB for P68871, instead of 342 kB for the whole entry
+    const FIELDS = "accession,id,protein_name,organism_name,sequence," +
+                   "ft_init_met,ft_chain,ft_domain,ft_binding,ft_act_site,ft_mod_res,ft_variant,ft_helix,ft_strand,ft_turn";
+
+    const $ = id => document.getElementById(id);
+    const status = text => { $("status").textContent = text; };
+    const fail = text => { $("result").hidden = true; status(text); };   // hide the last answer, so it is not mistaken for this one
+
+    // Fetch JSON with a time limit and one retry if the service is busy (429) or failing (5xx)
+    async function getJSON(url, tries = 2) {
+      for (let attempt = 1; ; attempt++) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 20000);
+        try {
+          const r = await fetch(url, { signal: ctrl.signal });
+          const body = await r.json().catch(() => null);
+          if (r.ok) return { body, release: r.headers.get("X-UniProt-Release") };
+          const message = body && body.messages ? body.messages.join(" ") : "HTTP " + r.status;
+          if (attempt >= tries || !(r.status === 429 || r.status >= 500)) throw new Error(message);
+        } catch (err) {
+          if (attempt >= tries) throw err.name === "AbortError" ? new Error("no answer within 20 seconds") : err;
+        } finally {
+          clearTimeout(timer);
+        }
+        await new Promise(res => setTimeout(res, 2000));
+      }
+    }
+
+    function describe(f) {
+      if (f.alternativeSequence && f.alternativeSequence.originalSequence) {      // a variant: E → V
+        const a = f.alternativeSequence;
+        const alt = a.alternativeSequences && a.alternativeSequences.length ? a.alternativeSequences.join(" or ") : "missing";
+        return a.originalSequence + " → " + alt + ": " + (f.description || "");
+      }
+      return [f.ligand && f.ligand.name, f.description].filter(Boolean).join("; ");
+    }
+
+    function row(cells) {
+      const tr = document.createElement("tr");
+      for (const text of cells) tr.appendChild(document.createElement("td")).textContent = text;
+      return tr;
+    }
+
+    // The sequence in blocks of ten, each labelled with the number of its first residue
+    function showSequence(seq, pos) {
+      const box = $("sequence");
+      box.replaceChildren();
+      for (let start = 0; start < seq.length; start += 10) {
+        const block = box.appendChild(document.createElement("span"));
+        block.className = "block";
+        block.appendChild(document.createElement("small")).textContent = start + 1;
+        const letters = seq.slice(start, start + 10);
+        const i = pos - 1 - start;                        // where the chosen residue falls in this block
+        if (i >= 0 && i < letters.length) {
+          block.append(letters.slice(0, i));
+          block.appendChild(document.createElement("mark")).textContent = letters[i];
+          block.append(letters.slice(i + 1));
+        } else {
+          block.append(letters);
+        }
+      }
+    }
+
+    async function lookUp(acc, pos) {
+      acc = acc.trim().toUpperCase();
+      if (!ACCESSION.test(acc)) { fail("“" + acc + "” is not a UniProt accession. Accessions look like P68871."); return; }
+      const url = "https://rest.uniprot.org/uniprotkb/" + acc + "?format=json&fields=" + FIELDS;
+      status("Asking UniProt for " + acc + "…");
+      let reply;
+      try {
+        reply = await getJSON(url);
+      } catch (err) {
+        fail("UniProt did not answer (" + err.message + "). Try again later.");
+        return;
+      }
+      const e = reply.body;
+      if (e.entryType === "Inactive") {                   // merged, demerged or deleted entries have no sequence
+        fail(acc + " is no longer an active UniProt entry (" + e.inactiveReason.inactiveReasonType.toLowerCase() + ")" +
+          (e.inactiveReason.mergeDemergeTo ? ": try " + e.inactiveReason.mergeDemergeTo.join(", ") : "") + ".");
+        return;
+      }
+      const seq = e.sequence.value;
+      if (!(pos >= 1 && pos <= seq.length)) { fail(acc + " has " + seq.length + " residues. Choose a residue from 1 to " + seq.length + "."); return; }
+
+      const name = e.proteinDescription.recommendedName ? e.proteinDescription.recommendedName.fullName.value : "";
+      $("entry").textContent = e.primaryAccession + " (" + e.uniProtkbId + "): " + name + ", " + e.organism.scientificName + ", " + seq.length + " residues";
+
+      // Feature positions count from 1 along the stored sequence. The Chain feature says where the mature protein starts.
+      const at = f => f.location.start.value <= pos && pos <= f.location.end.value;
+      const chain = e.features.find(f => f.type === "Chain" && at(f));
+      const aa = seq[pos - 1];
+      let text = "Residue " + pos + " is " + aa + " (" + (AA[aa] || "unusual residue") + ").";
+      if (chain && chain.location.start.value > 1) {
+        text += " The mature protein runs from residue " + chain.location.start.value + ", so this is residue " +
+          (pos - chain.location.start.value + 1) + " of the mature protein, as older papers number it.";
+      }
+      $("residue").textContent = text;
+
+      const here = e.features.filter(at);
+      $("caption").textContent = here.length + " feature" + (here.length === 1 ? "" : "s") + " recorded at residue " + pos;
+      $("features").replaceChildren(...here.map(f => {
+        const s = f.location.start.value, end = f.location.end.value;
+        return row([f.type, s === end ? String(s) : s + "–" + end, describe(f)]);
+      }));
+      showSequence(seq, pos);
+      $("source").textContent = "Request: ";
+      const link = $("source").appendChild(document.createElement("a"));
+      link.href = url; link.target = "_blank"; link.rel = "noopener"; link.textContent = url;
+      $("result").hidden = false;
+      // The release comes from a response header that UniProt lets other websites read
+      status("Found " + e.primaryAccession + " in UniProt release " + (reply.release || "(not stated)") + ".");
+    }
+
+    $("lookup").addEventListener("submit", ev => {
+      ev.preventDefault();
+      lookUp($("acc").value, Number($("pos").value));
+    });
+    document.querySelectorAll("button[data-acc]").forEach(b => b.addEventListener("click", () => {
+      $("acc").value = b.dataset.acc;
+      $("pos").value = b.dataset.pos;
+      lookUp(b.dataset.acc, Number(b.dataset.pos));
+    }));
+    lookUp("P68871", 7);
+  </script>
+</body>
+</html>

@@ -81,6 +81,7 @@
       } else { fallbackCopy(text); done(); }
     });
     block.style.position = 'relative';
+    block.classList.add('has-copy');
     block.appendChild(button);
   });
   function fallbackCopy(text) {
@@ -90,6 +91,25 @@
     try { document.execCommand('copy'); } catch (e) {}
     document.body.removeChild(ta);
   }
+
+  /* ─── Wide tables: let keyboard users scroll them ─── */
+  function markScrollableTables() {
+    document.querySelectorAll('.table-wrap').forEach(function (wrap) {
+      var scrolls = wrap.scrollWidth > wrap.clientWidth + 1;
+      if (scrolls && !wrap.hasAttribute('tabindex')) {
+        var heading = null, el = wrap.previousElementSibling;
+        while (el && !heading) { if (/^H[2-4]$/.test(el.tagName)) heading = el; el = el.previousElementSibling; }
+        wrap.setAttribute('tabindex', '0');
+        wrap.setAttribute('role', 'region');
+        wrap.setAttribute('aria-label', 'Table' + (heading ? ': ' + heading.textContent : '') + ' (scrolls sideways)');
+      } else if (!scrolls && wrap.getAttribute('role') === 'region') {
+        wrap.removeAttribute('tabindex'); wrap.removeAttribute('role'); wrap.removeAttribute('aria-label');
+      }
+    });
+  }
+  markScrollableTables();
+  var resizeTimer = null;
+  window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(markScrollableTables, 200); });
 
   /* ─── Examples that wait for a click ─── */
   document.querySelectorAll('[data-load-example]').forEach(function (button) {

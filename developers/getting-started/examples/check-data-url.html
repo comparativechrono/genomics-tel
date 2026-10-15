@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Check whether a teaching page can read a data file</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; }
+    label { display: block; font-weight: 600; font-size: 14px; margin: 8px 0 3px; }
+    select, input, button { font: inherit; font-size: 14px; }
+    select, input { width: 100%; box-sizing: border-box; padding: 5px 8px; border: 1px solid #8a94a6; border-radius: 6px; background: #fff; color: #172033; }
+    button { margin-top: 10px; min-height: 32px; padding: 5px 16px; border: 1px solid #172033; border-radius: 6px; background: #172033; color: #fff; cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: progress; }
+    :focus-visible { outline: 3px solid #2b56c9; outline-offset: 2px; }
+    #summary { margin: 12px 0 6px; font-weight: 700; min-height: 1.5em; }
+    dl { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 5px 14px; font-size: 14px; }
+    dt { font-weight: 600; }
+    dd { margin: 0; }
+    pre { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; background: #f4f6fa; border: 1px solid #dde2ea; border-radius: 6px; padding: 6px 8px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    @media (max-width: 480px) { dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } dd { margin-bottom: 8px; } }
+  </style>
+</head>
+<body>
+  <h1>Check a data address before class</h1>
+  <p>The check asks for the first 100 bytes of a file, as igv.js and JBrowse do when they read an indexed file.</p>
+
+  <form id="form">
+    <label for="preset">Choose an example</label>
+    <select id="preset">
+      <option value="data/hbb-exon1.fa">A file next to this page (HBB exon 1, FASTA)</option>
+      <option value="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes">UCSC: GRCh38 chromosome sizes</option>
+      <option value="https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2026/clinvar_20261004.vcf.gz">NCBI: the ClinVar VCF of 4 October 2026 (200 MB)</option>
+      <option value="https://files.rcsb.org/download/4HHB.cif">RCSB PDB: haemoglobin, entry 4HHB</option>
+      <option value="https://zenodo.org/records/2596382/files/limma-voom_luminalpregnant-luminallactate?download=1">Zenodo: a results table, by its download link</option>
+      <option value="https://zenodo.org/api/records/2596382/files/limma-voom_luminalpregnant-luminallactate/content">Zenodo: the same table, by its API link</option>
+    </select>
+    <label for="url">Address to check (or paste your own)</label>
+    <input id="url" type="text" inputmode="url" spellcheck="false" autocomplete="off">
+    <button type="submit" id="go">Check</button>
+  </form>
+
+  <p id="summary" role="status" aria-live="polite"></p>
+  <dl id="details"></dl>
+
+  <script>
+    const form = document.getElementById("form");
+    const preset = document.getElementById("preset");
+    const input = document.getElementById("url");
+    const go = document.getElementById("go");
+    const summary = document.getElementById("summary");
+    const details = document.getElementById("details");
+
+    input.value = preset.value;
+    preset.addEventListener("change", () => { input.value = preset.value; });
+    form.addEventListener("submit", e => { e.preventDefault(); check(input.value.trim()); });
+
+    // One finding: a term and what it means. Code-like values go in a <pre>.
+    function add(term, text, asCode) {
+      const dt = document.createElement("dt");
+      dt.textContent = term;
+      const dd = document.createElement("dd");
+      if (asCode) {
+        const pre = document.createElement("pre");
+        pre.textContent = text;
+        dd.append(pre);
+      } else {
+        dd.textContent = text;
+      }
+      details.append(dt, dd);
+    }
+
+    const STATUS = { 401: "login needed", 403: "forbidden", 404: "not found", 410: "gone", 416: "range not available",
+                     429: "too many requests", 500: "server error", 502: "bad gateway", 503: "service unavailable" };
+
+    const size = n => n.toLocaleString("en-GB") + " bytes" +
+      (n >= 1e6 ? " (" + (n / 1e6).toFixed(n >= 1e8 ? 0 : 1) + " MB)" : n >= 1e3 ? " (" + (n / 1e3).toFixed(1) + " kB)" : "");
+
+    // Recognise common genomics formats from their first bytes
+    function describe(bytes) {
+      const hex = Array.from(bytes.slice(0, 4), x => x.toString(16).padStart(2, "0")).join(" ");
+      if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+        // bgzip output (BGZF) is gzip with an extra field named "BC" at bytes 12 and 13.
+        // An index (.tbi, .csi, .bai) can point into a BGZF file, but not into ordinary gzip.
+        const bgzf = (bytes[3] & 4) && bytes[12] === 0x42 && bytes[13] === 0x43;
+        return bgzf ? "compressed with bgzip (BGZF), so an index can point into it"
+                    : "compressed with ordinary gzip, so an index cannot point into it: recompress it with bgzip";
+      }
+      if (hex === "43 27 41 1a") return "a UCSC 2bit sequence file";
+      if (hex === "26 fc 8f 88") return "a bigWig file";
+      if (hex === "eb f2 89 87") return "a bigBed file";
+      const text = new TextDecoder().decode(bytes);
+      // Binary data decodes with control characters or replacement characters (U+FFFD) in it.
+      // The last character may be a letter cut in half at byte 100, so it is ignored.
+      if (/[\u0000-\u0008\u000e-\u001f]/.test(text) || text.slice(0, -1).includes("�")) return "binary data";
+      if (text.startsWith(">")) return "text, in FASTA format";
+      if (text.startsWith("##fileformat=VCF")) return "text, in VCF format";
+      if (text.startsWith("data_")) return "text, in mmCIF format";
+      return "text";
+    }
+
+    // Text is shown as it is; anything else as hexadecimal byte values
+    function firstBytes(bytes) {
+      const start = bytes.subarray(0, 100);
+      if (/^text/.test(describe(bytes))) return new TextDecoder().decode(start);
+      return Array.from(start.subarray(0, 32), x => x.toString(16).padStart(2, "0")).join(" ") + (start.length > 32 ? " …" : "");
+    }
+
+    async function check(address) {
+      details.replaceChildren();
+      let url;
+      try { url = new URL(address, location.href); }
+      catch (err) { summary.textContent = "That is not a web address."; return; }
+
+      if (location.protocol === "file:" && url.protocol === "file:") {
+        summary.textContent = "This page is open from your disk, so the browser will not let it read files.";
+        add("What to do", "Serve the folder with a local web server, such as tools/serve.py from this site's repository, or check an https:// address.");
+        return;
+      }
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        summary.textContent = "Only http:// and https:// addresses can be checked.";
+        return;
+      }
+      if (location.protocol === "https:" && url.protocol === "http:") {
+        summary.textContent = "A page served over https:// cannot read files from plain http:// addresses.";
+        add("Why", "Browsers block it as mixed content. Use the file's https:// address, if it has one.");
+        return;
+      }
+
+      go.disabled = true;
+      summary.textContent = "Checking…";
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000);   // a busy server can take a long time: give up after 20 s
+      const started = performance.now();
+      try {
+        let response;
+        try {
+          // A single byte range is a "CORS-safelisted" header, so the browser sends the request at once,
+          // as it does for a genome browser reading an index, without asking the server's permission first.
+          response = await fetch(url, { headers: { Range: "bytes=0-99" }, cache: "no-store", signal: ctrl.signal });
+        } catch (err) {
+          if (err.name === "AbortError") {
+            summary.textContent = "No answer within 20 seconds.";
+            add("What to do", "Try again later. A server this slow will be slow for a class too.");
+            return;
+          }
+          // The browser does not tell the page why a request failed. Ask again in "no-cors" mode: that answer
+          // cannot be read either, but if it arrives, the server is reachable and refused to let this page read it.
+          const probe = new AbortController();
+          const probeTimer = setTimeout(() => probe.abort(), 10000);
+          const reachable = await fetch(url, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: probe.signal })
+            .then(() => true, () => false);
+          clearTimeout(probeTimer);
+          if (reachable) {
+            summary.textContent = "The server answered, but this page was not allowed to read the answer.";
+            add("Other websites", "Not allowed: the answer had no Access-Control-Allow-Origin header. Busy servers also leave it off their error messages, so try again before you decide.");
+            add("What to do", "Host a copy next to your page, if the licence allows it, or look for another address for the same file. The two Zenodo examples are one file at two addresses.");
+          } else {
+            summary.textContent = "The browser could not reach the server.";
+            add("What to do", "Check the address and your connection. A network filter may also block the site.");
+          }
+          return;
+        }
+
+        // Read the first bytes. A 206 answer holds only the bytes asked for. From any other answer,
+        // read one piece and stop, so that a large file is not downloaded in full.
+        let bytes = new Uint8Array(0);
+        if (response.status === 206) {
+          bytes = new Uint8Array(await response.arrayBuffer());
+        } else if (response.body) {
+          const reader = response.body.getReader();
+          const piece = await reader.read();
+          if (piece.value) bytes = piece.value;
+          if (!piece.done) reader.cancel();
+        }
+        const ms = Math.round(performance.now() - started);
+        const sameSite = url.origin === location.origin;
+        const status = response.status;
+
+        if (!response.ok) {
+          summary.textContent = "The server answered with an error: HTTP " + status + (STATUS[status] ? " (" + STATUS[status] + ")." : ".");
+          add("What to do", status === 404 ? "Check the address: there is no file there." : "Check the address, or try again later.");
+          return;
+        }
+
+        const ranges = status === 206;
+        if (sameSite) {
+          summary.textContent = ranges ? "This page can read the file, and the server answers range requests."
+                                       : "This page can read the file, but the server sends it whole.";
+          add("Other websites", "This file is on the same site as the page, so the browser reads it without asking. For pages on other sites, the server must send Access-Control-Allow-Origin. GitHub Pages and tools/serve.py both do.");
+        } else {
+          summary.textContent = ranges ? "Other websites can read this file, and the server answers range requests."
+                                       : "Other websites can read this file, but the server sends it whole.";
+          add("Other websites", "Allowed: the server sent Access-Control-Allow-Origin, so the browser let this page read the answer.");
+        }
+        add("Range requests", ranges
+          ? "Answered: the server sent only the 100 bytes asked for (HTTP 206). igv.js and JBrowse can read indexed files from here."
+          : "Not answered: the server sent the whole file (HTTP " + status + "), and this page stopped after the first piece. A page can still read a small file whole, but a genome browser cannot read an indexed file from here.");
+
+        // Content-Range ("bytes 0-99/200145964") gives the full size, but a page can read it only if the server
+        // lists it in Access-Control-Expose-Headers. Content-Length is always readable.
+        const range = response.headers.get("Content-Range");
+        const total = range && /\/(\d+)$/.exec(range);
+        const length = response.headers.get("Content-Length");
+        add("File size", total ? size(Number(total[1]))
+          : ranges ? "Not shown: the server does not let pages read its Content-Range header. UCSC's servers are the same, and genome browsers read their files without it."
+          : length ? size(Number(length))
+          : "Not shown: the server did not say.");
+        const type = response.headers.get("Content-Type");
+        if (type) add("Content type", type);
+        add("The file is", describe(bytes));
+        add("Start of the file", firstBytes(bytes), true);
+        add("Time taken", ms.toLocaleString("en-GB") + " ms");
+      } catch (err) {
+        summary.textContent = err.name === "AbortError" ? "The answer stopped arriving within 20 seconds." : "The check failed: " + err.message;
+      } finally {
+        clearTimeout(timer);
+        go.disabled = false;
+      }
+    }
+
+    check(input.value);   // start with the file next to this page
+  </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vega-Lite: a simulated genome-wide scan with no real associations</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@6.4.0/build/vega.min.js"
+          integrity="sha384-VKdcJr3ZaBIJMbVcopTAI/JEuUkSY6qnwVu9iLuw0DnQ9gQ1JjsfZJhXFQAgNi43"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4.3/build/vega-lite.min.js"
+          integrity="sha384-9/70gNCfOu6G7xXvkdreMfuqAEsoaGJVXV2BN/JLRXkSmcGvnMqtsRx8HZtUWAvI"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.3.0/build/vega-embed.min.js"
+          integrity="sha384-Muy1QRxYFeNrA1zShc1KtN4OfipkR/61gt+HWqN57c1Zxu3Oe16TsilsruVVjfKL"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 4px; }
+    p { margin: 0 0 6px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 10px; }
+    #status { font-weight: 600; min-height: 1.5em; }
+    #chart { width: 100%; }
+    .scroll { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 14px; margin: 4px 0 6px; }
+    th, td { padding: 3px 14px 3px 0; text-align: left; border-bottom: 1px solid #dde2ea; white-space: nowrap; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <h1>A genome-wide scan with no real associations (simulated)</h1>
+  <p>Each scan tests 1,000,000 made-up variants that have no effect at all, so every p-value comes from chance.
+     The chart shows the tests with p &lt; 0.01; the other 99% sit below its floor.</p>
+  <div class="controls">
+    <button type="button" id="one">Run another scan</button>
+    <button type="button" id="hundred">Run 100 scans</button>
+  </div>
+  <p id="status" role="status" aria-live="polite"></p>
+  <div id="chart"></div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Tests with</th><th class="num">Expected by chance</th><th class="num">In the last scan</th></tr></thead>
+      <tbody id="counts"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const N = 1000000;                                 // tests in one scan
+    const LINES = [                                    // thresholds to count, with the number expected by chance
+      { label: "p < 0.05", p: 0.05 }, { label: "p < 0.01", p: 0.01 },
+      { label: "p < 10⁻⁵", p: 1e-5 }, { label: "p < 5 × 10⁻⁸", p: 5e-8 } ];
+
+    // Lengths of chromosomes 1 to 22 in Mb (GRCh38). The tests are spread evenly along them.
+    const MB = [248.96, 242.19, 198.30, 190.21, 181.54, 170.81, 159.35, 145.14, 138.39, 133.80, 135.09,
+                133.28, 114.36, 107.04, 101.99, 90.34, 83.26, 80.37, 58.62, 64.44, 46.71, 50.82];
+    const ends = [];
+    MB.reduce((sum, mb, i) => (ends[i] = sum + mb), 0);
+    const total = ends[ends.length - 1];
+    const chromAt = x => ends.findIndex(e => x < e) + 1;
+
+    function runScan(keepPoints) {
+      const counts = LINES.map(() => 0);
+      const points = [];
+      for (let i = 0; i < N; i++) {
+        // With no real effect, a p-value is equally likely to fall anywhere between 0 and 1.
+        // (1 - Math.random() can never be exactly 0, so -log10(p) stays finite.)
+        const p = 1 - Math.random();
+        if (p >= 0.05) continue;
+        LINES.forEach((t, j) => { if (p < t.p) counts[j]++; });
+        if (keepPoints && p < 0.01) {
+          const x = (i / N) * total;
+          points.push({ x, mlogp: -Math.log10(p), odd: chromAt(x) % 2 });
+        }
+      }
+      return { counts, points };
+    }
+
+    // Keep a tally across scans, and show the counts for the latest one
+    const status = document.getElementById("status");
+    const buttons = document.querySelectorAll("button");
+    let scans = 0, scansPastLine = 0;
+
+    function record(result) {
+      scans++;
+      if (result.counts[3] > 0) scansPastLine++;
+      const tbody = document.getElementById("counts");
+      tbody.textContent = "";
+      LINES.forEach((t, j) => {
+        const row = tbody.insertRow();
+        [t.label, (N * t.p).toLocaleString("en-GB"), result.counts[j].toLocaleString("en-GB")].forEach((text, k) => {
+          const cell = row.insertCell();
+          cell.textContent = text;
+          if (k) cell.className = "num";
+        });
+      });
+      status.textContent = "Scans so far: " + scans.toLocaleString("en-GB") + ". Scans with at least one test past 5 × 10⁻⁸: " +
+        scansPastLine.toLocaleString("en-GB") + " (" + Math.round((100 * scansPastLine) / scans) + "%).";
+    }
+
+    const first = runScan(true);
+    record(first);
+
+    const chroms = MB.map((mb, i) => ({ chrom: String(i + 1), mid: ends[i] - mb / 2, mb }));
+    const x = { field: "x", type: "quantitative", title: "Chromosome",
+                scale: { domain: [0, total], nice: false, zero: false },
+                axis: { labels: false, ticks: false, grid: false, titlePadding: 20 } };
+    const y = { field: "mlogp", type: "quantitative", title: "−log₁₀(p)",
+                scale: { domain: { unionWith: [2, 8] }, zero: false } };   // always show 2 to 8, more if needed
+
+    const spec = {
+      $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+      description: "Manhattan plot of a simulated scan of 1,000,000 tests with no real associations. " +
+                   "Only tests with p below 0.01 are drawn. Lines mark p = 1e-5 and p = 5e-8.",
+      width: "container", height: 240,
+      datasets: { points: first.points },              // a named dataset, so the page can replace it later
+      layer: [
+        { data: { name: "points" },
+          mark: { type: "circle", size: 9, opacity: 0.85, aria: false },
+          encoding: { x, y, color: { field: "odd", type: "nominal", legend: null,
+                                     scale: { domain: [1, 0], range: ["#2a78d6", "#eb6834"] } } } },
+        { data: { values: [ { y: 5, label: "p = 10⁻⁵" }, { y: -Math.log10(5e-8), label: "p = 5 × 10⁻⁸" } ] },
+          layer: [
+            { mark: { type: "rule", strokeDash: [6, 4], color: "#172033", aria: false },
+              encoding: { y: { field: "y", type: "quantitative" } } },
+            { mark: { type: "text", align: "right", baseline: "bottom", dy: -3, x: "width", fontSize: 11, color: "#172033", aria: false },
+              encoding: { y: { field: "y", type: "quantitative" }, text: { field: "label" } } } ] },
+        { data: { values: chroms },
+          transform: [ { calculate: "datum.mb / " + total + " * width >= 13 ? datum.chrom : ''", as: "label" } ],
+          mark: { type: "text", y: "height", dy: 9, baseline: "top", fontSize: 10, color: "#3b4659", aria: false },
+          encoding: { x: { field: "mid", type: "quantitative" }, text: { field: "label" } } }
+      ],
+      config: { font: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
+    };
+
+    vegaEmbed("#chart", spec, { actions: false }).then(({ view }) => {
+      // view.data() swaps in new points without rebuilding the chart
+      const draw = result => view.data("points", result.points).runAsync();
+
+      document.getElementById("one").addEventListener("click", () => {
+        const result = runScan(true);
+        record(result);
+        draw(result);
+      });
+      document.getElementById("hundred").addEventListener("click", async () => {
+        buttons.forEach(b => (b.disabled = true));
+        let last;
+        for (let k = 1; k <= 100; k++) {
+          last = runScan(k === 100);                   // keep the points of the last scan only
+          if (k < 100) { scans++; if (last.counts[3] > 0) scansPastLine++; }
+          if (k % 10 === 0) {                          // let the page redraw every ten scans
+            status.textContent = "Running: " + k + " of 100 scans done…";
+            await new Promise(r => setTimeout(r, 0));
+          }
+        }
+        record(last);                                  // counts the 100th scan and fills the table
+        await draw(last);
+        buttons.forEach(b => (b.disabled = false));
+      });
+    });
+  </script>
+</body>
+</html>

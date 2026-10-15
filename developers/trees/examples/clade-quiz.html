@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clade quiz: read a primate tree by its branching</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"
+          integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 4px; }
+    p { margin: 0 0 6px; }
+    .help { font-size: 14px; color: #3b4659; }
+    .question { border: 1px solid #c3cbd8; border-radius: 6px; padding: 8px 12px; margin: 0 0 6px; }
+    .question legend, #progress { font-size: 13px; font-weight: 600; color: #3b4659; padding: 0 4px; }
+    #choices label { display: block; margin: 2px 0; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 6px 0 0; }
+    button { font: inherit; font-size: 14px; padding: 3px 9px; }
+    #feedback { min-height: 3em; margin: 6px 0 0; font-weight: 600; }
+    #feedback.ok { color: #0b6b50; }
+    #feedback.bad { color: #b8322f; }
+    svg { display: block; overflow: visible; }
+    .branch { fill: none; stroke: #6b7385; stroke-width: 1.5px; }
+    .branch.shaded { stroke: #b45309; stroke-width: 3px; }
+    .node { fill: #fff; stroke: #3b4659; stroke-width: 1.5px; cursor: pointer; }
+    .tip { font: italic 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #172033; cursor: pointer; }
+    .tip.chosen { fill: #fff; font-weight: 700; paint-order: stroke; stroke: #1f4e9c; stroke-width: 7px; stroke-linejoin: round; }
+    .tip:focus-visible, .node:focus-visible { outline: 2px solid #1f4e9c; outline-offset: 2px; }
+    details { font-size: 14px; }
+    details ul { margin: 2px 0; padding-left: 1.2rem; }
+  </style>
+</head>
+<body>
+  <h1>Clade quiz: nine primates and the mouse</h1>
+  <p class="help">Click a name to select it, or Tab to it and press Space. Click a node circle, or press Enter on it, to rotate the branches there. The drawing shows the order of branching only: branch lengths are not to scale.</p>
+
+  <fieldset class="question">
+    <legend id="progress"></legend>
+    <p id="question"></p>
+    <div id="choices"></div>
+    <div class="controls">
+      <button type="button" id="check">Check answer</button>
+      <button type="button" id="clear">Clear selection</button>
+      <button type="button" id="shuffle">Rotate branches at random</button>
+      <button type="button" id="next">Next question</button>
+    </div>
+    <p id="feedback" role="status" aria-live="polite"></p>
+  </fieldset>
+
+  <div id="tree"></div>
+  <details><summary>The tree as text</summary><div id="as-text"></div></details>
+
+  <script>
+    // Faircloth et al. (2012), TreeBASE tree Tr49836. Only its branching order is used here.
+    const NEWICK = "((((((Pongo_abelii:0.005033,((Homo_sapiens:0.002481,Pan_troglodytes:0.002181)1.00:4.86E-4,Gorilla_gorilla:0.002762)1.00:0.001866)1.00:4.16E-4,Nomascus_leucogenys:0.005591)1.00:0.001522,(Papio_hamadryas:0.001943,Macaca_mulatta:0.001852)1.00:0.004712)1.00:0.002352,Callithrix_jacchus:0.012341)1.00:0.009184,Otolemur_garnettii:0.024586):0.034538,Mus_musculus:0.034538);";
+
+    // "pick" questions are answered by selecting species on the tree, "choose" questions with the buttons.
+    // `wrong` holds feedback for particular wrong answers that show a known misconception.
+    const QUESTIONS = [
+      { kind: "pick", text: "Select the closest relative of humans (<i>Homo sapiens</i>) in this tree.",
+        answer: ["Pan_troglodytes"],
+        right: "Chimpanzees share a common ancestor with humans that no other species in the tree descends from.",
+        hint: "Follow the human branch back to the first node you reach. Which other species descend from that node?" },
+      { kind: "pick", text: "Select all of the orangutan's (<i>Pongo abelii</i>) closest relatives. There may be more than one.",
+        answer: ["Gorilla_gorilla", "Homo_sapiens", "Pan_troglodytes"],
+        right: "Humans, chimpanzees and gorillas all share the same most recent common ancestor with the orangutan, so they are equally closely related to it, wherever their names sit.",
+        wrong: { Homo_sapiens: "Humans sit next to the orangutan in this drawing, but the order of the names means nothing. Press Rotate branches at random and another species may sit there. Follow the branches instead." },
+        hint: "Follow the orangutan's branch back to the first node. Every other species that descends from that node is one of its closest relatives." },
+      { kind: "pick", text: "Is the gibbon (<i>Nomascus leucogenys</i>) more closely related to humans or to the macaque (<i>Macaca mulatta</i>)? Select one of the two.",
+        answer: ["Homo_sapiens"],
+        right: "The gibbon and humans share a more recent common ancestor, the ancestor of all the apes, than the gibbon and the macaque do.",
+        wrong: { Macaca_mulatta: "There are fewer nodes between the gibbon and the macaque, but counting nodes does not measure relatedness. Find the most recent common ancestor of each pair and see which is more recent." },
+        hint: "Compare the most recent common ancestor of the gibbon and humans with that of the gibbon and the macaque." },
+      { kind: "pick", clade: ["Callithrix_jacchus", "Homo_sapiens"],
+        text: "Select every species in the smallest clade that contains both the marmoset (<i>Callithrix jacchus</i>) and humans.",
+        answer: ["Callithrix_jacchus", "Gorilla_gorilla", "Homo_sapiens", "Macaca_mulatta", "Nomascus_leucogenys", "Pan_troglodytes", "Papio_hamadryas", "Pongo_abelii"],
+        right: "A clade is an ancestor and all of its descendants. These eight are every species descended from the most recent common ancestor of the marmoset and humans." },
+      { kind: "choose", text: "The marmoset's lineage branches off nearer the root than the human lineage does. What does that tell you?",
+        options: [
+          ["Marmosets are more primitive than humans.", "That is reading the tree as a ladder. Both are living species, and both lineages have been evolving for the same length of time since their common ancestor."],
+          ["Humans evolved from marmosets.", "Neither living species is the other's ancestor. They share an ancestor that lived long ago."],
+          ["Nothing about which species is more advanced.", ""]],
+        right: "It tells you only that the marmoset's lineage split from the others before the apes and the Old World monkeys split from each other." },
+      { kind: "choose", text: "Press Rotate branches at random two or three times. What changes?",
+        options: [
+          ["The order of the names, and nothing else.", ""],
+          ["Which species are each other's closest relatives.", "Try question 1 again: the answer has not changed. Rotating the branches at a node changes the drawing, not the relationships."],
+          ["Which groups of species form clades.", "Rotating the branches at a node never moves a species into or out of a clade."]],
+        right: "Rotating the branches at a node is like turning part of a hanging mobile: the order of the names changes, the relationships do not." }
+    ];
+
+    // Newick to nested objects (see the d3 tree example for a version that also keeps lengths and support values)
+    function parseNewick(text) {
+      const tokens = text.split(/\s*([;(),:])\s*/), stack = [];
+      let node = {};
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i];
+        if (t === "(") { const child = {}; node.children = [child]; stack.push(node); node = child; }
+        else if (t === ",") { const child = {}; stack[stack.length - 1].children.push(child); node = child; }
+        else if (t === ")") { node = stack.pop(); }
+        else if (t && t !== ":" && t !== ";" && tokens[i - 1] !== ":" && !node.children) node.name = t;
+      }
+      return node;
+    }
+
+    const T = parseNewick(NEWICK);
+    const pretty = name => name.replace(/_/g, " ");
+    const chosen = new Set();     // the species the student has selected
+    let shaded = null;            // the clade shaded on the tree after checking an answer
+    let current = 0, nextId = 1;
+
+    const box = document.getElementById("tree");
+    const svg = d3.select(box).append("svg").attr("role", "group").attr("aria-label", "Tree of nine primates and the mouse");
+    d3.hierarchy(T).each(d => { if (d.children) d.data.id = nextId++; });
+
+    function draw(focus) {
+      const W = Math.max(300, Math.min(640, box.clientWidth)), H = 300;
+      const M = { top: 10, right: 160, bottom: 10, left: 10 };
+      svg.attr("width", W).attr("height", H).selectAll("*").remove();
+      const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+      const root = d3.hierarchy(T);
+      // A cladogram: d3.cluster lines the tips up on the right and spaces the nodes by their order of branching
+      d3.cluster().size([H - M.top - M.bottom, W - M.left - M.right]).separation(() => 1)(root);
+      const inShaded = d => shaded && d.ancestors().some(a => a.data === shaded);
+
+      g.selectAll(".branch").data(root.links()).join("path")
+        .attr("class", l => "branch" + (inShaded(l.target) ? " shaded" : ""))
+        .attr("d", l => `M${l.source.y},${l.source.x}V${l.target.x}H${l.target.y}`);
+
+      // Tips are checkboxes, so they work by keyboard and screen readers announce their state.
+      // They come before the nodes in the page, so Tab reaches the species first.
+      g.selectAll(".tip").data(root.leaves()).join("text")
+        .attr("class", d => "tip" + (chosen.has(d.data.name) ? " chosen" : ""))
+        .attr("x", d => d.y + 8).attr("y", d => d.x).attr("dy", "0.32em").text(d => pretty(d.data.name))
+        .attr("tabindex", 0).attr("role", "checkbox").attr("aria-checked", d => chosen.has(d.data.name))
+        .attr("data-name", d => d.data.name)
+        .on("click", (e, d) => toggle(d.data.name))
+        .on("keydown", (e, d) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(d.data.name); } });
+
+      // Nodes rotate their branches: the same tree, drawn differently
+      const rotate = d => { d.data.children.reverse(); draw({ id: d.data.id }); };
+      g.selectAll(".node").data(root.descendants().filter(d => d.children)).join("circle")
+        .attr("class", "node").attr("r", 5).attr("cx", d => d.y).attr("cy", d => d.x)
+        .attr("tabindex", 0).attr("role", "button").attr("data-id", d => d.data.id)
+        .attr("aria-label", d => `Rotate the branches at the node joining ${d.leaves().length} species`)
+        .on("click", (e, d) => rotate(d))
+        .on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); rotate(d); } });
+
+      // The same tree as nested lists, in the order drawn
+      const asList = n => n.children ? `<li>Clade<ul>${n.children.map(asList).join("")}</ul></li>` : `<li><i>${pretty(n.name)}</i></li>`;
+      document.getElementById("as-text").innerHTML = `<ul>${asList(T)}</ul>`;
+
+      if (focus) svg.select(focus.id ? `[data-id="${focus.id}"]` : `[data-name="${focus.name}"]`).node()?.focus();
+    }
+
+    function toggle(name) {
+      chosen.has(name) ? chosen.delete(name) : chosen.add(name);
+      shaded = null;
+      draw({ name });
+    }
+
+    // The most recent common ancestor of some species, in the tree as it stands
+    function mrca(names) {
+      const leaves = d3.hierarchy(T).leaves().filter(l => names.includes(l.data.name));
+      let ancestor = leaves[0];
+      while (!leaves.every(l => l.ancestors().includes(ancestor))) ancestor = ancestor.parent;
+      return ancestor;
+    }
+
+    const feedback = document.getElementById("feedback");
+    const say = (text, mood) => { feedback.textContent = text; feedback.className = mood || ""; };
+    const list = names => names.map(pretty).join(", ");
+
+    function checkPick(q) {
+      const picked = [...chosen].sort();
+      if (!picked.length) return say("Select one or more species on the tree first.");
+      if (picked.join() === [...q.answer].sort().join()) return say("Correct. " + q.right, "ok");
+      if (q.wrong && q.wrong[picked.join()]) return say("Not quite. " + q.wrong[picked.join()], "bad");
+      if (q.clade) {
+        const ancestor = mrca(picked), below = ancestor.leaves().map(l => l.data.name);
+        shaded = ancestor.data;
+        draw();
+        if (below.length > picked.length)
+          return say("Not a clade yet. The most recent common ancestor of your selection, shaded on the tree, also has these descendants: " + list(below.filter(n => !chosen.has(n))) + ".", "bad");
+        if (!q.clade.every(n => chosen.has(n))) return say("That is a clade, but it does not contain both the marmoset and humans.", "bad");
+        return say("That is a clade with both in it, but not the smallest one. Find their most recent common ancestor and select only the species that descend from it.", "bad");
+      }
+      if (picked.every(n => q.answer.includes(n))) return say("Some of the right species, but not all of them. " + q.hint, "bad");
+      return say("Not quite. " + q.hint, "bad");
+    }
+
+    function checkChoose(q) {
+      const picked = document.querySelector("#choices input:checked");
+      if (!picked) return say("Choose one of the answers first.");
+      const why = q.options[+picked.value][1];
+      return why ? say("Not quite. " + why, "bad") : say("Correct. " + q.right, "ok");
+    }
+
+    function showQuestion() {
+      const q = QUESTIONS[current];
+      document.getElementById("progress").textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+      document.getElementById("question").innerHTML = q.text;
+      document.getElementById("choices").innerHTML = q.kind === "choose"
+        ? q.options.map((o, i) => `<label><input type="radio" name="choice" value="${i}"> ${o[0]}</label>`).join("") : "";
+      document.getElementById("next").textContent = current === QUESTIONS.length - 1 ? "Start again" : "Next question";
+      chosen.clear(); shaded = null; say("");
+      draw();
+    }
+
+    document.getElementById("check").addEventListener("click", () => {
+      const q = QUESTIONS[current];
+      q.kind === "pick" ? checkPick(q) : checkChoose(q);
+    });
+    document.getElementById("clear").addEventListener("click", () => { chosen.clear(); shaded = null; say(""); draw(); });
+    document.getElementById("shuffle").addEventListener("click", () => {
+      let changed = false;
+      d3.hierarchy(T).each(d => { if (d.children && Math.random() < 0.5) { d.data.children.reverse(); changed = true; } });
+      if (!changed) T.children.reverse();        // always change something
+      draw();
+    });
+    document.getElementById("next").addEventListener("click", () => { current = (current + 1) % QUESTIONS.length; showQuestion(); });
+    window.addEventListener("resize", () => draw());
+
+    showQuestion();
+  </script>
+</body>
+</html>

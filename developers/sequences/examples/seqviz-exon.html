@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SeqViz: HBB exon 1 with its translation and the sickle-cell base</title>
+  <!-- SeqViz 3.10.25: one script that includes React. It defines window.seqviz. -->
+  <script src="https://cdn.jsdelivr.net/npm/seqviz@3.10.25/dist/seqviz.min.js"
+          integrity="sha384-DC85VXIJ5mCuWR5xbBNpTXzPgV13jqBg8cJ+NWQtITy57e0vYKXvFYPFUty60qSz"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    #info { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #3b4659; min-height: 2.9em; margin: 6px 0 6px; }
+    #viewer { height: 300px; border: 1px solid #c3cbd8; border-radius: 6px; }
+    /* SeqViz pads its scroller by 10px without counting the padding in its height, so it would spill out of the box */
+    #viewer .la-vz-linear-scroller { box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <h1>HBB exon 1, read in the direction of the gene</h1>
+  <p>The orange base is c.20A in codon 7 (GAG, glutamate). In sickle-cell disease it is T, so the codon reads GTG (valine).</p>
+  <div id="viewer"></div>
+  <p id="info" aria-live="polite">Drag across some bases, or click an amino acid, to see where it sits.</p>
+  <div class="controls">
+    <button type="button" id="change" aria-pressed="false">Make the sickle-cell change</button>
+  </div>
+
+  <script>
+    // GRCh38 chr11:5,226,930-5,227,071, reverse-complemented because HBB lies on the reverse strand
+    const EXON1 = "ACATTTGCTTCTGACACAACTGTGTTCACTAGCAACCTCAAACAGACACCATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAG";
+    const ATG = 50;                          // index of c.1, counting from 0
+    const C20 = ATG + 19;                    // index of c.20, the sickle-cell base
+    const info = document.getElementById("info");
+
+    // A position in the exon (counting from 0) as a coding-sequence (c.) number. Bases before the ATG count back from c.-1.
+    const cNumber = i => i >= ATG ? "c." + (i - ATG + 1) : "c.-" + (ATG - i);
+
+    function props(seq) {
+      return {
+        name: "HBB exon 1",
+        seq,
+        viewer: "linear",
+        disableExternalFonts: true,          // otherwise SeqViz downloads a font from Google Fonts
+        zoom: { linear: 60 },
+        // Positions count from 0, and the end is not included: start 0, end 50 is the first 50 bases
+        annotations: [
+          { name: "5′ untranslated region", start: 0, end: ATG, direction: 1, color: "#cfd8dc" },
+          { name: "Coding sequence (exon 1 part)", start: ATG, end: seq.length, direction: 1, color: "#90caf9" }
+        ],
+        translations: [{ name: "β-globin, codons 1-30", start: ATG, end: ATG + 90, direction: 1 }],  // whole codons only
+        highlights: [{ start: C20, end: C20 + 1, color: "#ff8a65" }],
+        onSelection: sel => {
+          if (!sel || !sel.length) return;
+          const first = sel.start, last = sel.end - 1;
+          info.textContent = (sel.name ? sel.name + ": " : "") + "bases " + (first + 1) + "-" + (last + 1) + " of this exon, " +
+            cNumber(first) + " to " + cNumber(last) + " (" + sel.length + " bases)";
+        }
+      };
+    }
+
+    function start() {
+      const viewer = seqviz.Viewer("viewer", props(EXON1));
+      viewer.render();
+
+      // setState() replaces the options and draws the viewer again
+      document.getElementById("change").addEventListener("click", e => {
+        const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
+        e.currentTarget.setAttribute("aria-pressed", String(on));
+        e.currentTarget.textContent = on ? "Undo the change" : "Make the sickle-cell change";
+        const seq = EXON1.slice(0, C20) + (on ? "T" : "A") + EXON1.slice(C20 + 1);
+        viewer.setState(props(seq));
+        info.textContent = on ? "c.20A>T: codon 7 now reads GTG, which codes for valine (V)."
+                              : "c.20 is A again: codon 7 reads GAG, which codes for glutamate (E).";
+      });
+    }
+
+    if (window.seqviz) start();
+    else info.textContent = "SeqViz did not load. Check the connection and reload the page.";
+  </script>
+</body>
+</html>

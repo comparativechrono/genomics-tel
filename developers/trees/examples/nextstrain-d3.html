@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>d3: a Zika virus time tree drawn from Nextstrain's data</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"
+          integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; font-size: 14px; color: #3b4659; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0 0 6px; font-size: 14px; }
+    select { font: inherit; font-size: 14px; padding: 3px 6px; }
+    #status { color: #172033; }
+    svg { display: block; }
+    .branch { fill: none; stroke: #9aa3b2; stroke-width: 1px; }
+    .legend { list-style: none; padding: 0; margin: 6px 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+    .legend span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Zika virus time tree, drawn with d3 from Nextstrain's data</h1>
+  <div class="controls">
+    <label for="region">Show</label>
+    <select id="region"><option value="">every region</option></select>
+  </div>
+  <p id="status" role="status" aria-live="polite">Loading the dataset from nextstrain.org…</p>
+  <div id="tree"></div>
+  <ul class="legend" id="legend"></ul>
+  <p>Data: the Nextstrain Zika build as it stood on 1 January 2024, from genomes shared by research groups worldwide.</p>
+
+  <script>
+    // The same dated dataset as the embedded view. Asking for JSON returns the data behind it.
+    // Accept is one of the headers a page may send without a CORS pre-flight request,
+    // which matters because Nextstrain's answer to a pre-flight request lacks the CORS header.
+    const DATASET = "https://nextstrain.org/zika@2024-01-01";
+    const box = document.getElementById("tree");
+    const status = document.getElementById("status");
+    const choice = document.getElementById("region");
+
+    // Decimal years (2016.45) to dates (2016-06-14), for the tooltips
+    const asDate = y => new Date(Date.UTC(Math.floor(y), 0, 1) + (y % 1) * 365.25 * 864e5).toISOString().slice(0, 10);
+
+    async function main() {
+      const response = await fetch(DATASET, { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const data = await response.json();
+
+      const root = d3.hierarchy(data.tree);                    // the tree is already nested "children"
+      const date = d => d.data.node_attrs.num_date.value;      // every node, including ancestors, has a date
+      const region = d => d.data.node_attrs.region?.value ?? "unknown";
+      const tips = root.leaves();
+      const counts = d3.rollup(tips, v => v.length, region);
+      const regions = [...counts.keys()].sort();
+      const colour = d3.scaleOrdinal(regions, d3.schemeTableau10);
+
+      choice.innerHTML += regions.map(r => `<option value="${r}">${r}</option>`).join("");
+      document.getElementById("legend").innerHTML = regions
+        .map(r => `<li><span style="background:${colour(r)}"></span>${r} (${counts.get(r)})</li>`).join("");
+      status.textContent = `${tips.length} genomes, sampled from ${asDate(d3.min(tips, date)).slice(0, 4)} to ` +
+        `${asDate(d3.max(tips, date)).slice(0, 4)}. The root is dated to ${date(root).toFixed(1)}. ` +
+        `Dataset built on ${data.meta.updated}.`;
+
+      function draw() {
+        const W = Math.max(300, Math.min(780, box.clientWidth)), H = 430;
+        const M = { top: 6, right: 12, bottom: 30, left: 6 };
+        d3.cluster().size([H - M.top - M.bottom, 1]).separation(() => 1)(root);   // vertical positions only
+        const x = d3.scaleLinear(d3.extent(root.descendants(), date), [0, W - M.left - M.right]);
+        const picked = choice.value;
+
+        box.innerHTML = "";
+        const svg = d3.select(box).append("svg").attr("width", W).attr("height", H).attr("role", "img")
+          .attr("aria-label", `Time tree of ${tips.length} Zika virus genomes; the counts by region are listed below the tree`);
+        const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+        // x is the date of each node, so branch lengths are in years
+        g.selectAll(".branch").data(root.links()).join("path").attr("class", "branch")
+          .attr("d", l => `M${x(date(l.source))},${l.source.x}V${l.target.x}H${x(date(l.target))}`);
+        // When one region is chosen, grey out the rest and draw that region on top: no need to tell colours apart
+        const order = picked ? tips.slice().sort((a, b) => (region(a) === picked) - (region(b) === picked)) : tips;
+        g.selectAll("circle").data(order).join("circle")
+          .attr("cx", d => x(date(d))).attr("cy", d => d.x)
+          .attr("r", d => (picked && region(d) === picked ? 3.5 : 2.5))
+          .attr("fill", d => (!picked || region(d) === picked ? colour(region(d)) : "#d5dae3"))
+          .append("title").text(d => `${d.data.name}\n${d.data.node_attrs.country?.value ?? ""}, ${region(d)}\n${asDate(date(d))}`);
+        g.append("g").attr("transform", `translate(0,${H - M.top - M.bottom + 6})`)
+          .call(d3.axisBottom(x).ticks(Math.max(3, Math.floor(W / 90))).tickFormat(d3.format("d")));
+      }
+
+      choice.addEventListener("change", draw);
+      window.addEventListener("resize", draw);
+      draw();
+    }
+
+    main().catch(err => { status.textContent = "Could not load the dataset from nextstrain.org (" + err.message + "). Try again later."; });
+  </script>
+</body>
+</html>

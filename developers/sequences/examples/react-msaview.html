@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>react-msaview: β-globin with a highlight, your own track and differences from human</title>
+  <!-- react-msaview 8.4.1: one script that includes React. It defines window.ReactMSAView. -->
+  <script src="https://cdn.jsdelivr.net/npm/react-msaview@8.4.1/bundle/index.js"
+          integrity="sha384-bkCBVqpEO6arNBRJrbLqhTHUQXYq88/gXYGYujsTIx9nM3vldu1dUTKlDhbuENXZ"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    #info { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #3b4659; min-height: 1.45em; margin: 6px 0 8px; }
+  </style>
+</head>
+<body>
+  <h1>β-globin in react-msaview</h1>
+  <p>Orange marks the sickle-cell position. Blue bars show how many species match human in each column.</p>
+  <div id="viewer"></div>
+  <p id="info" aria-live="polite">Loading the alignment…</p>
+  <div class="controls">
+    <button type="button" id="zoom">Residues 1–30</button>
+    <button type="button" id="whole">Whole alignment</button>
+    <button type="button" id="diff" aria-pressed="false">Show only differences from human</button>
+  </div>
+
+  <script>
+    const info = document.getElementById("info");
+
+    // The alignment is a small file hosted next to this page (UniProt release 2026_03, aligned with FAMSA)
+    fetch("data/hbb-beta-globins.aln.fasta")
+      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+      .then(start)
+      .catch(err => { info.textContent = "Could not load the alignment (" + err.message + ")."; });
+
+    function start(fasta) {
+      if (!window.ReactMSAView) { info.textContent = "react-msaview did not load. Check the connection and reload the page."; return; }
+      // Your own data for each column, drawn as a bar track: the share of species identical to human
+      const seqs = fasta.split(/^>.*$/m).map(s => s.replace(/\s/g, "")).filter(Boolean);
+      const sameAsHuman = Array.from(seqs[0], (aa, col) => seqs.filter(s => s[col] === aa).length / seqs.length);
+
+      const viewer = window.ReactMSAView.mount(document.getElementById("viewer"), {
+        msa: fasta,
+        drawTree: false,                  // no tree file, so just a column of names
+        autoTreeAreaWidth: true,
+        colorScheme: "clustal",
+        // On a phone the toolbar wraps onto three lines, so leave it out: the buttons below the viewer still work
+        hideHeader: window.innerWidth < 600,
+        height: window.innerWidth < 600 ? 300 : 352,   // in pixels, including the toolbar when it is shown
+        highlights: [
+          // With "row", start and end are that row's own residue numbers, counting from 1
+          { row: "HBB_HUMAN", start: 7, end: 7, label: "HbS site", color: "rgba(232, 89, 12, 0.35)" }
+        ],
+        columnTracks: [
+          { id: "same", name: "Same as human", kind: "bar", values: sameAsHuman, max: 1, color: "#1c7ed6" }
+        ],
+        // column counts from 1 along the alignment; residue counts from 1 along the clicked row, and is absent on a gap
+        onCellClick: cell => {
+          if (!cell || !cell.row) { info.textContent = cell ? "Column " + cell.column : ""; return; }
+          info.textContent = "Column " + cell.column + ": " + cell.row + " " +
+            (cell.residue ? cell.letter + cell.residue : "gap") +
+            (cell.column === 7 ? ", the sickle-cell position" : "");
+        }
+      });
+      info.textContent = "Click a residue to see its column and its number in that species.";
+
+      // update() merges new options into the running viewer. A phone has room for about 12 readable columns.
+      const zoomEnd = window.innerWidth < 600 ? 12 : 30;
+      document.getElementById("zoom").textContent = "Residues 1–" + zoomEnd;
+      document.getElementById("zoom").addEventListener("click", () =>
+        viewer.update({ region: { row: "HBB_HUMAN", start: 1, end: zoomEnd } }));
+      document.getElementById("whole").addEventListener("click", () =>
+        viewer.update({ region: { start: 1, end: seqs[0].length } }));
+      document.getElementById("diff").addEventListener("click", e => {
+        const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
+        e.currentTarget.setAttribute("aria-pressed", String(on));
+        viewer.update({ relativeTo: on ? "HBB_HUMAN" : undefined });   // residues that match human become dots
+      });
+    }
+  </script>
+</body>
+</html>

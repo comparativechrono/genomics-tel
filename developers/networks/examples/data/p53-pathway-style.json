@@ -1,0 +1,46 @@
+[ {
+  "format_version" : "1.0",
+  "generated_by" : "written by hand for genomics.tel, in the format of a Cytoscape 3.10 export",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "p53 teaching style",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "shape" : "roundrectangle",
+      "background-color" : "rgb(244,246,250)",
+      "border-color" : "rgb(59,70,89)",
+      "border-width" : 1.5,
+      "width" : 75.0,
+      "height" : 35.0,
+      "font-family" : "SansSerif",
+      "font-size" : 14,
+      "color" : "rgb(23,32,51)",
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "content" : "data(name)"
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : { "background-color" : "rgb(255,243,196)" }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "width" : 2.5,
+      "line-color" : "rgb(0,114,178)",
+      "target-arrow-color" : "rgb(0,114,178)",
+      "target-arrow-shape" : "triangle",
+      "line-style" : "solid",
+      "curve-style" : "bezier"
+    }
+  }, {
+    "selector" : "edge[interaction = 'induces']",
+    "css" : { "line-style" : "dashed" }
+  }, {
+    "selector" : "edge[interaction = 'inhibits']",
+    "css" : {
+      "line-color" : "rgb(213,94,0)",
+      "target-arrow-color" : "rgb(213,94,0)",
+      "target-arrow-shape" : "tee"
+    }
+  } ]
+} ]

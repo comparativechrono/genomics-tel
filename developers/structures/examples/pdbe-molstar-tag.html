@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDBe Mol*: a structure viewer from one HTML tag</title>
+  <!-- PDBe Mol* 3.12.0: a stylesheet and the script that defines the <pdbe-molstar> tag -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.12.0/build/pdbe-molstar-light.css"
+        integrity="sha384-kARlbziDLc0Hj8qk+KXR1P27YYVjD71TknAF2jm8h4pCtySxFh7ivRH8IXXJNC/B"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/pdbe-molstar@3.12.0/build/pdbe-molstar-component.js"
+          integrity="sha384-Lvs9mZ6oGGQHH9AFrQb4n+M7GdH8Mp3adRaCEJuEgNOeME7JSuvcakm6pxJ/Yn3L"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    /* The tag needs a size and a positioned box */
+    pdbe-molstar { display: block; position: relative; height: 380px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    #status { min-height: 1.5em; margin: 6px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>Haemoglobin (PDB 4HHB) from one tag</h1>
+
+  <!-- The whole viewer. Attributes choose the entry, the background and which panels to show. -->
+  <pdbe-molstar id="hb" molecule-id="4hhb" hide-controls="true" pdbe-link="false"
+                bg-color-r="255" bg-color-g="255" bg-color-b="255"></pdbe-molstar>
+
+  <!-- Optional: buttons that script the same viewer. Delete from here to </script> and the viewer still works. -->
+  <div class="controls" role="group" aria-label="Select the sickle-cell residue">
+    <button type="button" id="uniprot">Select UniProt P68871 residue 7</button>
+    <button type="button" id="pdb">Select PDB residue 6 of chains B and D</button>
+    <button type="button" id="reset">Reset</button>
+  </div>
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <script>
+    const viewer = document.getElementById("hb").viewerInstance;   // the plugin inside the tag
+    const say = text => { document.getElementById("status").textContent = text; };
+
+    // PDBe's files map every residue to UniProt, so residues can be chosen by either numbering
+    document.getElementById("uniprot").onclick = async () => {
+      await viewer.visual.select({
+        data: [{ uniprot_accession: "P68871", uniprot_residue_number: 7, color: "#d7263d", sideChain: true }],
+        nonSelectedColor: "#cccccc"
+      });
+      say("UniProt residue 7 of β-globin is glutamate 6 of chains B and D in the PDB file. Hover over it to see both numbers.");
+    };
+    document.getElementById("pdb").onclick = async () => {
+      await viewer.visual.select({
+        data: [
+          { auth_asym_id: "B", auth_seq_id: 6, color: "#d7263d", sideChain: true },
+          { auth_asym_id: "D", auth_seq_id: 6, color: "#d7263d", sideChain: true }
+        ],
+        nonSelectedColor: "#cccccc"
+      });
+      say("The same two residues, chosen by the numbers in the PDB file.");
+    };
+    document.getElementById("reset").onclick = async () => {
+      await viewer.visual.clearSelection();
+      await viewer.visual.reset({ camera: true });
+      say("");
+    };
+  </script>
+</body>
+</html>

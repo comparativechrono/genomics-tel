@@ -29,6 +29,7 @@ class RangeHandler(SimpleHTTPRequestHandler):
         ".bed": "text/plain",
         ".aln": "text/plain",
         ".fasta": "text/plain",
+        ".cyjs": "application/json",
     }
 
     def end_headers(self):

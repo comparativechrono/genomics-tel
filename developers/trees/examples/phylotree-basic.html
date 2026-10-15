@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>phylotree.js: a primate tree drawn from Newick text</title>
+  <!-- phylotree.js 2.6.0 from jsDelivr, with the underscore library it needs, loaded first.
+       The integrity hashes stop a changed file from running. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/phylotree@2.6.0/dist/phylotree.css"
+        integrity="sha384-4Z3mkjcoeAfMJix9nxpdTzuemcgW8Y3+rBvP/S0sqGTJiZhcY1o846BvzENN4EuY"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.8/underscore-umd-min.js"
+          integrity="sha384-qZAXjHQr1t2ESpYPWL8zxAxRilTky3AarPVF2SilaNDgJKUW8T32DcW8OFgqZuGM"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phylotree@2.6.0/dist/phylotree.min.js"
+          integrity="sha384-nwdyfm9qI2lt07VSQvi/ECbWp+zTTfitL8SjTsVZ1KiZHXHlkzTZq42ojvJItGSW"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    p, details { margin: 4px 0 0; font-size: 14px; color: #3b4659; }
+    code { font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+    .phylotree-node-text { font-style: italic; }   /* species names in italics */
+  </style>
+</head>
+<body>
+  <h1>Nine primates and the mouse</h1>
+  <div id="tree"></div>
+  <p>Faircloth and colleagues (2012), TreeBASE tree Tr49836: a Bayesian tree from 2,030 ultraconserved elements, with the mouse as the outgroup.</p>
+  <details><summary>The tree as Newick text</summary><code id="newick">((((((Pongo_abelii:0.005033,((Homo_sapiens:0.002481,Pan_troglodytes:0.002181)1.00:4.86E-4,Gorilla_gorilla:0.002762)1.00:0.001866)1.00:4.16E-4,Nomascus_leucogenys:0.005591)1.00:0.001522,(Papio_hamadryas:0.001943,Macaca_mulatta:0.001852)1.00:0.004712)1.00:0.002352,Callithrix_jacchus:0.012341)1.00:0.009184,Otolemur_garnettii:0.024586):0.034538,Mus_musculus:0.034538);</code></details>
+
+  <script>
+    // The tree as stored in TreeBASE, with its taxon numbers replaced by names. A number after a colon
+    // is a branch length; the 1.00 after a closing bracket is that group's posterior probability.
+    // Keeping the text in the page gives readers a text version of the picture.
+    const newick = document.getElementById("newick").textContent;
+
+    const box = document.getElementById("tree");
+    const tree = new phylotree.phylotree(newick);
+
+    tree.render({
+      container: "#tree",
+      width: Math.max(300, Math.min(640, box.clientWidth)),   // no wider than the page, to fit phones
+      height: 300,
+      "left-right-spacing": "fit-to-size",     // stretch the tree to fill the width and height
+      "top-bottom-spacing": "fit-to-size",
+      "show-scale": false                      // in 2.6.0 the built-in scale bar disagrees with the branches
+    });
+
+    box.appendChild(tree.display.show());      // render() draws the tree; you put it on the page
+
+    // Write "Homo sapiens" rather than "Homo_sapiens"
+    tree.display.nodeLabel(node => (node.data.name || "").replace(/_/g, " "));
+  </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mol* activity: find the sickle-cell residue in haemoglobin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/molstar@5.12.0/build/viewer/molstar.css"
+        integrity="sha384-RIontCdJN53gEl2fmiHN+4bscIBvaUaOiCeeGktXqmFqdEBF+COnSdt9O4IKFSvq"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/molstar@5.12.0/build/viewer/molstar.js"
+          integrity="sha384-Mx9hwknXam3/nCj5WsEpyvr6nqiUp8vVLEh0ZG9OXpFepTFhVKTdEOJ4JG0XjMLf"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; }
+    /* Steps on the left and the viewer on the right; one column on narrow screens */
+    .layout { display: grid; grid-template-columns: minmax(240px, 350px) minmax(0, 1fr); gap: 14px; align-items: start; }
+    @media (max-width: 640px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+    ol { margin: 0 0 8px; padding-left: 1.3rem; }
+    li { margin: 0 0 8px; }
+    li.done { color: #0b6b50; }
+    li.done::after { content: "  ✓ done"; font-weight: 700; }
+    .answers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    button, input, select { font: inherit; font-size: 14px; padding: 2px 8px; }
+    input { width: 4.5em; }
+    form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 8px; font-size: 14px; }
+    #feedback { min-height: 1.5em; font-weight: 600; }
+    /* Mol* fills its container, so the container needs a height and a position */
+    #viewer { position: relative; height: 580px; }
+  </style>
+</head>
+<body>
+  <h1>Activity: find the sickle-cell residue</h1>
+  <p>In sickle-cell disease, glutamate 6 of β-globin becomes valine. Find it in human haemoglobin (PDB entry 4HHB).</p>
+  <div class="layout">
+    <div>
+      <ol>
+        <li id="t1">Hover over the four chains to read their names, then click a β chain (<i>Hemoglobin subunit beta</i>).</li>
+        <li id="t2">Find residue 6 of a β chain and click it, in 3D or in the sequence at the top (choose <b>2: Hemoglobin subunit beta</b> there first).</li>
+        <li id="t3">Is glutamate 6 on the surface, or buried inside the molecule?
+          <span class="answers">
+            <button type="button" data-step="t3" data-right>On the surface</button>
+            <button type="button" data-step="t3">Buried inside</button>
+          </span></li>
+        <li id="t4">UniProt and AlphaFold number this glutamate 7. Why?
+          <span class="answers">
+            <button type="button" data-step="t4" data-wrong="pdb">The PDB file is wrong</button>
+            <button type="button" data-step="t4" data-right>They count the first methionine</button>
+            <button type="button" data-step="t4" data-wrong="shape">AlphaFold predicts another shape</button>
+          </span></li>
+      </ol>
+      <!-- The same checks without a mouse: choose a chain and a residue number -->
+      <form id="pick">
+        <label for="chain">Or go to chain</label>
+        <select id="chain"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        <label for="number">residue</label>
+        <input id="number" type="number" min="1" max="146" value="1">
+        <button type="submit">Go</button>
+      </form>
+      <p id="feedback" role="status" aria-live="polite">Loading the structure…</p>
+    </div>
+    <div id="viewer" role="region" aria-label="3D model of haemoglobin, PDB 4HHB, with its four chains in different colours"></div>
+  </div>
+
+  <script>
+    const feedback = document.getElementById("feedback");
+    const say = text => { feedback.textContent = text; };
+    const done = id => document.getElementById(id).classList.add("done");
+    const isDone = id => document.getElementById(id).classList.contains("done");
+    const BETA_CHAINS = ["B", "D"];
+    // View directions (camera to target) that look at Glu6 of each β chain from outside the molecule
+    const OUTSIDE = { B: [-0.49, 0.817, 0.304], D: [0.717, 0.53, -0.453] };
+
+    // Build the scene. Once the residue is found, the scene is loaded again with Glu6 shown and labelled.
+    function scene(foundChain) {
+      const builder = molstar.PluginExtensions.mvs.MVSData.createBuilder();
+      const structure = builder
+        .download({ url: "https://models.rcsb.org/4hhb.bcif" })
+        .parse({ format: "bcif" })
+        .modelStructure();
+      const protein = structure.component({ selector: "polymer" });
+      protein.representation({ type: "cartoon" })
+        .color({ selector: { auth_asym_id: "A" }, color: "#56b4e9" })   // four colours that do not give
+        .color({ selector: { auth_asym_id: "B" }, color: "#009e73" })   // away which chains are α and β
+        .color({ selector: { auth_asym_id: "C" }, color: "#cc79a7" })
+        .color({ selector: { auth_asym_id: "D" }, color: "#0072b2" });
+      structure.component({ selector: "ligand" })
+        .representation({ type: "ball_and_stick" })
+        .color({ color: "#e69f00" });
+      if (!foundChain) {
+        protein.focus({ direction: OUTSIDE.B });
+      } else {
+        const glu6 = { auth_asym_id: foundChain, auth_seq_id: 6 };
+        structure.component({ selector: [{ auth_asym_id: "B", auth_seq_id: 6 }, { auth_asym_id: "D", auth_seq_id: 6 }] })
+          .representation({ type: "spacefill" })
+          .color({ color: "#d7263d" });
+        structure.primitives({ label_background_color: "#ffffff", label_show_tether: true, label_tether_length: 4, label_attachment: "bottom-center" })
+          .label({ position: glu6, text: "β Glu6 (Val in HbS)", label_size: 3, label_color: "#000000" });
+        // Turn the camera to face the residue that was found, with 15 Å of its surroundings
+        structure.component({ selector: glu6 }).focus({ direction: OUTSIDE[foundChain], radius_extent: 15 });
+      }
+      return builder.getState();
+    }
+
+    async function start() {
+      const viewer = await molstar.Viewer.create("viewer", {
+        layoutIsExpanded: false,
+        layoutShowControls: true,      // needed for the sequence panel above the structure
+        layoutShowLeftPanel: false,    // but not the side panels or the log
+        collapseRightPanel: true,
+        layoutShowLog: false,
+        layoutShowRemoteState: false,
+        viewportShowAnimation: false,
+        viewportShowSelectionMode: false
+      });
+      const mvs = molstar.PluginExtensions.mvs;
+      await mvs.loadMVS(viewer.plugin, scene(null));
+      viewer.plugin.managers.snapshot.clear();
+
+      // molstar.lib gives access to Mol*'s structure model, so the page can name what was clicked
+      const { StructureElement, StructureProperties: P } = molstar.lib.structure;
+      function describe(loci) {
+        if (!StructureElement.Loci.is(loci) || StructureElement.Loci.isEmpty(loci)) return null;
+        const at = StructureElement.Loci.getFirstLocation(loci);
+        return {
+          chain: P.chain.auth_asym_id(at),
+          number: P.residue.auth_seq_id(at),          // the number printed in the PDB file
+          name: P.atom.label_comp_id(at),             // three-letter code, such as GLU
+          molecule: P.entity.pdbx_description(at).join(", "),
+          type: P.entity.type(at)                     // "polymer", "non-polymer" or "water"
+        };
+      }
+
+      async function check(r) {
+        if (!r) return;
+        if (r.type === "water") { say("That is a water molecule. Click the protein itself."); return; }
+        if (r.type !== "polymer") {
+          say(r.name === "HEM" ? "That is a haem group, which holds the iron that binds oxygen. Click a protein chain." : "That is " + r.name + ", not part of a protein chain.");
+          return;
+        }
+        const what = r.name + " " + r.number + " of chain " + r.chain + " (" + r.molecule + ")";
+        if (!BETA_CHAINS.includes(r.chain)) { say("That is " + what + ", an α chain. Try another chain."); return; }
+        done("t1");
+        if (r.number !== 6) {
+          say("That is " + what + ", a β chain. " + (isDone("t2") ? "" : "Now find residue 6 of a β chain."));
+          return;
+        }
+        if (!isDone("t2")) {
+          done("t2");
+          await mvs.loadMVS(viewer.plugin, scene(r.chain));   // replaces the first scene
+          viewer.plugin.managers.snapshot.clear();
+        }
+        say("Found it: " + what + ". Both β chains have one, now shown in red.");
+      }
+
+      // Clicks in the 3D view and in the sequence panel both arrive here
+      viewer.subscribe(viewer.plugin.behaviors.interaction.click, event => check(describe(event.current.loci)));
+
+      // The form: find the residue, move the camera to it, and check it in the same way
+      document.getElementById("pick").addEventListener("submit", event => {
+        event.preventDefault();
+        const target = { auth_asym_id: document.getElementById("chain").value, auth_seq_id: Number(document.getElementById("number").value) };
+        const structure = viewer.plugin.managers.structure.hierarchy.current.structures[0].cell.obj.data;
+        const found = describe(StructureElement.Schema.toLoci(structure, target));
+        // Haem and water carry chain letters and numbers too, so accept only amino acids
+        if (!found || found.type !== "polymer") {
+          say("Chain " + target.auth_asym_id + " has no amino acid numbered " + target.auth_seq_id + ". α chains have 141, β chains 146.");
+          return;
+        }
+        viewer.structureInteractivity({ elements: target, action: ["select", "focus"], focusOptions: { extraRadius: 10 } });
+        check(found);
+      });
+
+      // The two questions
+      const replies = {
+        t3: { right: "Yes: it sits on the outside, 21 Å from the nearest haem. In HbS, the valine here sticks to a neighbouring haemoglobin molecule when oxygen is low, and the molecules join into fibres.",
+              wrong: "Not quite. Turn the molecule to look at Glu6 from the side. Is anything covering it?" },
+        t4: { right: "Yes. The gene starts with a methionine that is removed from the finished protein. The PDB file numbers the finished protein; UniProt, AlphaFold and the variant name p.Glu7Val count the methionine.",
+              pdb: "No. Both numbers are correct, but they count from different starting points. Look at the first residue of a β chain in the sequence.",
+              shape: "No. The shape is not the question: the two count from different starting points. Look at the first residue of a β chain in the sequence." }
+      };
+      document.querySelectorAll("button[data-step]").forEach(button => button.addEventListener("click", () => {
+        const step = button.dataset.step;
+        if (button.hasAttribute("data-right")) { done(step); say(replies[step].right); }
+        else say(replies[step][button.dataset.wrong || "wrong"]);
+      }));
+
+      say("Ready. Drag to turn the molecule and scroll or pinch to zoom.");
+    }
+
+    start().catch(err => {
+      console.error(err);
+      say("The structure could not be loaded: " + err.message);
+    });
+  </script>
+</body>
+</html>

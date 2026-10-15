@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mol*: the sickle-cell residue in haemoglobin, marked and labelled</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/molstar@5.12.0/build/viewer/molstar.css"
+        integrity="sha384-RIontCdJN53gEl2fmiHN+4bscIBvaUaOiCeeGktXqmFqdEBF+COnSdt9O4IKFSvq"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/molstar@5.12.0/build/viewer/molstar.js"
+          integrity="sha384-Mx9hwknXam3/nCj5WsEpyvr6nqiUp8vVLEh0ZG9OXpFepTFhVKTdEOJ4JG0XjMLf"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+    button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    /* Mol* fills its container, so the container needs a height and a position */
+    #viewer { position: relative; height: 420px; }
+    #status { min-height: 1.5em; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Glutamate 6 of β-globin, the residue changed in sickle-cell haemoglobin</h1>
+  <p>Deoxyhaemoglobin (PDB 4HHB): α chains grey, β chains blue, haem orange, and Glu6 of each β chain red.</p>
+  <div class="controls" role="group" aria-label="Views of the structure">
+    <button type="button" id="focus">Zoom to Glu6 of chain B</button>
+    <button type="button" id="select">Select both Glu6</button>
+    <button type="button" id="highlight">Highlight chain B</button>
+    <button type="button" id="reset">Whole molecule</button>
+  </div>
+  <div id="viewer" role="region" aria-label="3D model of haemoglobin with glutamate 6 of each beta chain in red and labelled"></div>
+  <p id="status" role="status" aria-live="polite">Loading…</p>
+
+  <script>
+    const say = text => { document.getElementById("status").textContent = text; };
+
+    // Residues are named by chain and author number (auth_seq_id), the numbers printed in the PDB file.
+    // In 4HHB the sickle-cell residue is Glu6. UniProt P68871 and AlphaFold count the first
+    // methionine, which is removed from the finished protein, so they call it residue 7 (p.Glu7Val).
+    const GLU6_B = { auth_asym_id: "B", auth_seq_id: 6 };
+    const GLU6_D = { auth_asym_id: "D", auth_seq_id: 6 };
+
+    async function start() {
+      const viewer = await molstar.Viewer.create("viewer", {
+        layoutIsExpanded: false,
+        layoutShowControls: false,
+        viewportShowAnimation: false,
+        viewportShowSelectionMode: false
+      });
+
+      // A MolViewSpec (MVS) scene: a description of what to load and how to show it
+      const mvs = molstar.PluginExtensions.mvs;
+      const scene = mvs.MVSData.createBuilder();
+      const structure = scene
+        .download({ url: "https://models.rcsb.org/4hhb.bcif" })   // BinaryCIF from RCSB PDB
+        .parse({ format: "bcif" })
+        .modelStructure();
+
+      const protein = structure.component({ selector: "polymer" });
+      protein.representation({ type: "cartoon" })
+        .color({ color: "#b8b8b8" })                                    // α chains grey
+        .color({ selector: [{ auth_asym_id: "B" }, { auth_asym_id: "D" }], color: "#4a7fc1" });
+      // Look at the molecule from the side where Glu6 of chain B faces outwards
+      // (the direction from that residue to the centre of the molecule, worked out from the coordinates)
+      protein.focus({ direction: [-0.49, 0.817, 0.304] });
+
+      structure.component({ selector: "ligand" })                       // the four haem groups
+        .representation({ type: "ball_and_stick" })
+        .color({ color: "#e0a526" });
+
+      structure.component({ selector: [GLU6_B, GLU6_D] })
+        .representation({ type: "spacefill" })
+        .color({ color: "#d7263d" });
+      structure.component({ selector: GLU6_B })
+        .tooltip({ text: "Glutamate 6 of the β chain: valine in sickle-cell haemoglobin (HbS)" });
+
+      // A label with a white background and a line to the residue. Its size is in ångströms.
+      structure.primitives({ label_background_color: "#ffffff", label_show_tether: true, label_tether_length: 4, label_attachment: "bottom-center" })
+        .label({ position: GLU6_B, text: "β Glu6 (Val in HbS)", label_size: 3, label_color: "#000000" });
+
+      await mvs.loadMVS(viewer.plugin, scene.getState());
+      viewer.plugin.managers.snapshot.clear();     // hide the one-item list of scenes that MVS adds
+
+      // Focus, select and highlight from your own buttons (Mol* 5.5 and later)
+      document.getElementById("focus").onclick = () => {
+        viewer.structureInteractivity({ elements: GLU6_B, action: "focus", focusOptions: { extraRadius: 14 } });
+        say("Zoomed to glutamate 6 of chain B.");
+      };
+      document.getElementById("select").onclick = () => {
+        viewer.structureInteractivity({ elements: { items: [GLU6_B, GLU6_D] }, action: "select" });
+        say("Glutamate 6 of both β chains selected (outlined in green). Each haemoglobin has two.");
+      };
+      document.getElementById("highlight").onclick = () => {
+        // label_asym_id "B" is the protein chain alone; auth_asym_id "B" would also take in its haem and water
+        viewer.structureInteractivity({ elements: { label_asym_id: "B" }, action: "highlight" });
+        say("Chain B, one of the two β chains, highlighted. The highlight goes when the pointer moves over the molecule.");
+      };
+      document.getElementById("reset").onclick = () => {
+        viewer.structureInteractivity({ action: ["select", "highlight"] });   // no target: clear both
+        viewer.plugin.managers.camera.reset();
+        say("Showing the whole molecule.");
+      };
+      say("Drag to turn the molecule, scroll or pinch to zoom, and hover over a residue to name it.");
+    }
+
+    start().catch(err => {
+      console.error(err);
+      say("The structure could not be loaded: " + err.message);
+    });
+  </script>
+</body>
+</html>

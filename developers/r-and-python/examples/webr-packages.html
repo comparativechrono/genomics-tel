@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>webR: check packages, and run Bioconductor's Biostrings</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    h2 { font-size: 0.95rem; margin: 14px 0 6px; }
+    p { margin: 0 0 8px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    input, textarea { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #172033; padding: 5px 8px;
+                      border: 1px solid #8a94a6; border-radius: 4px; box-sizing: border-box; width: 100%; }
+    textarea { resize: vertical; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+    .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 12px; border-radius: 4px; border: 1px solid #2b56c9; background: #2b56c9; color: #fff; cursor: pointer; }
+    button:disabled { opacity: 0.55; cursor: progress; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, pre:focus-visible { outline: 3px solid #b35a00; outline-offset: 2px; }
+    .state { font-size: 13px; color: #3b4659; }
+    pre { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; background: #f4f6fa; border: 1px solid #dde2ea; border-radius: 4px;
+          padding: 6px 8px; margin: 0; white-space: pre; overflow-x: auto; }
+    pre:empty { display: none; }
+    .err { color: #a40000; }
+  </style>
+</head>
+<body>
+  <h1>R packages in webR</h1>
+  <p>Both parts run R in your browser. Part 1 downloads about 20 MB: R, and the two repositories' lists of packages.
+     Part 2 downloads about 18 MB more for Biostrings and the packages it needs, and loading Biostrings takes several seconds.</p>
+
+  <h2>1. Does a package have a webR build, and so does everything it needs?</h2>
+  <label for="wanted">Package names, separated by spaces</label>
+  <input id="wanted" value="ggplot2 ape Biostrings GenomicRanges DESeq2 msa" spellcheck="false">
+  <div class="bar">
+    <button type="button" id="check">Check</button>
+    <span class="state" id="check-state" role="status" aria-live="polite"></span>
+  </div>
+  <pre id="check-out" tabindex="0" aria-label="Packages found"></pre>
+
+  <h2>2. Bioconductor's Biostrings, on the HBB coding sequence</h2>
+  <label for="code">R code (you can change it)</label>
+  <textarea id="code" rows="15" spellcheck="false">suppressPackageStartupMessages(library(Biostrings))
+hbb <- DNAString(paste0(    # HBB coding sequence, RefSeq NM_000518.5 bases 51-494
+  "ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAG",
+  "TTGGTGGTGAGGCCCTGGGCAGGCTGCTGGTGGTCTACCCTTGGACCCAGAGGTTCTTTGAGTCCTTTGG",
+  "GGATCTGTCCACTCCTGATGCTGTTATGGGCAACCCTAAGGTGAAGGCTCATGGCAAGAAAGTGCTCGGT",
+  "GCCTTTAGTGATGGCCTGGCTCACCTGGACAACCTCAAGGGCACCTTTGCCACACTGAGTGAGCTGCACT",
+  "GTGACAAGCTGCACGTGGATCCTGAGAACTTCAGGCTCCTGGGCAACGTGCTGGTCTGTGTGCTGGCCCA",
+  "TCACTTTGGCAAAGAATTCACCCCACCAGTGCAGGCTGCCTATCAGAAAGTGGTGGCTGGTGTGGCTAAT",
+  "GCCCTGGCCCACAAGTATCACTAA"))
+letterFrequency(hbb, "GC", as.prob = TRUE)
+reverseComplement(hbb)
+translate(hbb)
+hbs <- replaceLetterAt(hbb, 20, "T")   # the sickle-cell variant, c.20A>T
+translate(subseq(hbs, 19, 21))         # codon 7 now codes for valine (V)</textarea>
+  <div class="bar">
+    <button type="button" id="run">Install Biostrings and run</button>
+    <span class="state" id="run-state" role="status" aria-live="polite"></span>
+  </div>
+  <pre id="run-out" tabindex="0" aria-label="Output"></pre>
+
+  <script type="module">
+    const WEBR = 'https://webr.r-wasm.org/v0.6.0/webr.mjs';   // pinned. webR fetches more files of its own, so there is no integrity hash.
+
+    // Two repositories of packages built for webR: CRAN packages, and Bioconductor packages built by R-universe.
+    // Both change without notice; R-universe builds Bioconductor's development versions.
+    const CRAN_WASM = 'https://repo.r-wasm.org';
+    const BIOC_WASM = 'https://bioc.r-universe.dev';
+
+    // For each package: its version in either repository, and any packages it needs (Depends and Imports,
+    // followed all the way down) that have no webR build. Missing ones make library() fail even when the
+    // package itself installs.
+    const CHECK = `
+      version <- as.character(getRversion()[, 1:2])     # builds are made for each version of R, here 4.6
+      index <- function(repo) available.packages(contriburl = paste0(repo, "/bin/emscripten/contrib/", version))
+      cran <- index(cran_url)
+      bioc <- index(bioc_url)
+      db <- rbind(cran, bioc[!rownames(bioc) %in% rownames(cran), , drop = FALSE])
+      known <- c(rownames(db), rownames(installed.packages(priority = "base")))
+      needs <- tools::package_dependencies(wanted, db = db, which = c("Depends", "Imports"), recursive = TRUE)
+      found <- data.frame(
+        package = wanted,
+        version = ifelse(wanted %in% rownames(db), db[match(wanted, rownames(db)), "Version"], "-"),
+        repository = ifelse(wanted %in% rownames(cran), "repo.r-wasm.org",
+                            ifelse(wanted %in% rownames(bioc), "bioc.r-universe.dev", "none")),
+        missing = vapply(wanted, function(p) paste(setdiff(needs[[p]], known), collapse = " "), "")
+      )
+      print(found, row.names = FALSE)
+    `;
+
+    let webRPromise = null;
+    function startR() {
+      if (!webRPromise) {
+        webRPromise = (async () => {
+          const { WebR } = await import(WEBR).catch(() => {
+            throw new Error('R could not be downloaded from webr.r-wasm.org. Check the internet connection, then reload the page.');
+          });
+          const webR = new WebR();
+          await webR.init();
+          return webR;
+        })();
+        webRPromise.catch(() => { webRPromise = null; });
+      }
+      return webRPromise;
+    }
+
+    const seconds = (t0) => ((performance.now() - t0) / 1000).toFixed(1) + ' s';
+
+    // Run R code and show what it prints. Errors, warnings and messages arrive as text, in order.
+    async function show(webR, code, env, pre) {
+      const shelter = await new webR.Shelter();
+      try {
+        const result = await shelter.captureR(code, { env, withAutoprint: true, captureStreams: true, captureConditions: false });
+        pre.replaceChildren();
+        for (const line of result.output) {
+          const span = document.createElement('span');
+          if (line.type === 'stderr') span.className = 'err';
+          span.textContent = line.data + '\n';
+          pre.append(span);
+        }
+      } finally {
+        await shelter.purge();
+      }
+    }
+
+    let queue = Promise.resolve();     // one job at a time in the one R session
+
+    document.getElementById('check').addEventListener('click', (e) => {
+      const button = e.currentTarget;
+      const state = document.getElementById('check-state');
+      const wanted = document.getElementById('wanted').value.split(/[\s,]+/).filter(Boolean);
+      if (!wanted.length) { state.textContent = 'Type at least one package name.'; return; }
+      button.disabled = true;
+      queue = queue.then(async () => {
+        const t0 = performance.now();
+        try {
+          state.textContent = webRPromise ? 'Reading the package lists…' : 'Starting R, then reading the package lists…';
+          const webR = await startR();
+          await show(webR, CHECK, { wanted, cran_url: CRAN_WASM, bioc_url: BIOC_WASM }, document.getElementById('check-out'));
+          state.textContent = 'Done in ' + seconds(t0) + '.';
+        } catch (err) {
+          state.textContent = 'Failed: ' + err.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+
+    let biostrings = null;             // installed once per visit
+    document.getElementById('run').addEventListener('click', (e) => {
+      const button = e.currentTarget;
+      const state = document.getElementById('run-state');
+      button.disabled = true;
+      queue = queue.then(async () => {
+        const times = [];
+        try {
+          state.textContent = webRPromise ? 'Running…' : 'Starting R…';
+          const webR = await startR();
+          let t0;
+          if (!biostrings) {
+            t0 = performance.now();
+            state.textContent = 'Installing Biostrings and the packages it needs…';
+            // Bioconductor packages from R-universe; their CRAN dependencies from the webR repository
+            biostrings = webR.installPackages(['Biostrings'], { repos: [BIOC_WASM, CRAN_WASM], quiet: true });
+            biostrings.catch(() => { biostrings = null; });
+            await biostrings;
+            times.push('installed in ' + seconds(t0));
+          }
+          t0 = performance.now();
+          state.textContent = 'Running…';
+          await show(webR, document.getElementById('code').value, {}, document.getElementById('run-out'));
+          times.push('ran in ' + seconds(t0));
+          state.textContent = 'Done: ' + times.join(', ') + '.';
+          button.textContent = 'Run';
+        } catch (err) {
+          state.textContent = 'Failed: ' + err.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vega-Lite: an expression heatmap, with choices of scaling, order and colours</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@6.4.0/build/vega.min.js"
+          integrity="sha384-VKdcJr3ZaBIJMbVcopTAI/JEuUkSY6qnwVu9iLuw0DnQ9gQ1JjsfZJhXFQAgNi43"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4.3/build/vega-lite.min.js"
+          integrity="sha384-9/70gNCfOu6G7xXvkdreMfuqAEsoaGJVXV2BN/JLRXkSmcGvnMqtsRx8HZtUWAvI"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.3.0/build/vega-embed.min.js"
+          integrity="sha384-Muy1QRxYFeNrA1zShc1KtN4OfipkR/61gt+HWqN57c1Zxu3Oe16TsilsruVVjfKL"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 0 0 6px; font-size: 14px; }
+    .controls div { display: flex; align-items: center; gap: 6px; }
+    select { font: inherit; max-width: 100%; }
+    #status { font-size: 14px; color: #3b4659; }
+    #chart { width: 100%; }
+    summary { cursor: pointer; font-weight: 600; }
+    .scroll { overflow-x: auto; }
+    table { border-collapse: collapse; font-size: 13px; margin: 6px 0; }
+    th, td { padding: 2px 12px 2px 0; text-align: left; border-bottom: 1px solid #dde2ea; white-space: nowrap; }
+    .credit { font-size: 13px; color: #3b4659; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Growth-factor genes in mouse mammary cells</h1>
+  <div class="controls">
+    <div><label for="values">Values</label>
+      <select id="values">
+        <option value="z">z-scores within each gene</option>
+        <option value="raw">log₂ counts per million, not scaled</option>
+      </select></div>
+    <div><label for="order">Rows</label>
+      <select id="order">
+        <option value="cluster">clustered</option>
+        <option value="alpha">alphabetical</option>
+      </select></div>
+    <div><label for="colours">Colours</label>
+      <select id="colours">
+        <option value="bluered">blue-white-red</option>
+        <option value="viridis">viridis</option>
+        <option value="redgreen">red-green</option>
+        <option value="rainbow">rainbow</option>
+      </select></div>
+  </div>
+  <p id="status" role="status" aria-live="polite">Loading…</p>
+  <div id="chart"></div>
+  <details>
+    <summary>Where each gene is highest and lowest, as a table</summary>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Gene</th><th>Highest in</th><th>Lowest in</th></tr></thead>
+        <tbody id="summary"></tbody>
+      </table>
+    </div>
+  </details>
+  <p class="credit">Data: normalised log₂ counts per million from the Galaxy Training Network's heatmap training data
+    (Doyle M, Zenodo, <a href="https://doi.org/10.5281/zenodo.2529926" target="_blank" rel="noopener">doi:10.5281/zenodo.2529926</a>, CC BY 4.0),
+    from Fu NY et al. (2015) <i>Nature Cell Biology</i> 17: 365–375. The 31 rows the chart needs are stored next to this page.</p>
+
+  <script>
+    // The 31 genes of the full table (4 MB on Zenodo), stored next to the page: see data/README.txt
+    const URL = "data/gtn-growth-factor-genes.tsv";
+
+    // Clustered order, top to bottom. Vega-Lite cannot cluster, so this was worked out beforehand:
+    // z-scores, average-linkage clustering on Euclidean distance, optimal leaf ordering (SciPy).
+    const CLUSTERED = ["Wnt5a", "Ptn", "Cx3cl1", "Bmp1", "Kitl", "Pdgfa", "Cmtm3", "Ctgf", "Csf1", "Pdgfb", "Hbegf",
+      "Lif", "Edn1", "Mcl1", "Cxcl16", "Tgfb2", "Spp1", "Gmfg", "Cmtm8", "Bmp3", "Cxcl2", "Cxcl3", "Cxcl1",
+      "Cmtm7", "Nov", "Ccl28", "Egf", "Il15", "Cmtm6", "Pdgfd", "Il34"];
+
+    // Each sample and its group, from the training data's factordata file
+    const SAMPLES = [
+      ["MCL1.DG", "basal virgin"], ["MCL1.DH", "basal virgin"], ["MCL1.DI", "basal pregnant"], ["MCL1.DJ", "basal pregnant"],
+      ["MCL1.DK", "basal lactating"], ["MCL1.DL", "basal lactating"], ["MCL1.LA", "luminal virgin"], ["MCL1.LB", "luminal virgin"],
+      ["MCL1.LC", "luminal pregnant"], ["MCL1.LD", "luminal pregnant"], ["MCL1.LE", "luminal lactating"], ["MCL1.LF", "luminal lactating"]];
+    const column = (sample, group) => group + " · " + sample.slice(5);
+
+    // The colour scales on offer. Two of them are here to be criticised.
+    const COLOURS = {
+      bluered: { name: "blue-white-red", scale: { scheme: "redblue", reverse: true } },           // ColorBrewer RdBu, blue low
+      viridis: { name: "viridis", scale: { scheme: "viridis" } },
+      redgreen: { name: "red-green", scale: { range: ["#00b300", "#000000", "#e60000"] } },      // as in old microarray figures
+      rainbow: { name: "rainbow", scale: { scheme: "turbo" } }
+    };
+
+    const controls = { values: document.getElementById("values"), order: document.getElementById("order"),
+                       colours: document.getElementById("colours") };
+    // Start from the address if it says so, e.g. heatmap-makeover.html?values=raw&order=alpha&colours=rainbow
+    const asked = new URLSearchParams(location.search);
+    for (const [key, select] of Object.entries(controls)) {
+      if ([...select.options].some(o => o.value === asked.get(key))) select.value = asked.get(key);
+    }
+
+    function makeSpec(rows, width) {
+      const z = controls.values.value === "z";
+      const colours = COLOURS[controls.colours.value];
+      const order = controls.order.value === "cluster" ? CLUSTERED : CLUSTERED.slice().sort();
+      const all = rows.flatMap(r => SAMPLES.map(([s]) => r[s]));
+      const [lo, hi] = [Math.min(...all), Math.max(...all)];
+      const scale = Object.assign({}, colours.scale,
+        z ? { domain: [-2.5, 2.5], domainMid: 0, clamp: true }      // beyond ±2.5 gets the end colour
+          : { domain: [lo, hi], domainMid: (lo + hi) / 2 });       // the middle of the range, so three-colour scales work
+      return {
+        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+        description: "Heatmap of 31 growth-factor genes (rows) in 12 mouse mammary samples (columns). Colour shows " +
+          (z ? "each gene's z-score: how far each sample is above or below that gene's own average." : "log2 counts per million, not scaled."),
+        data: { values: rows },
+        transform: [
+          // One row per gene and sample. Names with dots ("MCL1.DG") must be escaped, or Vega reads them as nested fields.
+          { fold: SAMPLES.map(([s]) => s.replace(".", "\\.")), as: ["sample", "log2cpm"] },
+          { lookup: "sample", from: { data: { values: SAMPLES.map(([s, g]) => ({ s, g })) }, key: "s", fields: ["g"] }, as: ["group"] },
+          { calculate: "datum.group + ' · ' + slice(datum.sample, 5)", as: "column" },
+          // z-score: (value - the gene's mean) / the gene's standard deviation
+          { joinaggregate: [ { op: "mean", field: "log2cpm", as: "mean" }, { op: "stdev", field: "log2cpm", as: "sd" } ], groupby: ["SYMBOL"] },
+          { calculate: "(datum.log2cpm - datum.mean) / datum.sd", as: "z" },
+          { calculate: "datum.SYMBOL + ', ' + datum.column + ': ' + (" + (z ? "'z = ' + format(datum.z, '.1f')" : "format(datum.log2cpm, '.1f') + ' log2 CPM'") + ")", as: "desc" }
+        ],
+        mark: { type: "rect", stroke: "#fff", strokeWidth: 1 },
+        encoding: {
+          x: { field: "column", type: "nominal", title: null, sort: SAMPLES.map(([s, g]) => column(s, g)),
+               axis: { orient: "top", labelAngle: -40, labelLimit: 140 } },
+          y: { field: "SYMBOL", type: "nominal", title: null, sort: order, axis: { labelFontStyle: "italic" } },
+          color: { field: z ? "z" : "log2cpm", type: "quantitative", title: z ? "z-score" : "log₂ CPM", scale },
+          tooltip: [ { field: "SYMBOL", title: "Gene" }, { field: "group", title: "Group" }, { field: "sample", title: "Sample" },
+                     { field: "log2cpm", title: "log₂ CPM", format: ".2f" }, { field: "z", title: "z-score", format: ".2f" } ],
+          description: { field: "desc" }          // what a screen reader announces for each cell
+        },
+        width: width, height: { step: 15 },
+        config: { font: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
+      };
+    }
+
+    // The text version: the group where each gene's average is highest and lowest
+    function fillTable(rows, order) {
+      const groups = [...new Set(SAMPLES.map(([, g]) => g))];
+      const tbody = document.getElementById("summary");
+      tbody.textContent = "";
+      order.forEach(gene => {
+        const r = rows.find(row => row.SYMBOL === gene);
+        const means = groups.map(g => {
+          const v = SAMPLES.filter(([, sg]) => sg === g).map(([s]) => r[s]);
+          return v.reduce((a, b) => a + b, 0) / v.length;
+        });
+        const row = tbody.insertRow();
+        [gene, groups[means.indexOf(Math.max(...means))], groups[means.indexOf(Math.min(...means))]]
+          .forEach(text => { row.insertCell().textContent = text; });
+      });
+    }
+
+    fetch(URL).then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(text => {
+      const rows = vega.read(text, { type: "tsv", parse: "auto" });
+      async function draw() {
+        // 34 pixels a column when there is room; narrower on a phone
+        const width = Math.max(200, Math.min(12 * 34, document.getElementById("chart").clientWidth - 160));
+        await vegaEmbed("#chart", makeSpec(rows, width), { actions: false });
+        const order = controls.order.value === "cluster" ? CLUSTERED : CLUSTERED.slice().sort();
+        fillTable(rows, order);
+        document.getElementById("status").textContent = "Showing " + controls.values.selectedOptions[0].text +
+          "; rows " + controls.order.selectedOptions[0].text + "; " + COLOURS[controls.colours.value].name + " colours.";
+      }
+      Object.values(controls).forEach(select => select.addEventListener("change", draw));
+      draw();
+    }).catch(err => {
+      document.getElementById("status").textContent = "The data did not load (" + err.message + ").";
+    });
+  </script>
+</body>
+</html>

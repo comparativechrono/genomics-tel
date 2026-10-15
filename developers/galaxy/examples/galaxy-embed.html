@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A published Galaxy workflow shown in a frame</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; font-size: 14px; color: #3b4659; }
+    iframe { display: block; width: 100%; height: 480px; border: 1px solid #c3cbd8; border-radius: 6px; }
+    details { margin-top: 10px; font-size: 14px; }
+    summary { cursor: pointer; font-weight: 600; }
+    ol { margin: 6px 0 0; padding-left: 1.5rem; }
+  </style>
+</head>
+<body>
+  <h1>Variant calling in haploid genomes: a published workflow on usegalaxy.eu</h1>
+  <p>Release 0.3 of a workflow from the Intergalactic Workflow Commission (IWC). Drag to move around and use the zoom buttons.
+     <b>View In Galaxy</b> opens it on usegalaxy.eu, where a logged-in student can import it.</p>
+
+  <!-- Galaxy lets other sites frame /published/ pages only when the address includes embed=true.
+       The other settings are the ones Galaxy's own "Embed" option writes. -->
+  <iframe title="Galaxy workflow: paired-end variant calling in haploid genomes, release 0.3"
+          src="https://usegalaxy.eu/published/workflow?id=97fc3ee3a9fd0466&amp;embed=true&amp;buttons=true&amp;about=false&amp;heading=false&amp;minimap=true&amp;zoom_controls=true&amp;initialX=-20&amp;initialY=-20&amp;zoom=1"></iframe>
+
+  <!-- The diagram is hard to follow with a screen reader, so the same workflow is also given as text -->
+  <details>
+    <summary>The workflow as a list of steps</summary>
+    <p>Inputs: paired-end Illumina reads (a paired collection), a gene annotation (GTF) and a reference genome (FASTA).</p>
+    <ol>
+      <li>Trim and filter the reads (fastp).</li>
+      <li>Build a SnpEff database from the annotation and genome (SnpEff build).</li>
+      <li>Map the reads to the genome (BWA-MEM).</li>
+      <li>Keep reads mapped in proper pairs (Samtools view).</li>
+      <li>Summarise the mapping (Samtools stats).</li>
+      <li>Mark duplicate reads (Picard MarkDuplicates).</li>
+      <li>Combine the quality reports (MultiQC).</li>
+      <li>Realign the reads (LoFreq Viterbi).</li>
+      <li>Call variants (LoFreq call).</li>
+      <li>Keep only single-base substitutions (Text reformatting, with awk).</li>
+      <li>Predict each variant's effect on genes (SnpEff eff).</li>
+      <li>Extract fields into a table (SnpSift Extract Fields).</li>
+      <li>Join the samples' tables into one (Collapse Collection).</li>
+    </ol>
+  </details>
+</body>
+</html>

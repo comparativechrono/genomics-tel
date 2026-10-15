@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galaxy Training Network tutorials, listed live from the GTN API</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 4px; }
+    label { font-weight: 600; font-size: 14px; margin-right: 4px; }
+    select { font: inherit; font-size: 14px; padding: 3px 6px; max-width: 100%; }
+    #status { margin: 6px 0 4px; font-size: 14px; color: #3b4659; }
+    #status.error { color: #8a3b00; background: #fff4e5; padding: 6px 10px; border-radius: 6px; }
+    h2 { font-size: 0.95rem; margin: 14px 0 2px; padding-bottom: 2px; border-bottom: 1px solid #c3cbd8; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li { padding: 6px 0; border-bottom: 1px solid #e6eaf0; }
+    li > a { font-weight: 600; }
+    .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin-top: 2px; font-size: 13px; color: #3b4659; }
+    .chip { background: #eef2f8; border-radius: 999px; padding: 0 8px; }
+    .all { color: #0b6b50; }
+    .some { color: #8a5a00; }
+    .missing { color: #b42318; }
+    footer { margin-top: 12px; font-size: 13px; color: #3b4659; }
+  </style>
+</head>
+<body>
+  <h1>Galaxy Training Network tutorials, live from the GTN API</h1>
+  <div class="controls">
+    <span><label for="topic">Topic</label>
+      <select id="topic" disabled><option>Loading topics…</option></select></span>
+    <span><label for="server">Server for your class</label>
+      <select id="server">
+        <option value="https://usegalaxy.eu">usegalaxy.eu (Europe)</option>
+        <option value="https://usegalaxy.org">usegalaxy.org (United States)</option>
+        <option value="https://usegalaxy.org.au">usegalaxy.org.au (Australia)</option>
+        <option value="https://usegalaxy.fr">usegalaxy.fr (France)</option>
+      </select></span>
+  </div>
+  <p id="status" role="status" aria-live="polite">Loading…</p>
+  <div id="list"></div>
+  <footer>
+    Data from the <a href="https://training.galaxyproject.org/training-material/api/" target="_blank" rel="noopener">GTN API</a>.
+    The tutorials are under CC BY 4.0. The GTN describes this API as unstable and asks anyone who builds on it to contact them.
+  </footer>
+
+  <script>
+    const GTN = "https://training.galaxyproject.org/training-material";
+    const API = GTN + "/api";              // static JSON files, sent with Access-Control-Allow-Origin: *
+    const DEFAULT_TOPIC = "introduction";  // or start elsewhere with ?topic=variant-analysis in the address
+
+    const topicSelect = document.getElementById("topic");
+    const serverSelect = document.getElementById("server");
+    const statusEl = document.getElementById("status");
+    const listEl = document.getElementById("list");
+    let loaded = null;                     // the topic on screen, kept so a new server needs no new download
+
+    function setStatus(text, isError) {
+      statusEl.textContent = text;
+      statusEl.className = isError ? "error" : "";
+    }
+
+    async function getJSON(url) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }
+
+    // Build an element with attributes and text. textContent keeps titles from the API as plain text.
+    function el(tag, attrs, text) {
+      const e = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    const newTab = href => ({ href, target: "_blank", rel: "noopener" });
+    const host = url => { try { return new URL(url).host.toLowerCase(); } catch (e) { return ""; } };
+
+    // The GTN writes times as "1H30M", "40m" or "90M"
+    function prettyTime(t) {
+      const m = String(t).toUpperCase().match(/^(?:(\d+)H)?(?:(\d+)M)?$/);
+      if (!m) return String(t);
+      return [m[1] && m[1] + " h", m[2] && m[2] + " min"].filter(Boolean).join(" ");
+    }
+
+    // Material addresses are relative to the GTN; a few hands-on tutorials live on other sites
+    function link(m) {
+      if (m.hands_on === "external" && m.hands_on_url) return m.hands_on_url;
+      return GTN + m.url;
+    }
+
+    // supported_servers.exact: servers with every tool at the version the tutorial uses.
+    // supported_servers.inexact: every tool, but some at other versions.
+    // A material with no tools lists every big server as "inexact", so check its tools first.
+    function toolCheck(m, server) {
+      if (!Array.isArray(m.tools) || !m.tools.length || !m.supported_servers) return null;
+      const name = host(server);
+      const on = list => (list || []).some(s => host(s.url) === name);
+      if (on(m.supported_servers.exact)) return { cls: "all", text: "All tools on " + name };
+      if (on(m.supported_servers.inexact)) return { cls: "some", text: "All tools on " + name + ", some at other versions" };
+      return { cls: "missing", text: "Some tools not found on " + name };
+    }
+
+    function item(m, server) {
+      const li = el("li");
+      li.appendChild(el("a", newTab(link(m)), m.title));
+      const meta = el("div", { class: "meta" });
+      if (m.level) meta.appendChild(el("span", { class: "chip" }, m.level));
+      if (m.time_estimation) meta.appendChild(el("span", { class: "chip" }, prettyTime(m.time_estimation)));
+      if (m.hands_on === false && m.slides) meta.appendChild(el("span", { class: "chip" }, "slides only"));
+      const tools = toolCheck(m, server);
+      if (tools) meta.appendChild(el("span", { class: tools.cls }, tools.text));
+      // A finished history on the class server, for students who need to catch up
+      const answer = (m.answer_histories || []).find(h => host(h.history) === host(server));
+      if (answer) meta.appendChild(el("a", newTab(answer.history), "answer history"));
+      // The GTN's page for the tutorial's workflow, with buttons that import it into Galaxy
+      const wf = (m.workflows || [])[0];
+      if (wf && wf.url_html) meta.appendChild(el("a", newTab(wf.url_html), "workflow"));
+      if (m.short_id) meta.appendChild(el("a", newTab("https://gxy.io/GTN:" + m.short_id), "gxy.io/GTN:" + m.short_id));
+      li.appendChild(meta);
+      return li;
+    }
+
+    function render() {
+      if (!loaded) return;
+      const server = serverSelect.value;
+      listEl.textContent = "";
+      const materials = (loaded.materials || []).filter(m => m.draft !== true);   // drafts are unfinished
+      // Group by subtopic, in the GTN's order, then anything without a subtopic
+      const groups = (loaded.subtopics || []).map(s => ({ id: s.id, title: s.title, items: [] }));
+      const other = { id: null, title: groups.length ? "Other" : null, items: [] };
+      for (const m of materials) (groups.find(g => g.id === m.subtopic) || other).items.push(m);
+      for (const g of groups.concat(other)) {
+        if (!g.items.length) continue;
+        g.items.sort((a, b) => (a.priority || 99) - (b.priority || 99) || a.title.localeCompare(b.title, "en-GB"));
+        if (g.title) listEl.appendChild(el("h2", null, g.title));
+        const ul = el("ul");
+        for (const m of g.items) ul.appendChild(item(m, server));
+        listEl.appendChild(ul);
+      }
+      setStatus(materials.length + " materials in " + loaded.title + ". Tool checks for " + host(server) + " use the GTN's records.");
+    }
+
+    async function loadTopic(id) {
+      setStatus("Loading " + id + "…");
+      listEl.textContent = "";
+      loaded = null;
+      try {
+        loaded = await getJSON(API + "/topics/" + encodeURIComponent(id) + ".json");
+        render();
+      } catch (err) {
+        setStatus("The GTN did not send this topic (" + err.message + "). Browse it at training.galaxyproject.org instead.", true);
+      }
+    }
+
+    serverSelect.addEventListener("change", render);
+
+    (async function start() {
+      const wanted = new URLSearchParams(location.search).get("topic") || DEFAULT_TOPIC;
+      let first = wanted;
+      try {
+        const topics = await getJSON(API + "/topics.json");
+        topicSelect.textContent = "";
+        Object.values(topics)
+          .sort((a, b) => a.title.localeCompare(b.title, "en-GB"))
+          .forEach(t => topicSelect.appendChild(el("option", { value: t.name }, t.title)));
+        first = topics[wanted] ? wanted : DEFAULT_TOPIC;
+        topicSelect.value = first;
+        topicSelect.disabled = false;
+        topicSelect.addEventListener("change", () => {
+          // Keep the topic in the address, so a link can open the list at the same topic
+          const u = new URL(location.href);
+          u.searchParams.set("topic", topicSelect.value);
+          history.replaceState(null, "", u);
+          loadTopic(topicSelect.value);
+        });
+      } catch (err) {
+        topicSelect.textContent = "";
+        topicSelect.appendChild(el("option", null, "Topics unavailable"));
+      }
+      loadTopic(first);
+    })();
+  </script>
+</body>
+</html>

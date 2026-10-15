@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Links into Galaxy: open a tool, import a workflow, import a file</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; }
+    fieldset { margin: 8px 0 0; border: 1px solid #c3cbd8; border-radius: 6px; padding: 4px 10px 8px; min-width: 0; }
+    legend { font-weight: 600; padding: 0 4px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin: 4px 0 2px; }
+    input, select { font: inherit; font-size: 14px; padding: 3px 6px; width: 100%; box-sizing: border-box; }
+    select { width: auto; max-width: 100%; }
+    .pair { display: grid; grid-template-columns: 3fr 1fr; gap: 0 10px; }
+    @media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
+    .out { display: flex; align-items: flex-start; gap: 10px; margin: 6px 0 0; }
+    .out > a, .out > pre { flex: 1; min-width: 0; }
+    .out > a { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+    pre { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; background: #f4f6fa; border: 1px solid #dde2ea; border-radius: 6px; padding: 6px 8px; margin: 0; white-space: pre-wrap; word-break: break-all; }
+    button { font: inherit; font-size: 14px; padding: 2px 10px; }
+    code { white-space: nowrap; }
+    .warn { font-size: 14px; color: #8a3b00; margin: 6px 0 0; overflow-wrap: anywhere; }
+    .small { font-size: 14px; color: #3b4659; }
+    fieldset .small { margin: 6px 0 0; }
+    #msg { min-height: 1.5em; margin: 6px 0 0; font-size: 14px; font-weight: 600; color: #0b6b50; }
+  </style>
+</head>
+<body>
+  <h1>Links that open Galaxy at the right place</h1>
+  <p class="small">Change any box and the links change with it. Nothing is sent to Galaxy until someone clicks a link.</p>
+
+  <label for="server">Galaxy server</label>
+  <select id="server">
+    <option value="https://usegalaxy.eu">usegalaxy.eu (Europe)</option>
+    <option value="https://usegalaxy.org">usegalaxy.org (United States)</option>
+    <option value="https://usegalaxy.org.au">usegalaxy.org.au (Australia)</option>
+    <option value="https://usegalaxy.fr">usegalaxy.fr (France)</option>
+    <option value="choose">Each student's own server, through my.galaxy.training</option>
+  </select>
+
+  <fieldset>
+    <legend>1. Open a tool</legend>
+    <div class="pair">
+      <div><label for="tool-id">Tool ID</label>
+        <input id="tool-id" spellcheck="false" value="toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy1"></div>
+      <div><label for="tool-version">Version</label>
+        <input id="tool-version" spellcheck="false" value="0.74+galaxy1"></div>
+    </div>
+    <div class="out">
+      <a id="tool-link" target="_blank" rel="noopener"></a>
+      <button type="button" data-copy="tool-link" aria-label="Copy the tool link">Copy</button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>2. Import a workflow and open its run form</legend>
+    <label for="trs">The workflow's TRS address (from the GTN, WorkflowHub or Dockstore)</label>
+    <input id="trs" spellcheck="false" value="https://training.galaxyproject.org/training-material/api/ga4gh/trs/v2/tools/introduction-galaxy-intro-short/versions/galaxy-workflowlaxy-intro-short">
+    <div class="out">
+      <a id="wf-link" target="_blank" rel="noopener"></a>
+      <button type="button" data-copy="wf-link" aria-label="Copy the workflow link">Copy</button>
+    </div>
+    <p class="warn" id="trs-note" aria-live="polite"></p>
+    <p class="warn">Students must log in before they click. Galaxy sends a student who is logged out to its login page, and forgets the workflow.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>3. Import a file from a web address</legend>
+    <label for="data-url">Address of the file</label>
+    <input id="data-url" spellcheck="false" value="https://zenodo.org/records/582600/files/mutant_R1.fastq">
+    <div class="pair">
+      <div><label for="data-name">Name in Galaxy</label><input id="data-name" spellcheck="false" value="mutant_R1.fastq"></div>
+      <div><label for="data-ext">Galaxy format</label><input id="data-ext" spellcheck="false" value="fastqsanger"></div>
+    </div>
+    <p class="small">A plain link cannot carry the file's address. Run this once in a terminal to store a "landing request" on the server.
+      It prints an ID: share <code>/tool_landings/ID?public=true</code> on that server. Landing requests cannot be deleted.</p>
+    <div class="out">
+      <pre id="curl"></pre>
+      <button type="button" data-copy="curl" aria-label="Copy the command">Copy</button>
+    </div>
+    <p class="warn" id="landing-note" hidden>A landing request belongs to one server, so this command is for usegalaxy.eu. Choose a server above to change it.</p>
+    <p class="small">One we made on 15 October 2026, for the file above:
+      <a href="https://usegalaxy.eu/tool_landings/2622dd04-f56e-461b-a3a9-257ea3c6b9ae?public=true" target="_blank" rel="noopener">import mutant_R1.fastq into usegalaxy.eu</a>.
+      A student who is logged out logs in first, then comes back to the import.</p>
+  </fieldset>
+  <p id="msg" role="status" aria-live="polite"></p>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    // Tool IDs contain "/" and "+". Encode both: a "+" left as it is can be read as a space.
+    const enc = encodeURIComponent;
+    // Galaxy accepts TRS addresses of this shape (the pattern in Galaxy's trs_proxy.py)
+    const TRS_PATTERN = /^https?:\/\/.+\/ga4gh\/trs\/v2\/tools\/.+\/versions\/[^\/]+/;
+
+    // A path inside Galaxy, such as "/?tool_id=...", becomes a full link for the chosen server.
+    // my.galaxy.training asks each student for their server once, remembers it in their browser,
+    // and sends them on to the same path there.
+    function galaxyLink(path) {
+      const server = $("server").value;
+      if (server === "choose") return "https://my.galaxy.training/?path=" + enc(path);
+      return server + path;
+    }
+
+    function setLink(id, href) {
+      const a = $(id);
+      a.textContent = href;
+      a.href = href;
+    }
+
+    function update() {
+      // 1. A tool's form, at the version named
+      const tool = $("tool-id").value.trim();
+      const version = $("tool-version").value.trim();
+      setLink("tool-link", galaxyLink("/?tool_id=" + enc(tool) + (version ? "&version=" + enc(version) : "")));
+
+      // 2. Import a workflow from a TRS server and go straight to its run form
+      const trs = $("trs").value.trim();
+      setLink("wf-link", galaxyLink("/workflows/trs_import?trs_url=" + enc(trs) + "&run_form=true"));
+      $("trs-note").textContent = trs && !TRS_PATTERN.test(trs)
+        ? "Galaxy expects a TRS address ending in /ga4gh/trs/v2/tools/<id>/versions/<version>." : "";
+
+      // 3. A file landing request is stored on one server, so my.galaxy.training cannot help here
+      const choose = $("server").value === "choose";
+      const server = choose ? "https://usegalaxy.eu" : $("server").value;
+      $("landing-note").hidden = !choose;
+      const body = {
+        public: true,                      // with ?public=true, one link serves the whole class
+        request_state: [{ class: "File", location: $("data-url").value.trim(),
+                          ext: $("data-ext").value.trim(), name: $("data-name").value.trim() }]
+      };
+      // Single quotes around the JSON for the shell; any single quote inside is closed, escaped and reopened
+      const json = JSON.stringify(body).replace(/'/g, "'\\''");
+      // grep picks the ID out of Galaxy's reply, and works in any macOS or Linux terminal
+      $("curl").textContent =
+        "curl -s -X POST " + server + "/api/file_landings \\\n" +
+        "  -H 'Content-Type: application/json' \\\n" +
+        "  -d '" + json + "' \\\n" +
+        "  | grep -o '\"uuid\": *\"[^\"]*\"'";
+    }
+
+    document.querySelectorAll("input, select").forEach(e => e.addEventListener("input", update));
+    $("server").addEventListener("change", update);
+
+    // Copy buttons. Clipboard access can be refused, so say what happened either way:
+    // on the button for sighted users, and in the live region for screen readers.
+    document.querySelectorAll("button[data-copy]").forEach(b => b.addEventListener("click", async () => {
+      const text = $(b.dataset.copy).textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        $("msg").textContent = "Copied.";
+        b.textContent = "Copied";
+        setTimeout(() => { b.textContent = "Copy"; }, 1500);
+      } catch (err) {
+        $("msg").textContent = "Your browser did not allow copying. Select the text and copy it yourself.";
+        b.textContent = "Not copied";
+        setTimeout(() => { b.textContent = "Copy"; }, 2500);
+      }
+    }));
+
+    update();
+  </script>
+</body>
+</html>

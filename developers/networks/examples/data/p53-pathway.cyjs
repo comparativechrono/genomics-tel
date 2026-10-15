@@ -1,0 +1,54 @@
+{
+  "format_version" : "1.0",
+  "generated_by" : "written by hand for genomics.tel, in the format of a Cytoscape 3.10 export",
+  "target_cytoscapejs_version" : "~2.1",
+  "data" : {
+    "shared_name" : "p53 core pathway",
+    "name" : "p53 core pathway",
+    "SUID" : 52,
+    "selected" : true
+  },
+  "elements" : {
+    "nodes" : [ {
+      "data" : { "id" : "101", "shared_name" : "ATM", "name" : "ATM", "Description" : "Protein kinase activated by DNA double-strand breaks", "SUID" : 101, "selected" : false },
+      "position" : { "x" : 0.0, "y" : 0.0 }, "selected" : false
+    }, {
+      "data" : { "id" : "102", "shared_name" : "CHEK2", "name" : "CHEK2", "Description" : "Checkpoint kinase 2 (CHK2), activated by ATM", "SUID" : 102, "selected" : false },
+      "position" : { "x" : 190.0, "y" : 70.0 }, "selected" : false
+    }, {
+      "data" : { "id" : "103", "shared_name" : "TP53", "name" : "TP53", "Description" : "Tumour suppressor p53, a transcription factor", "SUID" : 103, "selected" : false },
+      "position" : { "x" : 40.0, "y" : 150.0 }, "selected" : false
+    }, {
+      "data" : { "id" : "104", "shared_name" : "MDM2", "name" : "MDM2", "Description" : "E3 ubiquitin ligase that marks p53 for degradation", "SUID" : 104, "selected" : false },
+      "position" : { "x" : -170.0, "y" : 150.0 }, "selected" : false
+    }, {
+      "data" : { "id" : "105", "shared_name" : "CDKN1A", "name" : "CDKN1A", "Description" : "p21, an inhibitor of cyclin-dependent kinases", "SUID" : 105, "selected" : false },
+      "position" : { "x" : -40.0, "y" : 250.0 }, "selected" : false
+    }, {
+      "data" : { "id" : "106", "shared_name" : "BAX", "name" : "BAX", "Description" : "BCL-2 family protein that promotes apoptosis", "SUID" : 106, "selected" : false },
+      "position" : { "x" : 140.0, "y" : 250.0 }, "selected" : false
+    } ],
+    "edges" : [ {
+      "data" : { "id" : "201", "source" : "101", "target" : "102", "shared_name" : "ATM (activates) CHEK2", "name" : "ATM (activates) CHEK2", "interaction" : "activates", "shared_interaction" : "activates", "PubMed" : "10973490", "SUID" : 201, "selected" : false },
+      "selected" : false
+    }, {
+      "data" : { "id" : "202", "source" : "101", "target" : "103", "shared_name" : "ATM (activates) TP53", "name" : "ATM (activates) TP53", "interaction" : "activates", "shared_interaction" : "activates", "PubMed" : "9733514", "SUID" : 202, "selected" : false },
+      "selected" : false
+    }, {
+      "data" : { "id" : "203", "source" : "102", "target" : "103", "shared_name" : "CHEK2 (activates) TP53", "name" : "CHEK2 (activates) TP53", "interaction" : "activates", "shared_interaction" : "activates", "PubMed" : "10710310", "SUID" : 203, "selected" : false },
+      "selected" : false
+    }, {
+      "data" : { "id" : "204", "source" : "103", "target" : "104", "shared_name" : "TP53 (induces) MDM2", "name" : "TP53 (induces) MDM2", "interaction" : "induces", "shared_interaction" : "induces", "PubMed" : "8319905", "SUID" : 204, "selected" : false },
+      "selected" : false
+    }, {
+      "data" : { "id" : "205", "source" : "104", "target" : "103", "shared_name" : "MDM2 (inhibits) TP53", "name" : "MDM2 (inhibits) TP53", "interaction" : "inhibits", "shared_interaction" : "inhibits", "PubMed" : "9153395", "SUID" : 205, "selected" : false },
+      "selected" : false
+    }, {
+      "data" : { "id" : "206", "source" : "103", "target" : "105", "shared_name" : "TP53 (induces) CDKN1A", "name" : "TP53 (induces) CDKN1A", "interaction" : "induces", "shared_interaction" : "induces", "PubMed" : "8242752", "SUID" : 206, "selected" : false },
+      "selected" : false
+    }, {
+      "data" : { "id" : "207", "source" : "103", "target" : "106", "shared_name" : "TP53 (induces) BAX", "name" : "TP53 (induces) BAX", "interaction" : "induces", "shared_interaction" : "induces", "PubMed" : "7834749", "SUID" : 207, "selected" : false },
+      "selected" : false
+    } ]
+  }
+}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NGL: haemoglobin with the sickle-cell residue labelled</title>
+  <script src="https://cdn.jsdelivr.net/npm/ngl@2.5.0/dist/ngl.js"
+          integrity="sha384-qOi8a5spSPm4TRNARfg3E5ksGPddyrJ4+cwWLRXFKthmvVZK5HgLmh2/gxptXYPl"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    #viewport { height: 400px; }
+    #picked { min-height: 1.5em; margin: 6px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>Haemoglobin (PDB 4HHB) in NGL. Click an atom to name its residue.</h1>
+  <div id="viewport" role="img" aria-label="Haemoglobin with alpha chains in grey, beta chains in blue and glutamate 6 of each beta chain as labelled red spheres"></div>
+  <p id="picked" role="status" aria-live="polite"></p>
+
+  <script>
+    const picked = document.getElementById("picked");
+    // NGL leaves an empty box when the browser has no WebGL, so check first and say so
+    const canvas = document.createElement("canvas");
+    if (!(canvas.getContext("webgl2") || canvas.getContext("webgl"))) {
+      picked.textContent = "This browser cannot show 3D graphics (WebGL is turned off or not supported).";
+    } else {
+      const stage = new NGL.Stage("viewport", { backgroundColor: "white" });
+      window.addEventListener("resize", () => stage.handleResize());   // NGL does not resize by itself
+
+      stage.loadFile("rcsb://4hhb.cif").then(hb => {                     // https://files.rcsb.org/download/4hhb.cif
+        // NGL's selection language: ":B" is chain B, "6:B" is residue 6 of chain B
+        hb.addRepresentation("cartoon", { sele: ":A or :C", color: "#b8b8b8" });
+        hb.addRepresentation("cartoon", { sele: ":B or :D", color: "#4a7fc1" });
+        hb.addRepresentation("ball+stick", { sele: "HEM", color: "#e0a526" });
+        hb.addRepresentation("spacefill", { sele: "6:B or 6:D", color: "#d7263d" });
+        // Label text is looked up by atom index. NGL's font has no Greek letters, so write "beta", not β.
+        const ca = hb.structure.getAtomIndices(new NGL.Selection("6:B and .CA"))[0];
+        hb.addRepresentation("label", {
+          sele: "6:B and .CA", labelType: "text", labelText: { [ca]: "beta Glu6 (Val in HbS)" },
+          color: "black", radiusType: "size", radiusSize: 1.6,
+          fixedSize: true,        // the same size on screen at any zoom; otherwise the size is in ångströms
+          zOffset: 6              // drawn 6 Å nearer the viewer, in front of the spheres
+        });
+        hb.autoView();
+      }).catch(err => {
+        console.error(err);
+        picked.textContent = "The structure could not be loaded: " + err.message;
+      });
+
+      // Report the residue under the pointer when it is clicked
+      stage.signals.clicked.add(pick => {
+        if (pick && pick.atom) {
+          const a = pick.atom;
+          picked.textContent = "Chain " + a.chainname + ", " + a.resname + " " + a.resno + " (atom " + a.atomname + ")";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

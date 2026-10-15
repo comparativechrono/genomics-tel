@@ -39,9 +39,14 @@ Ads appear only on guide pages, never inside the live examples.
 
 ## Live examples
 
-The live examples on the developer pages run in your browser. To work, they load software from public code libraries (for example jsDelivr) and data from public research services (for example the UCSC Genome Browser, the RCSB Protein Data Bank, AlphaFold DB, STRING and Galaxy). Those services receive your IP address and the request, as with any website you visit, under their own privacy policies.
+The live examples on the developer pages run in your browser. To work, they load software and data from other organisations' servers. Those servers receive your IP address and the request, as with any website you visit, and handle them under their own privacy policies.
 
-Some examples let you open a file from your own computer. The file is read by your browser and is not uploaded anywhere.
+- **Software** comes from jsDelivr, a public service that hosts open-source code. The R and Python examples also use webR's servers (webr.r-wasm.org), R-universe and the Python Package Index.
+- **Data** come from public research services: the UCSC Genome Browser, Ensembl, the 1000 Genomes Project, NCBI, the JBrowse project, the RCSB Protein Data Bank, AlphaFold DB, UniProt, STRING, FinnGen, Zenodo, the Galaxy servers and the Galaxy Training Network.
+
+Three examples show another organisation's app inside the page: Nextstrain, JupyterLite and Galaxy. Those apps follow their own privacy policies, and some of them count visits; Nextstrain, for example, uses Plausible analytics. These examples load only when you click to start them.
+
+Some examples let you open a file from your own computer. Your browser reads the file, and it is not uploaded anywhere.
 
 ## Your rights
 

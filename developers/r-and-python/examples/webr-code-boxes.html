@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>webR: R code boxes, with GC content in sliding windows</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 10px; }
+    .r-box { border: 1px solid #c3cbd8; border-radius: 6px; padding: 8px 10px 10px; margin: 0 0 12px; }
+    .r-box label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .r-box textarea { width: 100%; box-sizing: border-box; font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #172033;
+                      padding: 6px 8px; border: 1px solid #8a94a6; border-radius: 4px; resize: vertical;
+                      white-space: pre; overflow-wrap: normal; overflow-x: auto; tab-size: 2; }
+    .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+    button { font: inherit; font-size: 14px; padding: 4px 12px; border-radius: 4px; border: 1px solid #5c677a; background: #f4f6fa; color: #172033; cursor: pointer; }
+    button.run { background: #2b56c9; border-color: #2b56c9; color: #fff; }
+    button:disabled { opacity: 0.55; cursor: progress; }
+    button:focus-visible, textarea:focus-visible, pre:focus-visible { outline: 3px solid #b35a00; outline-offset: 2px; }
+    .state { font-size: 13px; color: #3b4659; }
+    pre.out { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; background: #f4f6fa; border: 1px solid #dde2ea; border-radius: 4px;
+              padding: 6px 8px; margin: 0; white-space: pre; overflow-x: auto; }
+    pre.out:empty { display: none; }
+    pre.out .err { color: #a40000; }
+    .plots img { display: block; max-width: 100%; height: auto; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>GC content in sliding windows, in R</h1>
+  <p>Edit the code and press <b>Run</b>, or <kbd>Ctrl</kbd>+<kbd>Enter</kbd>. R runs in your browser. It downloads (about 14 MB)
+     when you first click in a box, so the first Run takes a few seconds. The boxes share one R session, so run them in order.</p>
+
+  <div class="r-box">
+    <label for="code1">1. Make a DNA sequence with a GC-rich stretch in the middle (simulated data)</label>
+    <textarea id="code1" spellcheck="false">set.seed(1)                           # the same "random" sequence every time
+bases <- c("A", "C", "G", "T")
+ordinary <- c(0.3, 0.2, 0.2, 0.3)     # chances of A, C, G and T: 40% GC
+gc_rich  <- c(0.15, 0.35, 0.35, 0.15) # 70% GC
+dna <- c(sample(bases, 1500, replace = TRUE, prob = ordinary),
+         sample(bases, 1000, replace = TRUE, prob = gc_rich),
+         sample(bases, 1500, replace = TRUE, prob = ordinary))
+length(dna)
+table(dna)
+mean(dna %in% c("G", "C"))            # GC content of the whole sequence</textarea>
+  </div>
+
+  <div class="r-box" data-plot-alt="Line plot of GC fraction along the simulated sequence, made by the code above. The summary printed above the plot gives the same values as text.">
+    <label for="code2">2. GC content in sliding windows. Before you run it again, predict what a window of 50 or 1000 will do.</label>
+    <textarea id="code2" spellcheck="false">window <- 200    # bases in each window
+step <- 50       # how far the window moves each time
+starts <- seq(1, length(dna) - window + 1, by = step)
+gc <- sapply(starts, function(s) mean(dna[s:(s + window - 1)] %in% c("G", "C")))
+summary(gc)
+plot(starts + window / 2, gc, type = "l", lwd = 2, ylim = c(0, 1),
+     xlab = "Position (bases)", ylab = "GC fraction",
+     main = paste("GC content in", window, "base windows"))
+abline(h = mean(dna %in% c("G", "C")), lty = 2)   # the whole sequence</textarea>
+  </div>
+
+  <div class="r-box">
+    <label for="code3">3. Where do the GC-rich windows start and end? The true stretch is bases 1,501 to 2,500.</label>
+    <textarea id="code3" spellcheck="false">rich <- starts[gc > 0.55]
+c(first = min(rich), last = max(rich) + window - 1)</textarea>
+  </div>
+
+  <script type="module">
+    /* Runnable R code boxes, with webR 0.6.0 (R 4.6.0).
+       Every .r-box that holds a <textarea> gets Run and Reset buttons and an output area. All the boxes share one
+       R session, which starts the first time someone runs or edits a box.
+       Options: <body data-r-packages="ape seqinr"> installs packages as R starts;
+                <div class="r-box" data-time-limit="60"> changes the time limit (in seconds, default 30);
+                <div class="r-box" data-plot-alt="…"> describes the box's plot for screen readers. */
+    const WEBR = 'https://webr.r-wasm.org/v0.6.0/webr.mjs';   // pinned. webR fetches more files of its own, so there is no integrity hash.
+
+    // The R that runs a box. It prints values as R's console does, and stops the code after a time limit: without
+    // cross-origin isolation a runaway loop cannot be interrupted any other way. The limit is removed however the code ends.
+    const RUN = `(function() {
+      setTimeLimit(elapsed = limit, transient = TRUE)
+      on.exit(setTimeLimit(elapsed = Inf), add = TRUE)
+      withAutoprint(parse(text = code), evaluated = TRUE, local = globalenv(), echo = FALSE)
+      invisible()
+    })()`;
+
+    let webRPromise = null;
+    let queue = Promise.resolve();     // boxes run one at a time, in the order they were asked
+
+    function startR() {
+      if (!webRPromise) {
+        webRPromise = (async () => {
+          // Imported here rather than at the top, so that the page still works, and can say what is wrong, if it fails
+          const { WebR } = await import(WEBR).catch(() => {
+            // a browser does not fetch a module again after a failed import: only reloading the page retries
+            throw new Error('R could not be downloaded from webr.r-wasm.org. Check the internet connection, then reload the page.');
+          });
+          const webR = new WebR();     // without cross-origin isolation, webR chooses its PostMessage channel itself
+          await webR.init();
+          // install.packages() and library() of a missing package then fetch packages built for webR (repo.r-wasm.org)
+          await webR.evalRVoid('webr::shim_install(); options(webr.show_menu = FALSE)');
+          // packages the page needs, installed here so that they do not count against a box's time limit
+          const pkgs = (document.body.dataset.rPackages || '').split(/\s+/).filter(Boolean);
+          if (pkgs.length) await webR.installPackages(pkgs, { quiet: true });
+          return webR;
+        })();
+        webRPromise.catch(() => { webRPromise = null; });   // R did not start: try again at the next Run
+      }
+      return webRPromise;
+    }
+
+    // webR returns each plot as an ImageBitmap drawn at twice the size, for sharp lines. An <img> can be saved or copied.
+    function bitmapToImg(bitmap, alt) {
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      canvas.getContext('2d').drawImage(bitmap, 0, 0);
+      const img = document.createElement('img');
+      img.src = canvas.toDataURL('image/png');
+      img.width = bitmap.width / 2;
+      img.alt = alt;
+      return img;
+    }
+
+    for (const box of document.querySelectorAll('.r-box')) {
+      const ta = box.querySelector('textarea');
+      const original = ta.value;
+      ta.rows = Math.max(3, original.split('\n').length + 1);    // show all of the code
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.innerHTML = '<button type="button" class="run">Run</button><button type="button" class="reset">Reset</button>' +
+                      '<span class="state" role="status" aria-live="polite"></span>';
+      const out = document.createElement('pre');
+      out.className = 'out';
+      out.tabIndex = 0;                // long output scrolls sideways, so it must be reachable by keyboard
+      out.setAttribute('aria-label', 'Output');
+      const plots = document.createElement('div');
+      plots.className = 'plots';
+      box.append(bar, out, plots);
+      const runButton = bar.querySelector('.run');
+      const state = bar.querySelector('.state');
+
+      function run() {
+        if (runButton.disabled) return;
+        runButton.disabled = true;
+        out.textContent = '';
+        plots.replaceChildren();
+        state.textContent = webRPromise ? 'Waiting…' : 'Starting R (first time only)…';
+        queue = queue.then(async () => {
+          let shelter = null;
+          try {
+            const webR = await startR();
+            state.textContent = 'Running…';
+            shelter = await new webR.Shelter();       // frees the R objects made for this run in one go
+            const t0 = performance.now();
+            const result = await shelter.captureR(RUN, {
+              env: { code: ta.value, limit: Number(box.dataset.timeLimit) || 30 },
+              captureStreams: true,
+              captureConditions: false,               // errors, warnings and messages arrive as text, in order
+              captureGraphics: { width: 640, height: 360 }
+            });
+            for (const line of result.output) {
+              const span = document.createElement('span');
+              if (line.type === 'stderr') span.className = 'err';
+              span.textContent = line.data + '\n';
+              out.append(span);
+            }
+            const alt = box.dataset.plotAlt || 'Plot made by the R code above';
+            result.images.forEach((bitmap) => plots.append(bitmapToImg(bitmap, alt)));
+            state.textContent = 'Done in ' + ((performance.now() - t0) / 1000).toFixed(1) + ' s.';
+          } catch (e) {
+            out.textContent += 'Error: ' + e.message;
+            state.textContent = 'Failed.';
+          } finally {
+            if (shelter) await shelter.purge();
+            runButton.disabled = false;
+          }
+        });
+      }
+
+      runButton.addEventListener('click', run);
+      bar.querySelector('.reset').addEventListener('click', () => { ta.value = original; ta.focus(); });
+      ta.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
+      });
+      ta.addEventListener('focus', startR, { once: true });   // start downloading R as soon as someone starts to edit
+    }
+  </script>
+</body>
+</html>

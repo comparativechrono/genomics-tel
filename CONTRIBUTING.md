@@ -30,6 +30,7 @@ The readers are lecturers, demonstrators, learning technologists and research so
 - **Numbers**: words for one to nine in prose, figures for measurements, versions, sizes and times (7 MB, 15 seconds). Dates as 15 October 2026.
 - **Be specific and honest.** Give sizes, versions and the date something was tested. Say what does not work, and where the evidence is thin.
 - **Headings** are in sentence case and say what the section does ("Let students open their own files"), not just a noun.
+- **Asterisks in names.** Write the name Mol\* as `Mol\*` in Markdown. A bare asterisk starts italics, and two of them in one paragraph turn the text between them italic.
 
 ## Accuracy
 

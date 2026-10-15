@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vega-Lite: the lengths of the human chromosomes</title>
+  <!-- Vega-Lite needs three scripts, in this order: Vega draws the chart, Vega-Lite turns
+       a short description into a full Vega one, and vega-embed puts the result in the page.
+       The integrity hashes stop a changed file from running. -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@6.4.0/build/vega.min.js"
+          integrity="sha384-VKdcJr3ZaBIJMbVcopTAI/JEuUkSY6qnwVu9iLuw0DnQ9gQ1JjsfZJhXFQAgNi43"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4.3/build/vega-lite.min.js"
+          integrity="sha384-9/70gNCfOu6G7xXvkdreMfuqAEsoaGJVXV2BN/JLRXkSmcGvnMqtsRx8HZtUWAvI"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.3.0/build/vega-embed.min.js"
+          integrity="sha384-Muy1QRxYFeNrA1zShc1KtN4OfipkR/61gt+HWqN57c1Zxu3Oe16TsilsruVVjfKL"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 8px; }
+    #chart { width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>The lengths of the human chromosomes (GRCh38)</h1>
+  <div id="chart"></div>
+
+  <script>
+    const spec = {
+      $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+      // Screen readers read this description as the chart's label
+      description: "Bar chart of the lengths of the 24 human chromosomes in GRCh38, from 249 Mb for chromosome 1 down to 47 Mb for chromosome 21.",
+      width: "container",            // as wide as the element it sits in
+      height: 220,
+      data: {
+        values: [                    // lengths in megabases, from UCSC's hg38.chrom.sizes
+          { chrom: "1", mb: 248.96 }, { chrom: "2", mb: 242.19 }, { chrom: "3", mb: 198.30 },
+          { chrom: "4", mb: 190.21 }, { chrom: "5", mb: 181.54 }, { chrom: "6", mb: 170.81 },
+          { chrom: "7", mb: 159.35 }, { chrom: "8", mb: 145.14 }, { chrom: "9", mb: 138.39 },
+          { chrom: "10", mb: 133.80 }, { chrom: "11", mb: 135.09 }, { chrom: "12", mb: 133.28 },
+          { chrom: "13", mb: 114.36 }, { chrom: "14", mb: 107.04 }, { chrom: "15", mb: 101.99 },
+          { chrom: "16", mb: 90.34 }, { chrom: "17", mb: 83.26 }, { chrom: "18", mb: 80.37 },
+          { chrom: "19", mb: 58.62 }, { chrom: "20", mb: 64.44 }, { chrom: "21", mb: 46.71 },
+          { chrom: "22", mb: 50.82 }, { chrom: "X", mb: 156.04 }, { chrom: "Y", mb: 57.23 }
+        ]
+      },
+      mark: { type: "bar", color: "#2a78d6", width: { band: 0.6 }, cornerRadiusEnd: 3, tooltip: true },
+      encoding: {
+        // sort: null keeps the order of the data, rather than sorting the names as text (1, 10, 11…)
+        x: { field: "chrom", type: "nominal", sort: null, title: "Chromosome",
+             axis: { labelAngle: 0, labelOverlap: "parity" } },   // on a narrow screen, drop every other label rather than overlap
+        y: { field: "mb", type: "quantitative", title: "Length (Mb)" }
+      },
+      config: { font: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
+    };
+
+    // actions: false hides vega-embed's menu, which can send the chart to the online Vega Editor
+    vegaEmbed("#chart", spec, { actions: false });
+  </script>
+</body>
+</html>

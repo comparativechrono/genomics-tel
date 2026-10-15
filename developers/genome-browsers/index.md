@@ -15,7 +15,7 @@ description: How to embed igv.js and JBrowse 2 in a teaching web page, load publ
 | Download | 1.5 MB | 5.7 MB (1.4 MB compressed) | Nothing |
 | Best for | Most teaching pages, and exercises that react to what students click | Rich detail, such as every field of a VCF record in a table | Every track and tool the big browsers offer |
 | Limits | Its toolbar needs about 750 pixels of width | Heavier, and no simple events to build exercises from | Neither site can be shown inside your page |
-| Licence | MIT | Apache 2.0 | Free to link to |
+| Licence | MIT | Apache 2.0 (the view package is labelled MIT on npm) | Free to link to |
 
 </div>
 
@@ -172,7 +172,7 @@ Both APIs work from a web page. The UCSC API returns sequence and track data. Th
 
 ## Licences and credits
 
-igv.js is under the MIT licence and JBrowse 2 under Apache 2.0. If you publish teaching material built on them, cite their papers (below). The UCSC, ClinVar, ENCODE and 1000 Genomes data are free to use, each under its provider's terms; check those before you redistribute copies of the files.
+igv.js is under the MIT licence. JBrowse 2 is under Apache 2.0, although its linear genome view package is labelled MIT on npm. If you publish teaching material built on them, cite their papers (below). The UCSC, ClinVar, ENCODE and 1000 Genomes data are free to use, each under its provider's terms; check those before you redistribute copies of the files.
 
 ## References
 

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nightingale: β-globin in eight species, with the sickle-cell position highlighted</title>
+  <!-- Nightingale 5.11.0 comes as ES modules from jsDelivr. Every component imports the shared core
+       by name, so the import map says where that name lives. The integrity list holds a hash for
+       each module, so a changed file does not run. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "@nightingale-elements/nightingale-new-core": "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-new-core@5.11.0/dist/index.js"
+    },
+    "integrity": {
+      "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-new-core@5.11.0/dist/index.js": "sha384-jr6Yu/v5IIaoD6Hk4TG4tkNnrizDDewDyAifRF1S3NjF1t/xg+5d1188iJG34hb8",
+      "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-msa@5.11.0/dist/index.js": "sha384-X8Vi+Bbnhn0Y12X7rjSiB+39BnEFcAXzskxm3+eisUZHM5oeG0jYJknDGi5hUL/k",
+      "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-navigation@5.11.0/dist/index.js": "sha384-KbFSF43wJ9w9jCy+xxBOqGPF6sF6gW6rJoDfn2y0mlYZZF/FhARWV1iKTgBufI5I",
+      "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-manager@5.11.0/dist/index.js": "sha384-D2XIdvPlEPljf0/P45qpN7TAK9ncW5Ums+2gS4qyekXQfS9L3rHa1MI3BR49zsS0",
+      "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-sequence@5.11.0/dist/index.js": "sha384-sC1duoOfLF0jk/lxCp7kE3kYefySpWS21ptmFrrARGWAB2FZjpSweWhRLaeM3JJl"
+    }
+  }
+  </script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0; }
+    .controls form, .controls span { display: inline-flex; align-items: center; gap: 6px; }
+    button, input, select { font: inherit; font-size: 14px; padding: 4px 9px; }
+    input[type="number"] { width: 4.5em; }
+    #readout { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #3b4659; white-space: pre-line; min-height: 5.8em; margin: 6px 0 8px; }
+    nightingale-manager { display: block; }
+  </style>
+</head>
+<body>
+  <h1>β-globin in eight species: the sickle-cell position</h1>
+  <p>Column 7 is residue 7 of human β-globin in UniProt, the glutamate that older papers call Glu6.
+     Sickle-cell haemoglobin has valine here. Click a letter, or use the controls below.</p>
+
+  <!-- The manager keeps the tracks in step: an attribute named in reflected-attributes,
+       set on the manager, is passed to every track inside it. -->
+  <nightingale-manager id="manager" reflected-attributes="display-start,display-end,highlight">
+    <nightingale-navigation length="147" height="40" display-start="1" display-end="40"
+        margin-left="100" ruler-padding="0" min-width="300" show-highlight highlight-color="#e8590c88"></nightingale-navigation>
+    <!-- The human sequence as a ruler: its numbers are human UniProt residue numbers -->
+    <nightingale-sequence id="ruler" length="147" height="30" display-start="1" display-end="40"
+        margin-left="100" min-width="300" highlight-color="#e8590c88"></nightingale-sequence>
+    <nightingale-msa id="msa" length="147" height="170" tile-height="20" label-width="90" min-width="300"
+        display-start="1" display-end="40" color-scheme="clustal2" highlight-color="#e8590c"></nightingale-msa>
+  </nightingale-manager>
+
+  <p id="readout" role="status" aria-live="polite">Loading the alignment…</p>
+  <div class="controls">
+    <button type="button" id="sickle">Sickle-cell position</button>
+    <button type="button" id="whole">Whole alignment</button>
+    <form id="goto">
+      <label for="column">Column</label>
+      <input id="column" type="number" min="1" max="147" value="7">
+      <button type="submit">Show</button>
+    </form>
+    <span>
+      <label for="scheme">Colours</label>
+      <select id="scheme">
+        <option value="clustal2">Clustal: type of residue</option>
+        <option value="zappo">Zappo: chemistry</option>
+        <option value="conservation">Share of rows with this residue</option>
+      </select>
+    </span>
+  </div>
+
+  <script>
+    // If the modules cannot load (no network, or a hash that does not match), say so instead of waiting for ever
+    setTimeout(() => {
+      if (!customElements.get("nightingale-msa")) {
+        document.getElementById("readout").textContent = "Nightingale did not load. Check the connection and reload the page.";
+      }
+    }, 15000);
+  </script>
+  <script type="module">
+    import "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-manager@5.11.0/dist/index.js";
+    import "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-navigation@5.11.0/dist/index.js";
+    import "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-sequence@5.11.0/dist/index.js";
+    import "https://cdn.jsdelivr.net/npm/@nightingale-elements/nightingale-msa@5.11.0/dist/index.js";
+
+    // Eight reviewed UniProt entries (release 2026_03): P68871 human, P68873 chimpanzee, P02088 mouse,
+    // P02091 rat, P02062 horse, P60524 dog, P02070 cow and P02112 chicken, aligned with FAMSA.
+    // data/hbb-beta-globins.aln.fasta holds the same alignment under UniProt's entry names.
+    const FASTA = `>Human
+MVHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH
+>Chimpanzee
+MVHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH
+>Mouse
+MVHLTDAEKAAVSCLWGKVNSDEVGGEALGRLLVVYPWTQRYFDSFGDLSSASAIMGNAKVKAHGKKVITAFNDGLNHLDSLKGTFASLSELHCDKLHVDPENFRLLGNMIVIVLGHHLGKDFTPAAQAAFQKVVAGVATALAHKYH
+>Rat
+MVHLTDAEKAAVNGLWGKVNPDDVGGEALGRLLVVYPWTQRYFDSFGDLSSASAIMGNPKVKAHGKKVINAFNDGLKHLDNLKGTFAHLSELHCDKLHVDPENFRLLGNMIVIVLGHHLGKEFTPCAQAAFQKVVAGVASALAHKYH
+>Horse
+-VQLSGEEKAAVLALWDKVNEEEVGGEALGRLLVVYPWTQRFFDSFGDLSNPGAVMGNPKVKAHGKKVLHSFGEGVHHLDNLKGTFAALSELHCDKLHVDPENFRLLGNVLVVVLARHFGKDFTPELQASYQKVVAGVANALAHKYH
+>Dog
+-VHLTAEEKSLVSGLWGKVNVDEVGGEALGRLLIVYPWTQRFFDSFGDLSTPDAVMSNAKVKAHGKKVLNSFSDGLKNLDNLKGTFAKLSELHCDKLHVDPENFKLLGNVLVCVLAHHFGKEFTPQVQAAYQKVVAGVANALAHKYH
+>Cow
+--MLTAEEKAAVTAFWGKVKVDEVGGEALGRLLVVYPWTQRFFESFGDLSTADAVMNNPKVKAHGKKVLDSFSNGMKHLDDLKGTFAALSELHCDKLHVDPENFKLLGNVLVVVLARNFGKEFTPVLQADFQKVVAGVANALAHRYH
+>Chicken
+MVHWTAEEKQLITGLWGKVNVAECGAEALARLLIVYPWTQRFFASFGNLSSPTAILGNPMVRAHGKKVLTSFGDAVKNLDNIKNTFSQLSELHCDKLHVDPENFRLLGDILIIVLAAHFSKDFTPECQAAWQKLVRVVAHALARKYH`;
+
+    const rows = FASTA.trim().split(/^>/m).filter(Boolean).map(block => {
+      const [name, ...lines] = block.split("\n");
+      return { name: name.trim(), sequence: lines.join("").trim() };
+    });
+    const LENGTH = rows[0].sequence.length;          // 147 columns
+    const AA = { A: "Ala", R: "Arg", N: "Asn", D: "Asp", C: "Cys", Q: "Gln", E: "Glu", G: "Gly", H: "His", I: "Ile",
+                 L: "Leu", K: "Lys", M: "Met", F: "Phe", P: "Pro", S: "Ser", T: "Thr", W: "Trp", Y: "Tyr", V: "Val" };
+
+    const manager = document.getElementById("manager");
+    const msa = document.getElementById("msa");
+    const readout = document.getElementById("readout");
+
+    // The residue number of a column (counting from 1) in one aligned sequence, or null for a gap.
+    // Each sequence counts its own residues, so the same column can hold residue 7, 6 or 5.
+    const residueNumber = (seq, column) =>
+      seq[column - 1] === "-" ? null : seq.slice(0, column).replace(/-/g, "").length;
+
+    // A text version of one column, for everyone and for screen readers
+    function describe(column) {
+      const human = residueNumber(rows[0].sequence, column);
+      // UniProt counts the first methionine as residue 1; the older numbering starts after it
+      const where = human === null ? "a gap in human"
+        : human === 1 ? "human residue 1, the methionine removed from the mature protein"
+        : "human residue " + human + ", " + AA[rows[0].sequence[column - 1]] + (human - 1) + " in the older numbering";
+      // the commonest residue in the column, and how many species have it
+      const counts = new Map();
+      for (const r of rows) {
+        const aa = r.sequence[column - 1];
+        if (aa !== "-") counts.set(aa, (counts.get(aa) || 0) + 1);
+      }
+      const [top, n] = [...counts].sort((a, b) => b[1] - a[1])[0] || ["-", 0];
+      const each = rows.map(r => {
+        const k = residueNumber(r.sequence, column);
+        return r.name.toLowerCase() + " " + (k === null ? "gap" : r.sequence[column - 1] + k);
+      });
+      return "Column " + column + " (" + where + "): " +
+        (n === rows.length ? "all " : n + " of ") + rows.length + " species have " + top + " (" + AA[top] + ").\n" +
+        "In each species, with its own residue number: " + each.join(", ") + ".";
+    }
+
+    // Show about 18 pixels per column, so the letters stay readable on a phone
+    const fit = () => Math.max(8, Math.min(LENGTH, Math.floor((manager.clientWidth - 100) / 18)));
+    function showColumns(start, end) {
+      manager.setAttribute("display-start", String(start));
+      manager.setAttribute("display-end", String(end));
+    }
+    function select(column, clicked) {
+      column = Math.min(LENGTH, Math.max(1, column));
+      document.getElementById("column").value = column;
+      manager.setAttribute("highlight", column + ":" + column);   // start:end, counting from 1
+      const start = +manager.getAttribute("display-start"), end = +manager.getAttribute("display-end");
+      if (column < start || column > end) {                       // move the view if the column is off screen
+        const s = Math.max(1, Math.min(column - Math.floor(fit() / 2), LENGTH - fit() + 1));
+        showColumns(s, s + fit() - 1);
+      }
+      readout.textContent = (clicked || "") + describe(column);
+    }
+
+    await customElements.whenDefined("nightingale-msa");
+    await customElements.whenDefined("nightingale-sequence");
+    msa.data = rows;                                              // [{ name, sequence }], gaps as "-"
+    document.getElementById("ruler").sequence = rows[0].sequence;  // human has no gaps in this alignment
+    showColumns(1, fit());
+    select(7);
+
+    // position is the column and i the row, both counting from 0
+    msa.addEventListener("onResidueClick", e => {
+      const { position, i } = e.detail;
+      const row = rows[i], column = position + 1, aa = row.sequence[position];
+      const own = aa === "-" ? "a gap" : aa + " (" + AA[aa] + "), residue " + residueNumber(row.sequence, column) + " of the " + row.name.toLowerCase() + " sequence";
+      select(column, row.name + ": " + own + ".\n");
+    });
+
+    document.getElementById("sickle").addEventListener("click", () => { showColumns(1, fit()); select(7); });
+    document.getElementById("whole").addEventListener("click", () => showColumns(1, LENGTH));
+    document.getElementById("goto").addEventListener("submit", e => {
+      e.preventDefault();
+      select(+document.getElementById("column").value || 7);
+    });
+    document.getElementById("scheme").addEventListener("change", e => msa.setAttribute("color-scheme", e.target.value));
+  </script>
+</body>
+</html>

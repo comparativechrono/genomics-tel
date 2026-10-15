@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>phylotree.js: collapse, reroot and search a primate tree</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/phylotree@2.6.0/dist/phylotree.css"
+        integrity="sha384-4Z3mkjcoeAfMJix9nxpdTzuemcgW8Y3+rBvP/S0sqGTJiZhcY1o846BvzENN4EuY"
+        crossorigin="anonymous">
+  <!-- Styles for phylotree's node menu, so that the page does not need Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/phylotree@2.6.0/src/render/styles/phylotree-menus.css"
+        integrity="sha384-unxZUfcSszDiWo3XKUhEgIr0r1lTYWKQEzU3CLio37BMoAAA3ckjRmzkh/pHIBw6"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.8/underscore-umd-min.js"
+          integrity="sha384-qZAXjHQr1t2ESpYPWL8zxAxRilTky3AarPVF2SilaNDgJKUW8T32DcW8OFgqZuGM"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phylotree@2.6.0/dist/phylotree.min.js"
+          integrity="sha384-nwdyfm9qI2lt07VSQvi/ECbWp+zTTfitL8SjTsVZ1KiZHXHlkzTZq42ojvJItGSW"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; font-size: 14px; color: #3b4659; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0 0 6px; font-size: 14px; }
+    button, input, select { font: inherit; font-size: 14px; padding: 3px 8px; }
+    #tree { position: relative; }                       /* phylotree places its node menu inside this box */
+    .phylotree-node-text { font-style: italic; }
+    .internal-node .phylotree-node-text { font-style: normal; fill: #3b4659; }
+    .node.hl .phylotree-node-text { fill: #b8322f; font-weight: 700; }
+    #note { min-height: 1.5em; margin: 4px 0 0; color: #172033; }
+    details { font-size: 14px; color: #3b4659; }
+    code { font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>Collapse, reroot and search the primate tree</h1>
+  <p>Click a node circle for phylotree's own menu (mouse only). The buttons do the same jobs from the keyboard.</p>
+  <div class="controls">
+    <button type="button" id="ladder">Ladderise</button>
+    <button type="button" id="collapse">Collapse or expand the great apes</button>
+    <label for="root-on">Root on</label>
+    <select id="root-on"></select>
+    <button type="button" id="reroot">Reroot</button>
+    <button type="button" id="original">Original tree</button>
+  </div>
+  <div class="controls">
+    <label for="search">Highlight</label>
+    <input id="search" type="search" placeholder="e.g. pan, macaca" size="16">
+    <label><input type="checkbox" id="made-up"> Made-up support values, to test rerooting</label>
+  </div>
+  <div id="tree"></div>
+  <svg id="scale" width="320" height="22" role="img" aria-label="Scale bar"></svg>
+  <p id="note" role="status" aria-live="polite"></p>
+  <details><summary>The tree as Newick text</summary><code id="newick">((((((Pongo_abelii:0.005033,((Homo_sapiens:0.002481,Pan_troglodytes:0.002181)1.00:4.86E-4,Gorilla_gorilla:0.002762)1.00:0.001866)1.00:4.16E-4,Nomascus_leucogenys:0.005591)1.00:0.001522,(Papio_hamadryas:0.001943,Macaca_mulatta:0.001852)1.00:0.004712)1.00:0.002352,Callithrix_jacchus:0.012341)1.00:0.009184,Otolemur_garnettii:0.024586):0.034538,Mus_musculus:0.034538);</code></details>
+
+  <script>
+    const NEWICK = document.getElementById("newick").textContent;   // Faircloth et al. (2012), TreeBASE Tr49836
+    // Every posterior probability in this tree is 1.00, so a value on the wrong branch looks the same as one
+    // on the right branch. For testing, replace them with made-up values from 0.91 to 0.97.
+    let count = 0;
+    const MADE_UP = NEWICK.replace(/1\.00/g, () => (0.91 + 0.01 * count++).toFixed(2));
+
+    const box = document.getElementById("tree");
+    const note = document.getElementById("note");
+    const madeUp = document.getElementById("made-up");
+    const pretty = name => name.replace(/_/g, " ");
+    let tree, rerooted = false, highlight = [], rightPlaces;
+
+    // What to write at each node. phylotree keeps a support value as the "name" of an internal node,
+    // and names the root "root", so only numbers are shown. After a reroot, version 2.6.0 leaves
+    // support values on the wrong branches, so hide them unless we are testing.
+    function label(node) {
+      if (!node.children) return pretty(node.data.name);
+      if (rerooted && !madeUp.checked) return "";
+      return /^\d*\.?\d+$/.test(node.data.name || "") ? node.data.name : "";
+    }
+
+    // Called for every node when phylotree draws: mark tips whose names contain a search word
+    function styleNode(element, node) {
+      const name = (node.data.name || "").toLowerCase();
+      element.classed("hl", !node.children && highlight.some(word => name.includes(word)));
+    }
+
+    function build() {
+      tree = new phylotree.phylotree(madeUp.checked ? MADE_UP : NEWICK);
+      rerooted = false;
+      tree.render({
+        container: "#tree",
+        width: Math.max(300, Math.min(700, box.clientWidth)), height: 320,
+        "left-right-spacing": "fit-to-size",
+        "top-bottom-spacing": "fit-to-size",
+        "internal-names": true,          // draw internal node labels (here, the support values)
+        "show-scale": false,             // its own scale bar is wrong in 2.6.0, so we draw one below
+        brush: false,                    // no drag-to-select box
+        "node-styler": styleNode
+      });
+      box.innerHTML = "";
+      box.appendChild(tree.display.show());
+      rightPlaces = supportsByBranch();   // where each support value belongs, read before any reroot
+      setUp();
+    }
+
+    // Each branch splits the tips into two groups, whatever the rooting. Name each support value's branch by
+    // the smaller group (by the group with the first name, in a tie) so that it can be found again after a reroot.
+    function supportsByBranch() {
+      const all = tree.getTips().map(n => n.data.name).sort();
+      const found = new Map();
+      for (const n of tree.nodes.descendants()) {
+        if (!n.children || !n.parent || !/^\d*\.?\d+$/.test(n.data.name || "")) continue;
+        const below = n.leaves().map(l => l.data.name).sort();
+        const rest = all.filter(name => !below.includes(name));
+        const side = below.length < rest.length || (below.length === rest.length && below[0] < rest[0]) ? below : rest;
+        found.set(side.join(","), n.data.name);
+      }
+      return found;
+    }
+
+    // phylotree throws its display away after every reroot and builds a new one,
+    // so the labels and the scale bar must be set up again each time.
+    function setUp() {
+      tree.display.nodeLabel(label);
+      tree.display.on("rendered", drawScaleBar);
+      drawScaleBar();
+      if (!rerooted) note.textContent = "";
+      else if (!madeUp.checked) note.textContent = "Rerooted. Support values are hidden, because phylotree.js 2.6.0 can put them on the wrong branches.";
+      else {
+        const now = supportsByBranch();
+        const wrong = [...rightPlaces].filter(([branch, value]) => now.get(branch) !== value).length;
+        note.textContent = `Rerooted. ${wrong} of the ${rightPlaces.size} made-up values are no longer on the branch they belong to.`;
+      }
+    }
+    box.addEventListener("reroot", () => { rerooted = true; setUp(); });   // phylotree sends this event to its container
+
+    // A scale bar measured from the drawing itself, so it always agrees with the branches:
+    // pixels per unit = (horizontal distance from the root to a tip) / (sum of branch lengths in between)
+    function drawScaleBar() {
+      const nodes = tree.nodes.descendants();
+      const root = nodes.find(n => !n.parent);
+      const depth = n => n.ancestors().reduce((sum, a) => sum + (a.parent ? +tree.branch_length_accessor(a) || 0 : 0), 0);
+      const tips = nodes.filter(n => !n.children && Number.isFinite(n.screen_x));
+      const far = tips.reduce((a, b) => (depth(b) > depth(a) ? b : a));
+      const pixels = 0.01 * (far.screen_x - root.screen_x) / depth(far);
+      document.getElementById("scale").innerHTML =
+        `<line x1="1" x2="${1 + pixels}" y1="8" y2="8" stroke="#172033" stroke-width="2"/>` +
+        `<text x="${8 + pixels}" y="12" font-size="12" fill="#172033">0.01 substitutions per site</text>`;
+    }
+
+    // phylotree closes its menu only on clicks inside the tree. Close it on Escape and outside clicks too.
+    const closeMenu = () => { const m = box.querySelector(".phylotree-context-menu"); if (m) m.style.display = "none"; };
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+    document.addEventListener("click", e => { if (!box.contains(e.target)) closeMenu(); });
+
+    // Ladderise: sort each node's children by their number of tips, alternating direction on each click
+    let direction = 1;
+    document.getElementById("ladder").addEventListener("click", () => {
+      tree.resortChildren((a, b) => direction * (a.leaves().length - b.leaves().length));
+      direction = -direction;
+    });
+
+    document.getElementById("collapse").addEventListener("click", () => {
+      const greatApes = tree.mrca(["Homo_sapiens", "Pongo_abelii"]);
+      tree.display.toggleCollapse(greatApes).update();
+    });
+
+    const rootOn = document.getElementById("root-on");
+    function fillRootList() {
+      rootOn.innerHTML = tree.getTips().map(n => n.data.name).sort()
+        .map(name => `<option value="${name}">${pretty(name)}</option>`).join("");
+      rootOn.value = "Homo_sapiens";
+    }
+    document.getElementById("reroot").addEventListener("click", () => {
+      tree.reroot(tree.getNodeByName(rootOn.value));   // rebuilds the display and sends a "reroot" event
+    });
+    document.getElementById("original").addEventListener("click", build);
+    madeUp.addEventListener("change", build);
+
+    document.getElementById("search").addEventListener("input", e => {
+      highlight = e.target.value.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+      tree.display.update();
+    });
+
+    build();
+    fillRootList();
+  </script>
+</body>
+</html>

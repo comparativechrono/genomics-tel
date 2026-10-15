@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>An alignment drawn as SVG, with no library</title>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 8px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 8px 0; }
+    button, input { font: inherit; font-size: 14px; }
+    button { padding: 4px 9px; }
+    output { font: 600 14px ui-monospace, Menlo, Consolas, monospace; min-width: 2.5em; }
+    .legend { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; padding: 0; list-style: none; }
+    .legend li { padding: 0 6px; border-radius: 3px; font: 12px/1.6 ui-monospace, Menlo, Consolas, monospace; color: #000; }
+    .msa { display: flex; border: 1px solid #c3cbd8; border-radius: 6px; }
+    .labels { flex: none; padding: 42px 8px 0 6px; font: 12px/16px ui-monospace, Menlo, Consolas, monospace; white-space: nowrap; }
+    .scroller { overflow-x: auto; min-width: 0; }
+    .scroller:focus-visible { outline: 3px solid #1f4e9c; }
+    svg { display: block; cursor: pointer; }
+    svg text { font: 11px ui-monospace, Menlo, Consolas, monospace; pointer-events: none; }
+    #summary { margin: 8px 0 2px; font-weight: 600; }
+    .hint { margin: 0 0 2px; font-size: 14px; color: #3b4659; }
+    .cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5em, 1fr)); gap: 0 12px; margin: 0 0 8px; padding: 0; list-style: none; font: 13px/1.6 ui-monospace, Menlo, Consolas, monospace; }
+    .file { font-size: 14px; color: #3b4659; }
+  </style>
+</head>
+<body>
+  <h1 id="heading">β-globin in eight species, drawn as SVG with no library</h1>
+  <p>Colours show the type of residue, and every cell keeps its letter. The bars show how many species share each
+     column's commonest residue. Click a column, or use the slider below the alignment.</p>
+
+  <div class="msa">
+    <div class="labels" id="labels" aria-hidden="true"></div>
+    <div class="scroller" id="scroller" tabindex="0" role="region" aria-label="Alignment, scrolls sideways">
+      <svg id="svg" role="img" aria-labelledby="svg-title"><title id="svg-title">Alignment</title></svg>
+    </div>
+  </div>
+  <div class="controls">
+    <label for="col">Column</label>
+    <input id="col" type="range" min="1" max="147" value="7">
+    <output id="col-out" for="col">7</output>
+    <button type="button" id="sickle">Sickle-cell column</button>
+  </div>
+  <ul class="legend" id="legend" aria-label="Colour key"></ul>
+  <p id="summary" aria-live="polite"></p>
+  <p class="hint">Each sequence's residue in this column, with its number in its own sequence:</p>
+  <ul class="cells" id="cells"></ul>
+  <p class="file"><label for="file">Open your own aligned FASTA file (it stays on your computer):</label><br>
+    <input id="file" type="file" accept=".fa,.fasta,.fas,.faa,.aln,.txt"></p>
+
+  <script>
+    // Eight reviewed UniProt entries (release 2026_03), aligned with FAMSA. The same alignment, under UniProt's
+    // entry names, is in data/hbb-beta-globins.aln.fasta.
+    const FASTA = `>Human
+MVHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH
+>Chimpanzee
+MVHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH
+>Mouse
+MVHLTDAEKAAVSCLWGKVNSDEVGGEALGRLLVVYPWTQRYFDSFGDLSSASAIMGNAKVKAHGKKVITAFNDGLNHLDSLKGTFASLSELHCDKLHVDPENFRLLGNMIVIVLGHHLGKDFTPAAQAAFQKVVAGVATALAHKYH
+>Rat
+MVHLTDAEKAAVNGLWGKVNPDDVGGEALGRLLVVYPWTQRYFDSFGDLSSASAIMGNPKVKAHGKKVINAFNDGLKHLDNLKGTFAHLSELHCDKLHVDPENFRLLGNMIVIVLGHHLGKEFTPCAQAAFQKVVAGVASALAHKYH
+>Horse
+-VQLSGEEKAAVLALWDKVNEEEVGGEALGRLLVVYPWTQRFFDSFGDLSNPGAVMGNPKVKAHGKKVLHSFGEGVHHLDNLKGTFAALSELHCDKLHVDPENFRLLGNVLVVVLARHFGKDFTPELQASYQKVVAGVANALAHKYH
+>Dog
+-VHLTAEEKSLVSGLWGKVNVDEVGGEALGRLLIVYPWTQRFFDSFGDLSTPDAVMSNAKVKAHGKKVLNSFSDGLKNLDNLKGTFAKLSELHCDKLHVDPENFKLLGNVLVCVLAHHFGKEFTPQVQAAYQKVVAGVANALAHKYH
+>Cow
+--MLTAEEKAAVTAFWGKVKVDEVGGEALGRLLVVYPWTQRFFESFGDLSTADAVMNNPKVKAHGKKVLDSFSNGMKHLDDLKGTFAALSELHCDKLHVDPENFKLLGNVLVVVLARNFGKEFTPVLQADFQKVVAGVANALAHRYH
+>Chicken
+MVHWTAEEKQLITGLWGKVNVAECGAEALARLLIVYPWTQRFFASFGNLSSPTAILGNPMVRAHGKKVLTSFGDAVKNLDNIKNTFSQLSELHCDKLHVDPENFRLLGDILIIVLAAHFSKDFTPECQAAWQKLVRVVAHALARKYH`;
+
+    // Residue classes. Six colours come from the Okabe-Ito palette; black letters keep a contrast of at least 5.4:1 on all seven.
+    const CLASSES = [
+      { name: "hydrophobic", letters: "AILMV", colour: "#9ecae1" },
+      { name: "aromatic", letters: "FWY", colour: "#56b4e9" },
+      { name: "positive", letters: "KRH", colour: "#e69f00" },
+      { name: "negative", letters: "DE", colour: "#d55e00" },
+      { name: "polar", letters: "STNQ", colour: "#009e73" },
+      { name: "glycine, proline", letters: "GP", colour: "#f0e442" },
+      { name: "cysteine", letters: "C", colour: "#cc79a7" }
+    ];
+    const colourOf = aa => (CLASSES.find(c => c.letters.includes(aa)) || { colour: "#ffffff" }).colour;
+    const W = 14, H = 16, BAR = 34, TOP = BAR + 8;      // cell width and height, bar area, top of the first row
+                                                         // (.labels has padding-top: 42px to match TOP)
+    const SVGNS = "http://www.w3.org/2000/svg";
+
+    const svg = document.getElementById("svg");
+    const slider = document.getElementById("col");
+    const scroller = document.getElementById("scroller");
+    let rows = [], commonest = [], cursor;
+
+    function parseFasta(text) {
+      return text.trim().split(/^>/m).filter(Boolean).map(block => {
+        const [header, ...lines] = block.split(/\r?\n/);
+        return { name: header.trim().split(/\s+/)[0].slice(0, 24), seq: lines.join("").replace(/\s/g, "").toUpperCase().replace(/\./g, "-") };
+      });
+    }
+
+    function el(tag, attrs, parent) {
+      const e = document.createElementNS(SVGNS, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return parent.appendChild(e);
+    }
+
+    // Residue number of a column (counting from 1) in one aligned sequence, or null for a gap
+    const residueNumber = (seq, column) => seq[column - 1] === "-" ? null : seq.slice(0, column).replace(/-/g, "").length;
+
+    function draw(newRows) {
+      rows = newRows;
+      const ncol = rows[0].seq.length;
+      // For each column, the commonest residue and how many rows carry it (gaps never count)
+      commonest = Array.from({ length: ncol }, (_, i) => {
+        const counts = new Map();
+        for (const r of rows) if (r.seq[i] !== "-") counts.set(r.seq[i], (counts.get(r.seq[i]) || 0) + 1);
+        const [aa, n] = [...counts].sort((a, b) => b[1] - a[1])[0] || ["-", 0];
+        return { aa, n, share: n / rows.length };
+      });
+
+      svg.replaceChildren(svg.querySelector("title"));
+      svg.setAttribute("width", ncol * W);
+      svg.setAttribute("height", TOP + rows.length * H);
+      commonest.forEach(({ share }, i) => el("rect", { x: i * W + 1, y: BAR - share * BAR, width: W - 2, height: share * BAR,
+                                                      fill: share === 1 ? "#3b4659" : "#7d8899" }, svg));
+      rows.forEach((r, j) => [...r.seq].forEach((aa, i) => {
+        el("rect", { x: i * W, y: TOP + j * H, width: W, height: H, fill: aa === "-" ? "#ffffff" : colourOf(aa) }, svg);
+        el("text", { x: i * W + W / 2, y: TOP + j * H + 12, "text-anchor": "middle" }, svg).textContent = aa;
+      }));
+      cursor = el("rect", { y: 0, width: W, height: TOP + rows.length * H, fill: "none", stroke: "#000", "stroke-width": 2 }, svg);
+
+      const invariant = commonest.filter(c => c.share === 1).length;
+      svg.querySelector("title").textContent = "Alignment of " + rows.length + " sequences over " + ncol +
+        " columns, coloured by type of residue. " + invariant + " columns are the same in every sequence.";
+      document.getElementById("labels").replaceChildren(...rows.map(r => {
+        const d = document.createElement("div"); d.textContent = r.name; return d;
+      }));
+      slider.max = ncol;
+    }
+
+    // Select a column (counting from 1): move the outline, scroll it into view and write the text version
+    function select(column) {
+      slider.value = column;
+      document.getElementById("col-out").textContent = column;
+      cursor.setAttribute("x", (column - 1) * W);
+      const x = (column - 1) * W;
+      if (x < scroller.scrollLeft || x + W > scroller.scrollLeft + scroller.clientWidth) {
+        scroller.scrollLeft = x - scroller.clientWidth / 2;
+      }
+      const c = commonest[column - 1];
+      document.getElementById("summary").textContent = "Column " + column + ": " +
+        (c.share === 1 ? "all " + rows.length + " sequences have " + c.aa + "."
+                       : c.n + " of " + rows.length + " sequences have " + c.aa + ", the commonest residue here.");
+      document.getElementById("cells").replaceChildren(...rows.map(r => {
+        const li = document.createElement("li");
+        const n = residueNumber(r.seq, column);
+        li.textContent = r.name + ": " + (n === null ? "gap" : r.seq[column - 1] + n);
+        return li;
+      }));
+    }
+
+    document.getElementById("legend").replaceChildren(...CLASSES.map(c => {
+      const li = document.createElement("li");
+      li.style.background = c.colour;
+      li.textContent = c.letters + " " + c.name;
+      return li;
+    }));
+    svg.addEventListener("click", e => {
+      const x = e.clientX - svg.getBoundingClientRect().left;
+      select(Math.min(rows[0].seq.length, Math.floor(x / W) + 1));
+    });
+    slider.addEventListener("input", () => select(Number(slider.value)));
+    document.getElementById("sickle").addEventListener("click", () => select(7));
+
+    // A file chosen here is read by the browser. Nothing is uploaded.
+    document.getElementById("file").addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const newRows = parseFasta(await file.text());
+      const lengths = new Set(newRows.map(r => r.seq.length));
+      if (newRows.length < 2 || lengths.size !== 1) {
+        document.getElementById("summary").textContent = file.name + " is not an alignment: it needs two or more " +
+          "sequences of the same length, with gaps as dashes. Align the sequences first.";
+        return;
+      }
+      draw(newRows);
+      document.getElementById("heading").textContent = "Your alignment: " + file.name;
+      document.getElementById("sickle").hidden = true;    // column 7 means nothing in someone else's alignment
+      select(1);
+    });
+
+    draw(parseFasta(FASTA));
+    select(7);
+  </script>
+</body>
+</html>

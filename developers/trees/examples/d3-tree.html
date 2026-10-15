@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>d3: a phylogenetic tree drawn by hand, with rerooting that keeps support values on their branches</title>
+  <!-- d3 7.9.0 from jsDelivr. The integrity hash stops a changed file from running. -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"
+          integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"
+          crossorigin="anonymous"></script>
+  <style>
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px 16px 16px; color: #172033; background: #fff; }
+    h1 { font-size: 1.05rem; margin: 0 0 6px; }
+    p { margin: 0 0 6px; font-size: 14px; color: #3b4659; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0 0 6px; font-size: 14px; }
+    button, select { font: inherit; font-size: 14px; padding: 3px 8px; }
+    svg { display: block; overflow: visible; }
+    .branch { fill: none; stroke: #6b7385; stroke-width: 1.5px; }
+    .tip { font: italic 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #172033; }
+    .support, .length { font-size: 10px; fill: #3b4659; paint-order: stroke; stroke: #fff; stroke-width: 3px; }   /* white halo over lines */
+    .node { fill: #fff; stroke: #3b4659; stroke-width: 1.5px; cursor: pointer; }
+    .node.collapsed { fill: #3b4659; }
+    .node:focus-visible { outline: 2px solid #1f4e9c; outline-offset: 2px; }
+    .clade { fill: #e4e8ef; stroke: #6b7385; }
+    #note { min-height: 1.5em; margin: 4px 0; color: #172033; }
+    details { font-size: 14px; }
+    details ul { margin: 2px 0; padding-left: 1.2rem; }
+  </style>
+</head>
+<body>
+  <h1>A tree drawn with d3 and a 20-line Newick parser</h1>
+  <p>Click a node circle, or Tab to it and press Enter, to collapse or expand that clade.</p>
+  <div class="controls">
+    <label for="root-on">Root on</label>
+    <select id="root-on"></select>
+    <button type="button" id="reroot">Reroot</button>
+    <button type="button" id="original">Original rooting</button>
+    <button type="button" id="ladder">Ladderise</button>
+  </div>
+  <div class="controls">
+    <label><input type="checkbox" id="lengths"> Branch lengths</label>
+    <label><input type="checkbox" id="made-up"> Made-up support values, to test rerooting</label>
+  </div>
+  <div id="tree"></div>
+  <p id="note" role="status" aria-live="polite"></p>
+  <details><summary>The tree as text</summary><div id="as-text"></div></details>
+
+  <script>
+    const NEWICK = "((((((Pongo_abelii:0.005033,((Homo_sapiens:0.002481,Pan_troglodytes:0.002181)1.00:4.86E-4,Gorilla_gorilla:0.002762)1.00:0.001866)1.00:4.16E-4,Nomascus_leucogenys:0.005591)1.00:0.001522,(Papio_hamadryas:0.001943,Macaca_mulatta:0.001852)1.00:0.004712)1.00:0.002352,Callithrix_jacchus:0.012341)1.00:0.009184,Otolemur_garnettii:0.024586):0.034538,Mus_musculus:0.034538);";
+    // All the real support values are 1.00. For testing, give each branch its own made-up value.
+    let count = 0;
+    const MADE_UP = NEWICK.replace(/1\.00/g, () => (0.91 + 0.01 * count++).toFixed(2));
+    const pretty = name => name.replace(/_/g, " ");
+
+    // Newick text to nested objects: { name, length, support, children }.
+    // A node's length and support describe the branch above it. Quoted labels are not handled.
+    function parseNewick(text) {
+      const tokens = text.replace(/\[[^\]]*\]/g, "").split(/\s*([;(),:])\s*/);   // drop [comments], split on ; ( ) , :
+      const stack = [];
+      let node = {};
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i], previous = tokens[i - 1];
+        if (t === "(") { const child = {}; node.children = [child]; stack.push(node); node = child; }
+        else if (t === ",") { const child = {}; stack[stack.length - 1].children.push(child); node = child; }
+        else if (t === ")") { node = stack.pop(); }
+        else if (t && t !== ":" && t !== ";") {
+          if (previous === ":") node.length = parseFloat(t);                    // "4.86E-4" works too
+          else if (node.children && !isNaN(t)) node.support = parseFloat(t);    // a number after ")" is a support value
+          else node.name = t;
+        }
+      }
+      return node;
+    }
+
+    // Put the root in the middle of the branch above `target`. Support values belong to branches,
+    // not nodes, so each one is carried along with its branch as the path to the old root turns round.
+    function reroot(tree, target) {
+      const parentOf = new Map();
+      (function walk(n) { (n.children || []).forEach(c => { parentOf.set(c, n); walk(c); }); })(tree);
+      const parent = parentOf.get(target);
+      if (!parent) return tree;
+      // every neighbour of a node, with the length and support of the branch that joins them
+      const neighbours = n => (n.children || []).map(c => ({ node: c, length: c.length, support: c.support }))
+        .concat(parentOf.has(n) ? [{ node: parentOf.get(n), length: n.length, support: n.support }] : []);
+      // rebuild outwards from the new root, never going back the way we came
+      function build(n, from, length, support) {
+        const kids = neighbours(n).filter(e => e.node !== from).map(e => build(e.node, n, e.length, e.support));
+        if (kids.length === 1) {   // the old root had two branches: remove it and join them into one
+          const only = kids[0];
+          return { ...only, length: (only.length || 0) + (length || 0), support: only.support ?? support };
+        }
+        return kids.length ? { children: kids, length, support } : { name: n.name, length };
+      }
+      const half = (target.length || 0) / 2;
+      return { children: [build(target, parent, half, target.support), build(parent, target, half, target.support)] };
+    }
+
+    const box = document.getElementById("tree");
+    const note = document.getElementById("note");
+    const svg = d3.select(box).append("svg").attr("role", "group").attr("aria-label", "Phylogenetic tree of nine primates and the mouse");
+    let T = parseNewick(NEWICK), nextId = 1, direction = 1;
+
+    function draw(focusId) {
+      const W = Math.max(280, Math.min(760, box.clientWidth)), H = 320;
+      const M = { top: 12, right: 150, bottom: 42, left: 12 };     // room for names on the right and the axis below
+      svg.attr("width", W).attr("height", H).selectAll("*").remove();
+      const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+      const all = d3.hierarchy(T);                                    // every node, for sizes and depths
+      const shown = d3.hierarchy(T, d => (d.collapsed ? null : d.children));   // stops at collapsed clades
+      for (const h of [all, shown]) h.eachBefore(d => { d.dist = (d.parent ? d.parent.dist : 0) + (d.data.length || 0); });
+      all.each(d => { if (d.children && !d.data.id) d.data.id = nextId++; });
+      d3.cluster().size([H - M.top - M.bottom, 1]).separation(() => 1)(shown);   // spaces tips evenly; only the vertical position (x) is used
+      const x = d3.scaleLinear([0, d3.max(all.leaves(), d => d.dist)], [0, W - M.left - M.right]);
+      const deepest = new Map(all.descendants().map(d => [d.data, d3.max(d.leaves(), l => l.dist)]));
+      const tipCount = new Map(all.descendants().map(d => [d.data, d.leaves().length]));
+
+      // Branches as elbows: from the parent, up or down to the child's height, then across
+      g.selectAll(".branch").data(shown.links()).join("path").attr("class", "branch")
+        .attr("d", l => `M${x(l.source.dist)},${l.source.x}V${l.target.x}H${x(l.target.dist)}`)
+        .append("title").text(l => `Branch length ${l.target.data.length}`);
+
+      // Branch lengths, written only where the branch is long enough to hold them (hover shows the rest)
+      if (document.getElementById("lengths").checked) {
+        g.selectAll(".length").data(shown.links().filter(l => x(l.target.dist) - x(l.source.dist) > 34))
+          .join("text").attr("class", "length").attr("text-anchor", "middle")
+          .attr("x", l => (x(l.source.dist) + x(l.target.dist)) / 2).attr("y", l => l.target.x - 3)
+          .text(l => d3.format(".4f")(l.target.data.length));
+      }
+
+      // A collapsed clade is a triangle that reaches as far as its deepest tip
+      const collapsed = shown.descendants().filter(d => d.data.collapsed);
+      g.selectAll(".clade").data(collapsed).join("path").attr("class", "clade")
+        .attr("d", d => `M${x(d.dist)},${d.x}L${x(deepest.get(d.data))},${d.x - 8}V${d.x + 8}Z`);
+
+      // A support value is stored on the node below its branch; write it just right of that node
+      g.selectAll(".support").data(shown.descendants().filter(d => d.children && d.data.support != null))
+        .join("text").attr("class", "support").attr("dy", "0.32em")
+        .attr("x", d => x(d.dist) + 6).attr("y", d => d.x).text(d => d.data.support.toFixed(2));
+
+      // Internal nodes are buttons that collapse or expand their clade, by mouse or keyboard
+      const toggle = d => { d.data.collapsed = !d.data.collapsed; draw(d.data.id); };
+      g.selectAll(".node").data(shown.descendants().filter(d => d.data.children && d.parent)).join("circle")
+        .attr("class", d => "node" + (d.data.collapsed ? " collapsed" : ""))
+        .attr("r", 4).attr("cx", d => x(d.dist)).attr("cy", d => d.x)
+        .attr("tabindex", 0).attr("role", "button").attr("data-id", d => d.data.id)
+        .attr("aria-label", d => `${d.data.collapsed ? "Expand" : "Collapse"} the clade of ${tipCount.get(d.data)} species`)
+        .on("click", (e, d) => toggle(d))
+        .on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(d); } });
+
+      g.selectAll(".tip").data(shown.leaves()).join("text").attr("class", "tip").attr("dy", "0.32em")
+        .attr("x", d => (d.data.collapsed ? x(deepest.get(d.data)) : x(d.dist)) + 6).attr("y", d => d.x)
+        .text(d => (d.data.collapsed ? `${tipCount.get(d.data)} species` : pretty(d.data.name)));
+
+      // The scale bar is an axis made from the same scale as the branches, so the two cannot disagree
+      g.append("g").attr("transform", `translate(0,${H - M.top - M.bottom + 12})`).call(d3.axisBottom(x).ticks(5))
+        .append("text").attr("x", x.range()[1]).attr("y", 30).attr("fill", "currentColor")
+        .attr("text-anchor", "end").text("substitutions per site");
+
+      // A text version of the same tree, as nested lists, for screen readers and for copying
+      const asList = n => n.children
+        ? `<li>Clade of ${tipCount.get(n)} species${n.support != null ? ", support " + n.support.toFixed(2) : ""}<ul>${n.children.map(asList).join("")}</ul></li>`
+        : `<li><i>${pretty(n.name)}</i></li>`;
+      document.getElementById("as-text").innerHTML = `<ul>${asList(T)}</ul>`;
+
+      if (focusId) svg.select(`[data-id="${focusId}"]`).node()?.focus();   // keep keyboard focus after redrawing
+    }
+
+    function original() {
+      T = parseNewick(document.getElementById("made-up").checked ? MADE_UP : NEWICK);
+      note.textContent = "";
+      draw();
+    }
+
+    // Ladderise: sort every node's children by their number of tips, alternating direction on each click
+    function ladderise(n, dir) {
+      if (!n.children) return;
+      n.children.forEach(c => ladderise(c, dir));
+      n.children.sort((a, b) => dir * (d3.hierarchy(a).leaves().length - d3.hierarchy(b).leaves().length));
+    }
+
+    const rootOn = document.getElementById("root-on");
+    rootOn.innerHTML = d3.hierarchy(T).leaves().map(d => d.data.name).sort()
+      .map(name => `<option value="${name}">${pretty(name)}</option>`).join("");
+    rootOn.value = "Homo_sapiens";
+
+    document.getElementById("reroot").addEventListener("click", () => {
+      const target = d3.hierarchy(T).leaves().find(d => d.data.name === rootOn.value).data;
+      T = reroot(T, target);
+      note.textContent = `Rooted on the branch to ${pretty(rootOn.value)}. Each support value is still on the branch it belongs to.`;
+      draw();
+    });
+    document.getElementById("original").addEventListener("click", original);
+    document.getElementById("made-up").addEventListener("change", original);
+    document.getElementById("ladder").addEventListener("click", () => { ladderise(T, direction); direction = -direction; draw(); });
+    document.getElementById("lengths").addEventListener("change", () => draw());
+    window.addEventListener("resize", () => draw());
+
+    draw();
+  </script>
+</body>
+</html>
