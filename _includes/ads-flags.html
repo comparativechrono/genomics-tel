@@ -3,6 +3,8 @@
   ads_live:  a publisher ID is set, so the AdSense code is loaded.
   ads_shown: ads are live, or placeholders are switched on to preview where they go.
   page_ads:  this page may carry ad units (pages can opt out with `ads: false`).
+  The AdSense code itself loads on every page once ads are live, except pages
+  with `adsense_code: false` (the 404 page); see head.html.
 {%- endcomment -%}
 {%- assign ads_live = false -%}
 {%- if site.adsense.publisher_id and site.adsense.publisher_id != "" -%}{%- assign ads_live = true -%}{%- endif -%}

@@ -16,7 +16,7 @@
         <li><a href="{{ '/about/' | relative_url }}">About</a></li>
         <li><a href="{{ '/privacy/' | relative_url }}">Privacy</a></li>
         <li><a href="https://github.com/{{ site.repository }}">Source on GitHub</a></li>
-        {%- if ads_live %}
+        {%- if ads_live and page.adsense_code != false %}
         <li><button type="button" class="link-button" data-cookie-settings>Privacy and cookie settings</button></li>
         {%- endif %}
       </ul>

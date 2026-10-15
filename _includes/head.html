@@ -11,7 +11,8 @@
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1726" media="(prefers-color-scheme: dark)">
 {% seo %}
-{%- if ads_live and page_ads %}
+{%- comment -%} The AdSense code goes on every page (Google checks the home page, and its consent message needs it); ad units appear only where ad.html is included. {%- endcomment -%}
+{%- if ads_live and page.adsense_code != false %}
 <meta name="google-adsense-account" content="{{ site.adsense.publisher_id }}">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsense.publisher_id }}" crossorigin="anonymous"></script>
 {%- endif %}
