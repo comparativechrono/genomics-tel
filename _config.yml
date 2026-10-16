@@ -27,14 +27,15 @@ owner:
   email: tjh70@cam.ac.uk
 
 # ─── Google AdSense ──────────────────────────────────────────
-# Leave publisher_id empty and no ad code is loaded anywhere.
-# When AdSense approves the site, paste the IDs from AdSense → Ads → By ad unit:
+# With publisher_id empty, no ad code is loaded anywhere. Set it when you sign up,
+# because AdSense reviews the site with its code in place:
 #   publisher_id: ca-pub-1234567890123456
-#   slots: the data-ad-slot number of each display ad unit
+# Once AdSense has approved the site, add the data-ad-slot number of each display
+# ad unit (AdSense → Ads → By ad unit) under slots. Ads appear only after that.
 # show_placeholders marks where ads will appear (grey boxes, nothing loaded),
 # for checking the layout before launch. Set it to false once ads are live.
 adsense:
-  publisher_id: ""
+  publisher_id: "ca-pub-4293376559042270"
   slots:
     in_article: ""
     end_of_article: ""
