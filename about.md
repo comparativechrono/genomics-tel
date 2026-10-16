@@ -9,7 +9,7 @@ lede: A free site about teaching genomics with interactive tools, written for th
 
 Students learn more when they do something with the material than when they only listen (the [planning page]({{ '/educators/planning/' | relative_url }}) has the evidence). Genomics gives them plenty to do: finding a variant in a genome browser, turning a protein to see where a mutation sits, running an analysis and looking hard at the result. The tools that make this possible were built for research, and they are free. The hard part is fitting them into a course. This site collects what we have learned about that, from both sides: how to teach with these tools, and how to put them into a web page.
 
-The name comes from TEL, short for technology-enhanced learning.
+The name comes from TEL, short for technology enhanced learning: the use of digital tools to support teaching and learning.
 
 ## Who makes it
 

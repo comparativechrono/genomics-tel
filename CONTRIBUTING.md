@@ -129,4 +129,4 @@ python3 tools/serve.py 8800 _site               # serve with range requests, at 
 python3 tools/test_examples.py http://127.0.0.1:8800 genome-browsers   # run the examples in Chromium
 ```
 
-`test_examples.py` needs Python Playwright (`pip install playwright` and `playwright install chromium`). It saves a screenshot of each example in `tools/screenshots/`. Look at them, and look at your page in light and dark mode and at phone width before you push.
+`test_examples.py` needs Python Playwright (`pip install playwright` and `playwright install chromium`). It saves a screenshot of each example in `tools/screenshots/`. Look at them, and look at your page at desktop and phone width before you push.

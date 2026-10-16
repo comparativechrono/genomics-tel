@@ -2,8 +2,6 @@
    enhancement: the pages work without it. */
 (function () {
   'use strict';
-  var root = document.documentElement;
-  var KEY = 'gt-theme';
 
   /* A hidden live region for short announcements, such as "Code copied" */
   var announcer = document.createElement('div');
@@ -11,42 +9,6 @@
   announcer.setAttribute('aria-live', 'polite');
   document.body.appendChild(announcer);
   function announce(text) { announcer.textContent = ''; setTimeout(function () { announcer.textContent = text; }, 50); }
-
-  /* ─── Light and dark ─── */
-  var dark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-  function stored() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
-  function store(v) { try { if (v) localStorage.setItem(KEY, v); else localStorage.removeItem(KEY); } catch (e) {} }
-  function effective() {
-    var t = root.getAttribute('data-theme');
-    if (t === 'light' || t === 'dark') return t;
-    return dark && dark.matches ? 'dark' : 'light';
-  }
-  function applyTheme(choice) {
-    if (choice === 'light' || choice === 'dark') root.setAttribute('data-theme', choice);
-    else root.removeAttribute('data-theme');
-    store(choice === 'light' || choice === 'dark' ? choice : null);
-    syncThemeControls();
-  }
-  function syncThemeControls() {
-    var now = effective();
-    var choice = stored() || 'auto';
-    document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
-      b.setAttribute('aria-label', now === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    });
-    document.querySelectorAll('[data-theme-choice]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-choice') === choice));
-    });
-    var meta = document.querySelectorAll('meta[name="theme-color"]');
-    meta.forEach(function (m) { m.setAttribute('content', now === 'dark' ? '#0e1726' : '#ffffff'); m.removeAttribute('media'); });
-  }
-  document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
-    b.addEventListener('click', function () { applyTheme(effective() === 'dark' ? 'light' : 'dark'); });
-  });
-  document.querySelectorAll('[data-theme-choice]').forEach(function (b) {
-    b.addEventListener('click', function () { applyTheme(b.getAttribute('data-theme-choice')); });
-  });
-  if (dark && dark.addEventListener) dark.addEventListener('change', syncThemeControls);
-  syncThemeControls();
 
   /* ─── Menu on small screens ─── */
   var menuButton = document.querySelector('.menu-toggle');

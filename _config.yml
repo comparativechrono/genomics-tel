@@ -5,10 +5,10 @@
 # ─────────────────────────────────────────────────────────────
 
 title: genomics.tel
-tagline: Interactive genomics for teaching
+tagline: Technology enhanced learning for genomics
 description: >-
-  Guides for educators and developers on teaching with interactive genomics:
-  genome browsers, sequences and alignments, 3D structures, networks, Galaxy,
+  Technology enhanced learning for genomics. Guides for educators and
+  developers on genome browsers, sequences and alignments, 3D structures, networks, Galaxy,
   R and Python in the browser, phylogenetic trees and charts, with live
   examples and code you can copy.
 lang: en-GB

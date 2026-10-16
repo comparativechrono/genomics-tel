@@ -12,10 +12,9 @@ genomics.tel is run by Tim Hearn. For any question about privacy, email [{{ site
 
 ## What we collect
 
-We do not ask you to sign up, we do not run analytics, and we do not set cookies of our own.
+We do not ask you to sign up, we do not run analytics, and we store nothing on your device ourselves: no cookies and no local storage.
 
 - **Hosting.** The site is hosted by GitHub Pages. Like any web server, GitHub receives your IP address and the pages you request, and may keep logs for security. See [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
-- **Your theme choice.** If you pick light or dark mode, your browser remembers the choice in its local storage on your own device. It is never sent to us.
 - **Fonts and site files** are served from this site, not from a font service.
 
 ## Ads from Google {#ads}

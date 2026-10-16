@@ -41,11 +41,6 @@
       description: Draw clinical pedigrees with standard symbols, including consanguinity, twins and legends, and export them as images or files.
       notes: A single page that works offline. Nothing you draw leaves your computer.
       featured: true
-    - name: Undergraduate research projects
-      url: https://comparativechrono.org/undergraduate/
-      for: undergraduates
-      description: An interactive presentation of the research projects the Chronomic Medicine Group offers to undergraduates.
-      featured: true
 
 - group: Data and science communication
   intro: Interactive charts and maps for lectures and outreach.
