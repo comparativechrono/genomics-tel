@@ -1,8 +1,1 @@
----
-layout: null
-permalink: /ads.txt
-sitemap: false
----
-{%- if site.adsense.publisher_id and site.adsense.publisher_id != "" -%}
-google.com, {{ site.adsense.publisher_id | remove: 'ca-' }}, DIRECT, f08c47fec0942fa0
-{% endif -%}
+google.com, pub-4293376559042270, DIRECT, f08c47fec0942fa0
