@@ -34,16 +34,66 @@
       description: Real bioinformatics programs compiled to run in the browser, including fastp, minimap2, BWA, samtools, bcftools, Salmon and PLINK 2, with Python and R notebooks, a genome browser, a 3D structure viewer and a network viewer.
       notes: Needs an internet connection to fetch Python, R and database results.
       featured: true
-    - name: Pedigree Studio
-      url: https://pedigreestudio.xyz/
-      github: https://github.com/comparativechrono/PedigreeStudio
-      for: clinicians, genetic counsellors and genetics students
-      description: Draw clinical pedigrees with standard symbols, including consanguinity, twins and legends, and export them as images or files.
-      notes: A single page that works offline. Nothing you draw leaves your computer.
+
+- group: Practicals
+  intro: Complete practicals, with the instructions on one side of the screen and a workbench on the other. Each shows a different side of technology enhanced learning for genomics.
+  items:
+    - name: Genomic variant analysis practicals
+      url: https://comparativechrono.github.io/variant-practicals/
+      github: https://github.com/comparativechrono/variant-practicals
+      for: students and educators
+      description: Two practicals and a coursework workbench. Students take raw exome reads to a variant that matters in the clinic, CYP2C19*2, then annotate, filter and interpret variants, and finally analyse a patient's exome for their coursework.
+      notes: Real samtools and bcftools run in the browser, and FastQC, BWA-MEM and FreeBayes replay their recorded output. Answers are saved in the student's browser.
       featured: true
+    - name: Variant calling practical
+      url: https://comparativechrono.github.io/variant-lab/
+      github: https://github.com/comparativechrono/variant-lab
+      for: students and educators
+      description: Students align human and yeast reads with minimap2 or Bowtie 2, call variants with bcftools or exactSNP, and compare what each tool and setting finds, from a terminal or from Galaxy-style forms that share the same files.
+      notes: The aligners and variant callers are the real programs compiled to WebAssembly, and the data come with the site, so it needs no outside services during the practical.
+    - name: Pipelines and reproducibility
+      url: https://comparativechrono.github.io/pipelines-practical/
+      github: https://github.com/comparativechrono/pipelines-practical
+      for: students and educators
+      description: An extension practical that turns the reads-to-variants analysis into a reproducible pipeline in three ways, with Snakemake and conda, as a Galaxy workflow and with an AI agent, and asks which one meets Claerbout's principle.
+      notes: minimap2, samtools and bcftools are real programs compiled to WebAssembly. Snakemake, conda and Galaxy are recreated in the browser around them.
+    - name: AI agents for bioinformatics
+      url: https://comparativechrono.github.io/ai-agents-practical/
+      github: https://github.com/comparativechrono/ai-agents-practical
+      for: students and educators
+      description: A two-hour practical on AI assistants and AI agents. Students answer one question, which genotype NA12878 has at CYP2C19*2, with an assistant that writes commands and with an agent that runs them, and then turn the agent's run into an analysis they can repeat.
+      notes: The programs are the real ones, compiled to WebAssembly, and the AI is a real model. Each student enters their own API key, and Google's Gemini API has a free tier.
+    - name: Yeast, data and AI
+      url: https://comparativechrono.github.io/yeast-data-ai/
+      github: https://github.com/comparativechrono/yeast-data-ai
+      for: students and educators
+      description: Which genes does baker's yeast need to live? Students answer with a table of 5,481 genes, a Python notebook, machine learning, a protein language model and AlphaFold structures, helped by an AI coding assistant. Some of its answers contain deliberate mistakes for students to catch.
+      notes: Python runs in the page (Pyodide). The assistant gives prepared answers, or connects to a live model with the student's own API key. About 2½ to 3 hours.
+    - name: Proteins in 3D
+      url: https://comparativechrono.github.io/pharmacology-practical/
+      github: https://github.com/comparativechrono/pharmacology-practical
+      for: students and educators
+      description: Students study the immune receptor TLR4, its co-receptor MD-2 and bacterial LPS with UniProt, the Protein Data Bank, a 3D viewer and AlphaFold, then make a figure of their own, without leaving the page.
+      notes: Progress and answers are saved in the student's browser, and can be downloaded to keep or hand in.
+    - name: Introduction to R
+      url: https://comparativechrono.github.io/r-training/
+      github: https://github.com/comparativechrono/r-training
+      for: anyone new to R
+      description: Two short courses, R basics and then the tidyverse, with real R running in an RStudio-style workbench beside the instructions. Each course ends with a certificate to download.
+      notes: Adapted from Babraham Bioinformatics' Introduction to R (with Tidyverse) by Simon Andrews and Laura Biggins. Built on the R workbench.
+
+- group: Learning through games
+  intro: An example of gamified learning, where the course is a game with tasks to choose, experience points to earn and levels to reach.
+  items:
+    - name: "Datascape: Cambridge"
+      url: https://comparativechrono.github.io/datascape-cambridge/
+      github: https://github.com/comparativechrono/datascape-cambridge
+      for: data science apprentices and their tutors
+      description: A workplace simulator set in Cambridge. Apprentices take on scenario tasks in SQL, data cleaning, machine learning, statistics and data ethics. Each task earns experience points towards the next level, and finishing one unlocks harder ones. The tasks are mapped to the Level 6 Data Scientist apprenticeship standard.
+      notes: Progress is saved in the browser.
 
 - group: Data and science communication
-  intro: Interactive charts and maps for lectures and outreach.
+  intro: An interactive chart for lectures and outreach.
   items:
     - name: Sequencing cost chart
       url: https://comparativechrono.github.io/sequencing-cost-visualisation/
@@ -51,41 +101,10 @@
       for: educators, students and researchers
       description: How the cost of DNA sequencing per gigabase has fallen since 2001, by platform, with figures you can export for slides and papers.
       notes: Data from the NHGRI and manufacturers' specifications. Check values against the sources before you publish them.
-    - name: Seasonal Biomarker Atlas
-      url: https://comparativechrono.github.io/seasonal-biomarker-atlas/
-      github: https://github.com/comparativechrono/seasonal-biomarker-atlas
-      for: educators and researchers
-      description: A globe showing how a biomarker varies with the seasons across countries. It opens on serum vitamin D in 39 countries, and you can load your own data.
-    - name: "Datascape: Cambridge"
-      url: https://comparativechrono.github.io/datascape-cambridge/
-      github: https://github.com/comparativechrono/datascape-cambridge
-      for: data science apprentices and their tutors
-      description: A workplace simulator with scenario tasks in SQL, data cleaning, machine learning and statistics, mapped to the Level 6 Data Scientist apprenticeship standard.
-      notes: Progress is saved in the browser.
 
-- group: Tools for clinics and workshops
-  intro: Drawing tools that keep everything on your own computer.
+- group: Teaching materials
+  intro: Notebooks for courses. These live on GitHub rather than as websites.
   items:
-    - name: Genogram Studio
-      url: https://comparativechrono.github.io/GenogramStudio/
-      github: https://github.com/comparativechrono/GenogramStudio
-      for: counsellors and clinicians
-      description: Draw family genograms with structural and emotional relationship lines, and export them as images or files.
-      notes: Works offline. Nothing you draw leaves your computer.
-    - name: Mind Map Studio
-      url: https://comparativechrono.github.io/MindMapStudio/
-      github: https://github.com/comparativechrono/MindMapStudio
-      for: workshop leaders, counsellors and clinicians
-      description: Mind maps built from phrase cards and connections, with image export.
-      notes: Works offline. Nothing you make leaves your computer.
-
-- group: Teaching materials and code
-  intro: Notebooks and software for courses. These live on GitHub rather than as websites.
-  items:
-    - name: SLURM emulator
-      github: https://github.com/comparativechrono/SLURM_Emulator_Teaching_Package
-      for: students and HPC trainers
-      description: Practise writing, submitting and managing SLURM jobs on your own computer before you use a real cluster. Comes with a practical notebook.
     - name: Computational biology notebooks
       github: https://github.com/comparativechrono/computational_biology_notebooks
       for: students
@@ -98,22 +117,12 @@
       github: https://github.com/comparativechrono/Principles-of-Data-Science
       for: students
       description: Weekly notebooks to go with the textbook Principles of Data Science.
+
+- group: Code
+  intro: Software that you can build into your own teaching sites.
+  items:
     - name: Genomics WebAssembly tools
       github: https://github.com/comparativechrono/genomics-wasm
       for: developers
-      description: Bioinformatics programs such as BWA, minimap2, HISAT2, Salmon, kallisto, FreeBayes and PLINK 2 compiled to run in a web browser, each tested against the original program. The Bioinformatics workbench runs on them.
-
-- group: Research
-  intro: Our research group and the tools that come out of its work.
-  items:
-    - name: Chronomic Medicine Group
-      url: https://comparativechrono.org/
-      github: https://github.com/comparativechrono/ChronomicMedicine
-      for: everyone
-      description: Our research group's website, with our projects, publications and software.
-    - name: Cardiac Drug Plotter
-      url: https://chronomics.shinyapps.io/CardiacDrugPlotter/
-      github: https://github.com/comparativechrono/CardiacDrugPlotter
-      for: researchers and trial designers
-      description: Plots the daily peak of a drug target against an idealised QT-interval curve, to help choose when to take measurements in trials.
-      notes: A Shiny app, so it can take a few seconds to start.
+      description: Bioinformatics programs compiled to WebAssembly for web browsers and Node.js, 25 in all, among them BWA, minimap2, HISAT2, Salmon, kallisto, StringTie, FreeBayes, Kraken2, MACS3, Primer3 and PLINK 2, with DESeq2 through webR. Each is a separate package with a JavaScript API, tested against the original program.
+      notes: The tools run the real algorithms rather than replaying saved results. The Bioinformatics workbench is built on them.
