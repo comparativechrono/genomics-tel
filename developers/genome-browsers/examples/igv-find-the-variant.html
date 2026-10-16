@@ -110,6 +110,8 @@
         }
         return undefined;
       });
+    }).catch(err => {                       // the reference or a track could not be read
+      say("The genome browser could not start (" + err.message + "). Check the connection, or try again later.");
     });
   </script>
 </body>

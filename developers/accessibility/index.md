@@ -100,10 +100,10 @@ We found the following with the keyboard and by reading each library's code and 
 
 | Library | Draws with | Keyboard and screen readers | What to add |
 |---|---|---|---|
-| igv.js 3.8.9 | Canvas | The search box works from the keyboard. F and B jump to the next and previous feature on a selected track, but selecting one needs a pointer. The source has only 3 ARIA labels; screen readers cannot read the tracks. | Buttons for the places that matter, a feature table, and a text version of each task |
+| igv.js 3.8.9 | Canvas | The search box works from the keyboard. F and B jump to the next and previous feature on a selected track, but selecting one needs a pointer. The source has only 3 ARIA labels; screen readers cannot read the tracks. | Buttons for the key places, a feature table, and a text version of each task |
 | JBrowse 2 4.3.0 | Canvas tracks | Buttons and menus have ARIA labels (75 in the script); the tracks are pictures. | As for igv.js |
 | Nightingale 5.11.0 and react-msaview 8.4.1 | Canvas | The alignment is a picture. | A text read-out of the chosen column; a plain SVG viewer with a native slider is the accessible fallback |
-| SeqViz 3.10.25 | SVG | The bases, amino acids and labels are text in the page, but a screen reader meets the sequence one letter at a time. Tab does not reach the viewer. | A sentence that states the point, the sequence as plain text, and buttons for the bases that matter |
+| SeqViz 3.10.25 | SVG | The bases, amino acids and labels are text in the page, but a screen reader meets the sequence one letter at a time. Tab does not reach the viewer. | A sentence that states the point, the sequence as plain text, and buttons for the key bases |
 | Mol\* 5.12.0 and PDBe Mol\* 3.12.0 | WebGL | The viewer has its own buttons and panels around the picture. Labels in 3D can hide behind nearer atoms. | `role="region"` on the container, buttons for preset views, the key point in text, a residue table |
 | NGL 2.5.0 | WebGL | Without WebGL, a blank box. Its labels cannot show Greek letters. | A WebGL check, and labels in HTML |
 | 3Dmol.js 2.5.5 | WebGL | `data-spin` starts rotation on its own. | A pause control, and a WebGL check |

@@ -120,7 +120,7 @@ These sources behaved as follows when we checked them:
 | UCSC downloads (`hgdownload.soe.ucsc.edu`) and the UCSC API | Yes | Yes (downloads) |
 | 1000 Genomes at EBI (`ftp.1000genomes.ebi.ac.uk`) | Yes | Yes |
 | NCBI, including ClinVar (`ftp.ncbi.nlm.nih.gov`) | Yes | Yes |
-| UniProt REST API | Yes | FASTA from the `accessions` endpoint, yes; an entry's JSON comes whole |
+| UniProt REST API | Yes | FASTA yes; JSON only sometimes |
 | RCSB PDB files (`files.rcsb.org`) | Yes | No: it sends the whole file |
 | PDBe, the AlphaFold DB API and the STRING API | Yes | Not checked |
 | Zenodo, API address (`zenodo.org/api/records/…/content`) | Yes | Yes |

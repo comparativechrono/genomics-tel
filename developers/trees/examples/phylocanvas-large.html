@@ -51,12 +51,15 @@
       return id + ":" + length;
     }
 
-    // Give up after 20 seconds rather than wait for ever when a server hangs
-    async function fetchWithin(url, options = {}, ms = 20000) {
+    // Fetch JSON, giving up after 20 seconds rather than wait for ever when a server hangs.
+    // The clock runs until the whole reply has arrived, not just its first part.
+    async function getJSONWithin(url, options = {}, ms = 20000) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), ms);
       try {
-        return await fetch(url, { ...options, signal: ctrl.signal });
+        const r = await fetch(url, { ...options, signal: ctrl.signal });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return await r.json();
       } catch (err) {
         throw err.name === "AbortError" ? new Error("no answer within " + ms / 1000 + " seconds") : err;
       } finally {
@@ -65,9 +68,7 @@
     }
 
     async function main() {
-      const response = await fetchWithin(DATASET, { headers: { Accept: "application/json" } });
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      const data = await response.json();
+      const data = await getJSONWithin(DATASET, { headers: { Accept: "application/json" } });
 
       const tips = new Map();                                  // tip ID -> region
       const newick = toNewick(data.tree, data.tree.node_attrs.num_date.value, tips) + ";";

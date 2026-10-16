@@ -42,10 +42,13 @@
       (i.name.startsWith(f.name + ".") || i.name.replace(/\.[^.]+$/, "") === f.name.replace(/\.[^.]+$/, "")));
     const log = msg => { document.getElementById("log").textContent += msg + "\n"; };
 
-    // GRCh38 from UCSC's files, which costs far less to download than genome: "hg38".
-    // A FASTA chosen in step 1 replaces it.
+    const container = document.getElementById("igv");
+    let browser = null;
+
+    // Start with GRCh38 from UCSC's files, which costs far less to download than genome: "hg38".
+    // If UCSC cannot be reached, students can still start from their own FASTA file in step 1.
     const UCSC = "https://hgdownload.soe.ucsc.edu";
-    igv.createBrowser(document.getElementById("igv"), {
+    const ready = igv.createBrowser(container, {
       reference: {
         id: "hg38",
         name: "Human (GRCh38/hg38)",
@@ -60,38 +63,47 @@
       tracks: [
         { name: "MANE Select transcripts", url: UCSC + "/gbdb/hg38/mane/mane.1.0.bb", format: "bigBed", labelField: "geneName2" }
       ]
-    }).then(function (browser) {   // a failure to start is reported by the catch at the end
+    }).then(b => { browser = b; })
+      .catch(err => log("GRCh38 could not be loaded from UCSC (" + err.message + "). You can still choose your own FASTA file in step 1."));
 
-      document.getElementById("ref-files").addEventListener("change", async e => {
-        const files = Array.from(e.target.files);
-        const fasta = files.find(f => !isIndex(f));
-        if (!fasta) { log("Choose a FASTA file, and its .fai index if you have one."); return; }
-        const fai = findIndex(fasta, files);
-        try {
-          await browser.loadGenome({
-            id: fasta.name, name: fasta.name,
-            fastaURL: fasta,                  // a File object works wherever igv.js expects a URL
-            indexURL: fai                     // without a .fai the whole FASTA is read into memory
-          });
-          log("Reference: " + fasta.name + (fai ? " (indexed)" : " (not indexed)"));
-        } catch (err) { log("Could not load " + fasta.name + ": " + err.message); }
-      });
-
-      document.getElementById("track-files").addEventListener("change", async e => {
-        const files = Array.from(e.target.files);
-        for (const f of files.filter(f => !isIndex(f))) {
-          const index = findIndex(f, files);
-          const config = { name: f.name, url: f };
-          if (index) config.indexURL = index;
-          else config.indexed = false;        // small files can be read whole, without an index
-          try {
-            await browser.loadTrack(config);
-            log("Loaded " + f.name + (index ? " with " + index.name : ""));
-          } catch (err) { log("Could not load " + f.name + ": " + err.message); }
+    document.getElementById("ref-files").addEventListener("change", async e => {
+      const files = Array.from(e.target.files);
+      const fasta = files.find(f => !isIndex(f));
+      if (!fasta) { log("Choose a FASTA file, and its .fai index if you have one."); return; }
+      const fai = findIndex(fasta, files);
+      const reference = {
+        id: fasta.name, name: fasta.name,
+        fastaURL: fasta,                    // a File object works wherever igv.js expects a URL
+        indexURL: fai                       // without a .fai the whole FASTA is read into memory
+      };
+      await ready;                          // let the first start finish, or fail, before going on
+      try {
+        if (browser) {
+          await browser.loadGenome(reference);
+        } else {                            // UCSC could not be reached: start the browser from this file
+          igv.removeAllBrowsers();          // clears the browser that failed (igv.js draws inside a shadow root)
+          browser = await igv.createBrowser(container, { reference, loadDefaultGenomes: false });
         }
-        e.target.value = "";                  // so the same files can be chosen again
-      });
-    }).catch(err => log("The genome browser could not start (" + err.message + "). Check the connection, or try again later."));
+        log("Reference: " + fasta.name + (fai ? " (indexed)" : " (not indexed)"));
+      } catch (err) { log("Could not load " + fasta.name + ": " + err.message); }
+    });
+
+    document.getElementById("track-files").addEventListener("change", async e => {
+      await ready;
+      if (!browser) { log("Choose a reference sequence in step 1 first."); e.target.value = ""; return; }
+      const files = Array.from(e.target.files);
+      for (const f of files.filter(f => !isIndex(f))) {
+        const index = findIndex(f, files);
+        const config = { name: f.name, url: f };
+        if (index) config.indexURL = index;
+        else config.indexed = false;          // small files can be read whole, without an index
+        try {
+          await browser.loadTrack(config);
+          log("Loaded " + f.name + (index ? " with " + index.name : ""));
+        } catch (err) { log("Could not load " + f.name + ": " + err.message); }
+      }
+      e.target.value = "";                    // so the same files can be chosen again
+    });
   </script>
 </body>
 </html>
