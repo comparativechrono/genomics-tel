@@ -14,6 +14,9 @@ BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8800'
 FILTER = sys.argv[2] if len(sys.argv) > 2 else ''
 SHOTS = os.path.join(ROOT, 'tools', 'screenshots')
 WAIT_MS = int(os.environ.get('WAIT_MS', '6000'))
+# Analytics and error reporting inside other organisations' embedded apps (Nextstrain, Galaxy).
+# Ad blockers and some networks stop these, so a failure here is a warning, not an error.
+THIRD_PARTY_TRACKERS = ('plausible.io', 'plausible.galaxyproject.eu', 'sentry.galaxyproject.org')
 
 async def main():
     os.makedirs(SHOTS, exist_ok=True)
@@ -25,10 +28,11 @@ async def main():
         for path in pages:
             rel = os.path.relpath(path, ROOT).replace(os.sep, '/')
             page = await browser.new_page(viewport={'width': 1100, 'height': 760})
-            errors = []
+            errors, warnings = [], []
+            tracker = lambda url: any(h in url for h in THIRD_PARTY_TRACKERS)
             page.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
             page.on('pageerror', lambda e: errors.append(f'page error: {e}'))
-            page.on('requestfailed', lambda r: errors.append(f'failed: {r.url[:120]} ({r.failure})'))
+            page.on('requestfailed', lambda r: (warnings if tracker(r.url) else errors).append(f'failed: {r.url[:120]} ({r.failure})'))
             page.on('response', lambda r: errors.append(f'HTTP {r.status}: {r.url[:120]}') if r.status >= 400 else None)
             try:
                 await page.goto(f'{BASE}/{rel}', wait_until='load', timeout=60000)
@@ -40,6 +44,8 @@ async def main():
             print(('FAIL ' if errors else 'ok   ') + rel)
             for e in errors[:8]:
                 print('     ' + e)
+            for w in warnings[:3]:
+                print('     (warning) ' + w)
             failed += bool(errors)
             await page.close()
         await browser.close()

@@ -5,6 +5,13 @@
   var root = document.documentElement;
   var KEY = 'gt-theme';
 
+  /* A hidden live region for short announcements, such as "Code copied" */
+  var announcer = document.createElement('div');
+  announcer.className = 'visually-hidden';
+  announcer.setAttribute('aria-live', 'polite');
+  document.body.appendChild(announcer);
+  function announce(text) { announcer.textContent = ''; setTimeout(function () { announcer.textContent = text; }, 50); }
+
   /* ─── Light and dark ─── */
   var dark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   function stored() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
@@ -51,6 +58,14 @@
       menuButton.textContent = open ? 'Close' : 'Menu';
     };
     menuButton.addEventListener('click', function () { setMenu(!nav.classList.contains('is-open')); });
+    var header = document.querySelector('.site-header');
+    // Close the menu when keyboard focus or a click moves out of the header, so it never covers what has focus
+    header.addEventListener('focusout', function (e) {
+      if (nav.classList.contains('is-open') && e.relatedTarget && !header.contains(e.relatedTarget)) setMenu(false);
+    });
+    document.addEventListener('click', function (e) {
+      if (nav.classList.contains('is-open') && !header.contains(e.target)) setMenu(false);
+    });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && nav.classList.contains('is-open')) { setMenu(false); menuButton.focus(); }
     });
@@ -74,6 +89,7 @@
       var done = function () {
         button.textContent = 'Copied';
         button.classList.add('is-done');
+        announce('Code copied');
         setTimeout(function () { button.textContent = 'Copy'; button.classList.remove('is-done'); }, 1800);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -92,6 +108,24 @@
     document.body.removeChild(ta);
   }
 
+  /* ─── Code blocks that scroll: let keyboard users scroll them too ─── */
+  function markScrollableCode() {
+    document.querySelectorAll('.highlight pre').forEach(function (pre) {
+      var scrolls = pre.scrollWidth > pre.clientWidth + 1 || pre.scrollHeight > pre.clientHeight + 1;
+      if (scrolls && !pre.hasAttribute('tabindex')) {
+        var example = pre.closest('.example');
+        var file = example ? example.querySelector('.example-file') : null;
+        pre.setAttribute('tabindex', '0');
+        pre.setAttribute('role', 'region');
+        pre.setAttribute('aria-label', 'Code' + (file ? ': ' + file.textContent : '') + ' (scrolls)');
+      } else if (!scrolls && pre.getAttribute('role') === 'region') {
+        pre.removeAttribute('tabindex'); pre.removeAttribute('role'); pre.removeAttribute('aria-label');
+      }
+    });
+  }
+  markScrollableCode();
+  document.querySelectorAll('.example-code').forEach(function (d) { d.addEventListener('toggle', markScrollableCode); });
+
   /* ─── Wide tables: let keyboard users scroll them ─── */
   function markScrollableTables() {
     document.querySelectorAll('.table-wrap').forEach(function (wrap) {
@@ -109,7 +143,7 @@
   }
   markScrollableTables();
   var resizeTimer = null;
-  window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(markScrollableTables, 200); });
+  window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(function () { markScrollableTables(); markScrollableCode(); }, 200); });
 
   /* ─── Examples that wait for a click ─── */
   document.querySelectorAll('[data-load-example]').forEach(function (button) {
@@ -141,13 +175,22 @@
         list.appendChild(li);
       });
       toc.hidden = false;
+      var links = toc.querySelectorAll('a');
+      var setActive = function (id) {
+        links.forEach(function (a) {
+          var on = a.getAttribute('href') === '#' + id;
+          a.classList.toggle('is-active', on);
+          if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+        });
+      };
+      links.forEach(function (a) { a.addEventListener('click', function () { setActive(a.getAttribute('href').slice(1)); }); });
+      window.addEventListener('hashchange', function () { setActive(decodeURIComponent(location.hash.slice(1))); });
+      if (location.hash) setActive(decodeURIComponent(location.hash.slice(1)));
       if ('IntersectionObserver' in window) {
-        var links = toc.querySelectorAll('a');
-        var current = null;
+        // The band starts just below the sticky header, where a heading lands after a jump
         var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) { if (e.isIntersecting) current = e.target.id; });
-          links.forEach(function (a) { a.classList.toggle('is-active', a.getAttribute('href') === '#' + current); });
-        }, { rootMargin: '-15% 0px -70% 0px' });
+          entries.forEach(function (e) { if (e.isIntersecting) setActive(e.target.id); });
+        }, { rootMargin: '-60px 0px -65% 0px' });
         heads.forEach(function (h) { io.observe(h); });
       }
     }

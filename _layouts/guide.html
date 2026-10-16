@@ -12,6 +12,11 @@ layout: default
 {%- assign nav_item = site.data.nav[page.side] | where: "url", page.url | first -%}
 <div class="guide guide--{{ page.side }}">
   {% include sidenav.html %}
+  {%- comment -%} Before the article in the source, so keyboard users reach it early; the grid puts it on the right. {%- endcomment %}
+  <aside class="toc" aria-labelledby="toc-title" hidden>
+    <p class="toc-title" id="toc-title">On this page</p>
+    <ol></ol>
+  </aside>
   <main id="main" class="guide-main">
     <article class="prose">
       <header class="guide-head">
@@ -37,12 +42,20 @@ layout: default
         </nav>
         {%- endif %}
       </header>
+      {%- comment -%}
+        The end-of-page ad goes just before the References heading, so that it
+        sits between prose and a heading rather than next to a list of links.
+      {%- endcomment -%}
+      {%- assign ref_marker = '<h2 id="references">' -%}
+      {%- if content contains ref_marker -%}
+        {%- assign parts = content | split: ref_marker %}
+      {{ parts[0] }}
+      {% include ad.html slot="end_of_article" %}
+      {{ ref_marker }}{{ parts[1] }}
+      {%- else %}
       {{ content }}
       {% include ad.html slot="end_of_article" %}
+      {%- endif %}
     </article>
   </main>
-  <aside class="toc" aria-labelledby="toc-title" hidden>
-    <p class="toc-title" id="toc-title">On this page</p>
-    <ol></ol>
-  </aside>
 </div>

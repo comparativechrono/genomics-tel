@@ -1,14 +1,16 @@
 {%- comment -%}
   Works out whether ads are switched on, from the adsense settings in _config.yml.
-  ads_live:  a publisher ID is set, so the AdSense code is loaded.
-  ads_shown: ads are live, or placeholders are switched on to preview where they go.
-  page_ads:  this page may carry ad units (pages can opt out with `ads: false`).
+  ads_live:    a publisher ID is set, so the AdSense code is loaded and ads can show.
+  ads_preview: grey placeholders mark where ads will go. Only in local previews
+               (jekyll serve or build), never on GitHub Pages, which builds in
+               the "production" environment.
+  page_ads:    this page may carry ad units (pages can opt out with `ads: false`).
   The AdSense code itself loads on every page once ads are live, except pages
   with `adsense_code: false` (the 404 page); see head.html.
 {%- endcomment -%}
 {%- assign ads_live = false -%}
 {%- if site.adsense.publisher_id and site.adsense.publisher_id != "" -%}{%- assign ads_live = true -%}{%- endif -%}
-{%- assign ads_shown = ads_live -%}
-{%- if site.adsense.show_placeholders -%}{%- assign ads_shown = true -%}{%- endif -%}
+{%- assign ads_preview = false -%}
+{%- if site.adsense.show_placeholders and jekyll.environment != "production" -%}{%- assign ads_preview = true -%}{%- endif -%}
 {%- assign page_ads = true -%}
 {%- if page.ads == false -%}{%- assign page_ads = false -%}{%- endif -%}

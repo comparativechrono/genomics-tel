@@ -1,5 +1,6 @@
 ---
-title: About genomics.tel
+title: About this site
+description: Who makes genomics.tel, how the live examples are checked, why the site will carry a few ads, and how you may reuse its text and code.
 lede: A free site about teaching genomics with interactive tools, written for the people who teach it and the people who build teaching websites.
 ---
 {% include ads-flags.html %}
@@ -18,21 +19,19 @@ genomics.tel is written by [Tim Hearn and the Chronomic Medicine Group]({{ site.
 
 Every live example is a standalone page that we run in a current Chromium browser before publishing. Library versions are fixed in each example, so an example keeps working when a library changes. Data come from public services that allow other websites to use them, or from small files we host next to the examples. If something has stopped working, or you spot a mistake, please [open an issue on GitHub](https://github.com/{{ site.repository }}/issues) or email [{{ site.owner.email }}](mailto:{{ site.owner.email }}).
 
-{% if ads_shown %}
 ## Why there are ads {#ads}
 
+{% if ads_live -%}
 genomics.tel shows a small number of Google ads. The money they bring in pays for the genomics.tel web domain.
+{%- else -%}
+genomics.tel is going to show a small number of Google ads, to pay for the genomics.tel web domain. There are no ads on the site yet.
+{%- endif %}
 
 - Ads appear only on guide pages: at most two on a page, between sections of text, and never inside or next to a live example or its code.
 - Advertisers have no say in what we write, and nobody pays us to recommend a tool.
-- Google chooses the ads. In the UK, the European Economic Area and Switzerland, you are asked whether Google may use cookies to personalise them, and you can change your answer at any time from the link at the bottom of each page.
+- Google chooses the ads. In the UK, the European Economic Area and Switzerland, you are asked whether Google may use cookies to personalise them, and you can change your answer at any time from the "Privacy and cookie settings" link at the bottom of each page{% unless ads_live %}, which will appear with the ads{% endunless %}.
 
 Our [privacy page]({{ '/privacy/' | relative_url }}) explains what Google collects and how to opt out of personalised ads.
-{% if ads_live == false %}
-Ads are not switched on yet. The grey boxes marked "Ad space" show where they will appear.
-{: .note}
-{% endif %}
-{% endif %}
 
 ## Reusing our material
 

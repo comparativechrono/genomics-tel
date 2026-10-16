@@ -75,6 +75,11 @@ defaults:
       path: ""
     values:
       layout: page
+      image: /assets/img/social.png   # the picture shown when a page is shared
+  - scope:
+      path: "developers/*/examples"
+    values:
+      sitemap: false                  # list the guides in the sitemap, not the bare example files
   - scope:
       path: "educators"
     values:
