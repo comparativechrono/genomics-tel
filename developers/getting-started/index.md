@@ -55,7 +55,7 @@ Each example on this site is one HTML file that works on its own. A reader can o
 </html>
 ```
 
-The parts that matter:
+What each part does:
 
 - **`lang` and the viewport line.** Screen readers use the language, and phones need the viewport line to lay the page out at their own width.
 - **Exact versions and hashes**, explained in the next section.
@@ -83,7 +83,7 @@ Some cautions:
 
 ## Plan for networks that block a CDN
 
-A content delivery network (CDN) such as jsDelivr serves libraries from servers close to the reader. Most examples on this site use jsDelivr. Many files are also on unpkg or cdnjs, byte for byte the same: igv.js 3.8.9 has the same hash on unpkg as on jsDelivr. But a school, hospital or company network may block a CDN, or a particular site such as the one webR loads R from, so test from the room you will teach in.
+A content delivery network (CDN) such as jsDelivr serves libraries from servers close to the reader. Most examples on this site use jsDelivr. Many files are also on unpkg or cdnjs, byte for byte the same: igv.js 3.8.9 has the same hash on unpkg as on jsDelivr. But a school, hospital or company network may block a CDN, or a particular site such as the one webR loads R from, so test from the room you will teach in. Some libraries fetch from more than one host: when `hgdownload.soe.ucsc.edu` does not answer, igv.js 3.8.9 quietly fetches the same files from UCSC's mirror at `genome-browser.s3.us-east-1.amazonaws.com`, so ask for both to be allowed.
 
 The reliable answer is a copy of the library next to your page:
 
@@ -93,7 +93,7 @@ curl -sL -o vendor/igv.min.js https://cdn.jsdelivr.net/npm/igv@3.8.9/dist/igv.mi
 openssl dgst -sha384 -binary vendor/igv.min.js | openssl base64 -A    # must match the hash in your page
 ```
 
-Then point the script tag at `vendor/igv.min.js`, keep the `integrity` attribute, and keep the library's licence file beside it. In our tests, an igv.js page and a JBrowse 2 page that loaded their library and data from the same site kept working with every outside request blocked. webR and Pyodide are harder, because they load many megabytes of further files. Pyodide worked offline on a second visit while the page itself was still in the browser's cache. webR did not start offline even after a visit, because at start-up it asks its server for a file in a way that browsers never answer from their cache.
+Then point the script tag at `vendor/igv.min.js`, keep the `integrity` attribute, and keep the library's licence file beside it. In our tests, an igv.js page and a JBrowse 2 page that loaded their library and data from the same site kept working with every outside request blocked. webR and Pyodide are harder, because they load many megabytes of further files. Pyodide worked offline on a second visit while the page itself was still in the browser's cache. webR did not start offline even after a visit, because at start-up it asks its server for a file in a way that Chromium did not answer from its cache in our tests.
 
 Data need the same care. Public servers are sometimes slow or down: during our tests, Ensembl's REST API failed 32 of 45 requests over about 40 minutes, and Zenodo failed now and then. Where a dataset's licence allows it, host a small copy next to the page.
 
@@ -120,7 +120,7 @@ These sources behaved as follows when we checked them:
 | UCSC downloads (`hgdownload.soe.ucsc.edu`) and the UCSC API | Yes | Yes (downloads) |
 | 1000 Genomes at EBI (`ftp.1000genomes.ebi.ac.uk`) | Yes | Yes |
 | NCBI, including ClinVar (`ftp.ncbi.nlm.nih.gov`) | Yes | Yes |
-| UniProt REST API | Yes | Yes |
+| UniProt REST API | Yes | FASTA from the `accessions` endpoint, yes; an entry's JSON comes whole |
 | RCSB PDB files (`files.rcsb.org`) | Yes | No: it sends the whole file |
 | PDBe, the AlphaFold DB API and the STRING API | Yes | Not checked |
 | Zenodo, API address (`zenodo.org/api/records/…/content`) | Yes | Yes |
@@ -193,7 +193,7 @@ Some services refuse to appear inside another site's page, and some are better u
 |---|---|---|
 | UCSC Genome Browser | Its check for automated visitors runs inside the frame | Link in a new tab, show a picture from `hgRenderTracks`, or use the UCSC API for data |
 | Ensembl | Refused (`X-Frame-Options: SAMEORIGIN`) | Link in a new tab; use the REST API for data |
-| Galaxy | Refused by usegalaxy.org, .org.au and .fr, except published pages opened with `embed=true` | Link to a tool, a workflow or a published history |
+| Galaxy | Refused by usegalaxy.org and .org.au, except published pages opened with `embed=true`; usegalaxy.fr refused those too on 16 October 2026 | Link to a tool, a workflow or a published history |
 | STRING | The website sits behind a check for automated visitors | Draw the network yourself from the STRING API |
 | FinnGen | Refused (`X-Frame-Options: SAMEORIGIN`) | Link out; its API answers other websites |
 | JBrowse Web | Allowed | Host your own copy with analytics switched off, because the copy at jbrowse.org contacts Google Analytics |

@@ -6,7 +6,7 @@ description: How to make interactive genomics teaching pages accessible, with ke
 
 Most of the libraries on this site draw their main view on a canvas or with WebGL, which assistive technology treats as one picture. You cannot change that from outside the library, but you can build the page around the view so that every task has a second route. This page shows how, with an example you can copy, and says what each library offers. The target is WCAG 2.2 level AA [1]; the [educators' page](../../educators/accessibility/) explains what that means in class.
 
-The size of the problem is known. An evaluation of 3,112 life-science data portals found severe accessibility problems on 74.8% of them, and in a preliminary test of three portals, a blind user completed 53.3% of common tasks. Its authors found that following accessibility standards does not by itself make a resource usable [2], so test with people as well as with checklists. Smits and colleagues' ten rules [3] are a good companion to this page.
+An evaluation of 3,112 life-science data portals found severe accessibility problems on 74.8% of them, and in a preliminary test of three portals, a blind user completed 53.3% of common tasks. Its authors found that following accessibility standards does not by itself make a resource usable [2], so test with people as well as with checklists. Smits and colleagues' ten rules [3] are a good companion to this page.
 
 ## Give every pointer action a keyboard route
 
@@ -14,7 +14,7 @@ WCAG asks that everything works from a keyboard, that keyboard focus never gets 
 
 - **Use real HTML controls.** `<button type="button">` for actions, and `<input>` and `<select>` with a `<label>` for choices. They work with the keyboard and with screen readers without extra code.
 - **Give each thing in the picture a button.** One button per variant, as in the example below, or per molecule in a network: this is how a Cytoscape.js pathway diagram became usable from the keyboard in our tests.
-- **Replace dragging with buttons and search.** A search box, zoom buttons and buttons that jump to the places that matter, as in the [genome browser examples](../genome-browsers/#choose-the-tracks-add-buttons-mark-the-variant).
+- **Replace dragging with buttons and search.** A search box, zoom buttons and buttons that jump to the places students need, as in the [genome browser examples](../genome-browsers/#choose-the-tracks-add-buttons-mark-the-variant).
 - **Leave the canvas out of the tab order** unless your code handles keys on it. If it takes over the arrow keys, Tab must still move on.
 - **Make targets big enough.** The example's buttons are 32 pixels tall.
 
@@ -27,7 +27,7 @@ Keyboard users need to see where they are, and toolbars or overlays must not hid
 :focus-visible { outline: 3px solid #2b56c9; outline-offset: 2px; }
 ```
 
-Keep controls in the same order in the HTML as on screen, so that Tab moves through them in reading order. Think about where focus goes when something loads: on this site, the **Load the example** button moves focus into the example once it has loaded. If a table or panel scrolls sideways on a phone, give its box `tabindex="0"`, a role and a label, so that keyboard users can scroll it too; the example's table does this.
+Keep controls in the same order in the HTML as on screen, so that Tab moves through them in reading order. Think about where focus goes when something loads: on this site, the **Load the example** button moves focus to the example's frame as it starts to load. If a table or panel scrolls sideways on a phone, give its box `tabindex="0"`, a role and a label, so that keyboard users can scroll it too; the example's table does this.
 
 ## Announce feedback with a live region
 

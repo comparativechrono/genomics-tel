@@ -149,7 +149,22 @@
         detail: "BAX speeds up programmed cell death" }
     ];
 
+    // ----- Helpers: a molecule by its ID, and links to the papers -----
+    const byId = id => nodes.find(n => n.id === id);
+    const sources = refs => refs.map(id =>
+      `<a href="https://pubmed.ncbi.nlm.nih.gov/${id}/" target="_blank" rel="noopener">${PAPERS[id]}</a>`).join("; ");
+
+    // ----- The text version, from the same lists (built first, so it works even without the diagram) -----
+    document.getElementById("edge-table").innerHTML = edges.map(e =>
+      `<tr><td>${byId(e.source).label}</td><td>${e.effect}</td><td>${byId(e.target).label}</td>` +
+      `<td>${e.detail}</td><td>${sources(e.refs)}</td></tr>`).join("");
+
     // ----- The diagram -----
+    if (!window.cytoscape) {                   // the library did not arrive: say so, and stop here
+      document.getElementById("details").textContent = "Cytoscape.js did not load. Check the connection and reload the page.";
+      throw new Error("Cytoscape.js did not load");
+    }
+
     const cy = cytoscape({
       container: document.getElementById("cy"),
       elements: [
@@ -186,9 +201,6 @@
     cy.edges().unselectify();          // only molecules can be selected
 
     // ----- Details of one molecule, with its neighbours highlighted -----
-    const byId = id => nodes.find(n => n.id === id);
-    const sources = refs => refs.map(id =>
-      `<a href="https://pubmed.ncbi.nlm.nih.gov/${id}/" target="_blank" rel="noopener">${PAPERS[id]}</a>`).join("; ");
     const panel = document.getElementById("details");
 
     function showNode(node) {
@@ -247,10 +259,6 @@
       a.click();
     });
 
-    // ----- The text version, from the same lists -----
-    document.getElementById("edge-table").innerHTML = edges.map(e =>
-      `<tr><td>${byId(e.source).label}</td><td>${e.effect}</td><td>${byId(e.target).label}</td>` +
-      `<td>${e.detail}</td><td>${sources(e.refs)}</td></tr>`).join("");
   </script>
 </body>
 </html>

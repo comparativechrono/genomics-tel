@@ -16,12 +16,20 @@
 <body>
   <h1>The human β-globin gene (HBB) on GRCh38</h1>
   <div id="igv"></div>
+  <p id="status" role="status" aria-live="polite"></p>
 
   <script>
-    igv.createBrowser(document.getElementById("igv"), {
-      genome: "hg38",   // GRCh38 as hosted by the IGV team: sequence, chromosome bands and RefSeq genes
-      locus: "HBB"      // a gene name, or coordinates such as "chr11:5,225,464-5,229,395"
-    });
+    const say = text => { document.getElementById("status").textContent = text; };
+
+    // The element with id="igv" also makes a global called igv, so test for the function itself
+    if (typeof window.igv?.createBrowser !== "function") {
+      say("igv.js did not load. Check the connection and reload the page.");
+    } else {
+      igv.createBrowser(document.getElementById("igv"), {
+        genome: "hg38",   // GRCh38 as hosted by the IGV team: sequence, chromosome bands and RefSeq genes
+        locus: "HBB"      // a gene name, or coordinates such as "chr11:5,225,464-5,229,395"
+      }).catch(err => say("The genome could not be loaded (" + err.message + "). Check the connection, or try again later."));
+    }
   </script>
 </body>
 </html>

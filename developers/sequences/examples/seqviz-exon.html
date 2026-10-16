@@ -14,6 +14,7 @@
     p { margin: 0 0 8px; }
     .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
     button { font: inherit; font-size: 14px; padding: 4px 9px; }
+    button[aria-pressed="true"] { background: #172033; color: #fff; border-color: #172033; }   /* shows that the change is made */
     #info { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; color: #3b4659; min-height: 2.9em; margin: 6px 0 6px; }
     #viewer { height: 300px; border: 1px solid #c3cbd8; border-radius: 6px; }
     /* SeqViz pads its scroller by 10px without counting the padding in its height, so it would spill out of the box */
@@ -70,7 +71,7 @@
       document.getElementById("change").addEventListener("click", e => {
         const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
         e.currentTarget.setAttribute("aria-pressed", String(on));
-        e.currentTarget.textContent = on ? "Undo the change" : "Make the sickle-cell change";
+        // The label stays the same: aria-pressed tells screen readers whether the change is made
         const seq = EXON1.slice(0, C20) + (on ? "T" : "A") + EXON1.slice(C20 + 1);
         viewer.setState(props(seq));
         info.textContent = on ? "c.20A>T: codon 7 now reads GTG, which codes for valine (V)."

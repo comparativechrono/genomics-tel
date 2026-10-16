@@ -31,7 +31,7 @@ One script tag and one call to `igv.createBrowser` give you a working browser [1
 
 ## Choose the tracks, add buttons, mark the variant
 
-A teaching page usually needs three things: a starting view, a few tracks that make the point, and buttons that take students to the places that matter. This example adds all three, plus a shaded region on the sickle-cell base.
+Most teaching pages need a starting view, a few tracks that make the point, and buttons that take students to particular places. This example adds all three, plus a shaded region on the sickle-cell base.
 
 {% include example.html file="examples/igv-tracks.html" title="Public tracks, navigation buttons and a highlighted variant" height="570" load="click" note="This example downloads igv.js and its tracks, about 3 to 4 MB, when it starts." caption="The tracks come from UCSC's public files. The ENCODE and 1000 Genomes tracks load only when asked, because the 1000 Genomes panel takes 15 to 20 seconds to draw 3,202 people." %}
 
@@ -86,7 +86,7 @@ A file input can hand files from the student's computer straight to igv.js. The 
 
 A `File` object works wherever igv.js expects a URL. Index files (`.tbi`, `.bai`, `.fai`) have to be chosen at the same time as the data, and the example pairs them up by name. Small files without an index can be read whole with `indexed: false`.
 
-The page itself still loads igv.js from the internet. For sensitive files, save `igv.min.js` next to the page and point the script tag at that copy, so that the page works with no connection at all.
+The page itself still loads igv.js, and the genome it starts with, from the internet. For sensitive files, keep a copy of `igv.min.js` next to the page and point the script tag at it, and start the browser from a FASTA file hosted beside the page, so that the page works with no connection at all.
 
 ## Host a small dataset next to the page
 
@@ -101,26 +101,27 @@ The folder holds:
 | File | Contents |
 |---|---|
 | `hbb-region.fa` and `.fai` | GRCh38 chr11:5,217,001–5,237,000 from UCSC, as one sequence called `HBB_region`. Position 1 here is chr11:5,217,001. |
-| `hbb-region.gff3` and `.bed` | *HBB* (NM_000518.5) and *HBD* (NM_000519.4) from RefSeq Select: genes, transcripts, exons and coding sequence. |
+| `hbb-region.gff3` and `.bed` | *HBB* (NM_000518.5) and *HBD* (NM_000519.4) from RefSeq Select: genes, transcripts, exons and coding sequence. Exons are numbered along each gene, which runs on the reverse strand, so exon 1 is the one furthest to the right. The BED names contain a space, which is why the command below uses `-tab`. |
 | `hbb-variants.vcf.gz` and `.tbi` | Seven ClinVar variants, including HbS (rs334), HbC, HbE and β-thalassaemia variants, with four fictional people. |
 | `hbb-variants.grch38.vcf.gz` and `.tbi` | The same variants at their real chromosome 11 positions, for use over the full GRCh38 genome. |
 
 </div>
 
-Index files come from the standard command-line tools. FASTA lines must all be the same length, and VCF files must be sorted and compressed with `bgzip`, not ordinary `gzip`:
+Index files come from the standard command-line tools. FASTA lines must all be the same length, VCF and BED files must be sorted, and VCF files must be compressed with `bgzip`, not ordinary `gzip`:
 
 ```bash
 samtools faidx hbb-region.fa                       # makes hbb-region.fa.fai
 bgzip -c hbb-variants.vcf > hbb-variants.vcf.gz    # block-compressed, so it can be read in pieces
 tabix -p vcf hbb-variants.vcf.gz                   # makes hbb-variants.vcf.gz.tbi
-bedToBigBed genes.bed hg38.chrom.sizes genes.bb    # UCSC tool, for large annotation files
+sort -k1,1 -k2,2n genes.bed > genes.sorted.bed     # bedToBigBed refuses unsorted files
+bedToBigBed -tab genes.sorted.bed hg38.chrom.sizes genes.bb   # UCSC tool, for large annotation files
 ```
 
 GitHub Pages answers the range requests these files need, and allows other websites to read them. Python's built-in test server does not handle range requests, so to try indexed files on your own computer use a server that does; this site's repository has one in `tools/serve.py`.
 
 In a self-hosted page, start the view with coordinates rather than a gene name, because names in your own tracks become searchable only once the track has loaded. `search: false` stops igv.js sending unknown names to IGV's search service.
 
-## JBrowse 2 when students need more detail
+## Use JBrowse 2 when students need more detail
 
 JBrowse 2 [2] is heavier than igv.js, but clicking a feature opens a full table of its details, and clicking a VCF record shows every field with a genotype count. It also has six-frame translation and its own gene search. The linear genome view comes as a single script that includes React.
 
@@ -149,7 +150,7 @@ UCSC builds the view from parameters in the address:
 | Start with no tracks showing | `hideTracks=1` (this also hides any tracks you add) |
 | Show tracks | `mane=pack&clinvar=pack&cons100way=full` (or `dense`, `squish`, `hide`) |
 | Turn off part of a track | `clinvarCnv_sel=0`, or `cons100wayViewalign=hide` for one of a track's views |
-| Highlight a region | `highlight=hg38.chr11:5227002-5227002%23FFA50080` (positions count from 1) |
+| Highlight a region | `highlight=hg38.chr11:5227002-5227002%23FFA500` (positions count from 1; give a 6-digit colour, which UCSC draws pale: the 8-digit `#FFA50080` came out magenta in our tests) |
 | Add a track from a file | `hgt.customText=` followed by an encoded track line pointing at your file |
 | Load a track hub | `hubUrl=https://…/hub.txt` |
 

@@ -209,7 +209,8 @@ The pathway example's "Download PNG" button does this, and gave an image of abou
 Cytoscape.js draws on a canvas, so screen readers find nothing in the drawing, and keyboard users cannot reach the nodes. Give the container a short description with `role="img"` and `aria-label`, and put the full information in a table near it [6]. Build the table from the same lists as the diagram, so that the two always agree:
 
 ```js
-// one row per interaction, from the same list of edges that draws the diagram
+// one row per interaction, from the same lists of nodes and edges that draw the diagram
+const name = id => nodes.find(n => n.id === id).label;
 document.getElementById("edge-table").innerHTML = edges.map(e =>
   `<tr><td>${name(e.source)}</td><td>${e.effect}</td><td>${name(e.target)}</td><td>${e.detail}</td></tr>`
 ).join("");
@@ -225,7 +226,7 @@ Keep the table small enough to read with a keyboard: Smits and colleagues cite a
 - **`:visible` can be out of date.** After we hid 3 of 12 edges inside `cy.batch()`, the `:visible` selector still counted 12, even after the batch had ended. Select by your own classes instead, as the examples do with `.not(".hidden")`.
 - **Warnings.** Setting `width: "label"`, which sized a node to its label, is deprecated and prints a warning, as does a custom `wheelSensitivity`. The pathway example sizes nodes with a function instead.
 - **Hairballs.** Cytoscape.js can draw hundreds of nodes, but nobody can read them. Show less detail, fade what matters less, or split the network into several figures [4].
-- **STRING in class.** STRING asks that its API be used only for "limited or occasional" access. For a large class, point students at the saved copy (`?offline=1`) or save your own copy of the replies.
+- **STRING in class.** STRING's help pages ask heavy users to download the full data set rather than call the API many times. For a large class, point students at the saved copy (`?offline=1`) or save your own copy of the replies.
 - **Versions.** Each example names an exact version of every library, and STRING's address names its version. When you update, read the release notes and test the page again.
 
 ## Licences and credits

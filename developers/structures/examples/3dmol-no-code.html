@@ -29,6 +29,15 @@
        data-labelres2="fontSize:14;fontColor:black;backgroundColor:white;backgroundOpacity:0.85;inFront:true"
        data-select3="resn:HEM" data-style3="stick:colorscheme=orangeCarbon"></div>
   <p>α chains grey, β chains blue, haem orange. The red spheres are glutamate 6 of each β chain.</p>
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <!-- Optional: 3Dmol.js says nothing when it cannot download the file, so this does. -->
+  <script>
+    window.addEventListener("unhandledrejection", () => {
+      document.getElementById("status").textContent =
+        "The structure could not be downloaded from the RCSB PDB. Check your connection, or try again later.";
+    });
+  </script>
 
   <!-- 3Dmol.js 2.5.5. Loaded after the viewer element; it finds the element and draws it. -->
   <script src="https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js"

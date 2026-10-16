@@ -14,7 +14,7 @@ description: How to run R with webR and Python with Pyodide in a teaching web pa
 | What it is | R compiled to WebAssembly, driven by your page's JavaScript | Python compiled to WebAssembly, driven the same way | JupyterLab and Jupyter Notebook as a static website, with Python or R running in the browser | A Quarto extension that turns code cells into boxes run by webR or Pyodide | Python written into a page's HTML, run by Pyodide |
 | First load, measured | 14 MB, 4–6 s; with ggplot2, 51 MB and 16–23 s | 6 MB, 3–6 s; with numpy, matplotlib and Biopython, 22 MB | A console: 14 MB, 16–21 s. A notebook with Biopython and a plot: 33 MB, 18–20 s | A page with R and Python: 50 MB, 20 s | 6 MB, 4–12 s |
 | Offline after a visit | No | Only while the page is in the browser's cache | Not tested | No | Not tested |
-| Packages | 24,638 CRAN and 2,402 Bioconductor packages, but not DESeq2 or edgeR | 357 built for Pyodide, and pure-Python packages from PyPI | Pyodide's, or a fixed set chosen when you build the site | webR's, and those of an older Pyodide | Pyodide's |
+| Packages | 24,638 CRAN and 2,402 Bioconductor packages, but not DESeq2 or edgeR | About 350 built for Pyodide, and pure-Python packages from PyPI | Pyodide's, or a fixed set chosen when you build the site | webR's, and those of an older Pyodide | Pyodide's |
 | Keeps students' work | No | No | Yes, in the browser, and as downloaded notebooks | Not by default | No |
 | Build step | None | None | A GitHub Actions workflow | `quarto render` when you write the page | None |
 | Licence | MIT, and GPL for R itself | MPL 2.0 | BSD 3-Clause | MIT | Apache 2.0 |
@@ -33,7 +33,7 @@ The core of webR is a few lines. It starts R in a Web Worker, a background threa
 import { WebR } from 'https://webr.r-wasm.org/v0.6.0/webr.mjs';
 
 const webR = new WebR();                   // R runs in a Web Worker
-await webR.init();                         // downloads about 13 MB the first time
+await webR.init();                         // downloads about 14 MB the first time
 const shelter = await new webR.Shelter();  // keeps track of the R objects made below
 const result = await shelter.captureR('gc <- c(0.41, 0.70, 0.39)\nmean(gc)', {
   withAutoprint: true,                     // print values, as R's console does
@@ -111,7 +111,7 @@ What we found on 15 October 2026:
 - **Size and time add up.** Biostrings and the packages it needs download 18 MB, and loading Biostrings took about 7 seconds of computing at every visit. ggtree brought 76 MB of dependencies. Keep a class's packages few and light.
 - **For a course that must not change,** webR's [rwasm tools](https://r-wasm.github.io/rwasm/) can build a fixed set of packages for you to host yourself. We have not tested this.
 
-Pyodide 314.0.7 comes with 357 packages built for it, including numpy, pandas, matplotlib, scipy, scikit-learn, Biopython, pysam and msprime. `micropip` installs other packages from PyPI, but only those written purely in Python:
+Pyodide 314.0.7 comes with about 350 packages built for it, including numpy, pandas, matplotlib, scipy, scikit-learn, Biopython, pysam and msprime. `micropip` installs other packages from PyPI, but only those written purely in Python:
 
 ```js
 // packages built for Pyodide: one call loads them and everything they need
@@ -281,7 +281,7 @@ quarto add r-wasm/quarto-live   # the extension, version 0.2.0 when we tested
 quarto render genomics.qmd      # with engine: markdown, you need neither R nor Python installed
 ```
 
-With Quarto 1.10.18, both boxes printed their results, and a correct answer to the exercise showed "Correct: 4 of the 6 bases are G or C." The first visit downloaded 50 MB and took 20 seconds. The rendered page comes with a folder of 2.3 MB of files and has Quarto's own look, not your site's, so publish it as a separate page. Quarto Live 0.2.0 loads webR 0.6.0 but an older Pyodide, 0.28.1 (Python 3.13); a newer Pyodide needs a new release of the extension.
+`engine: markdown` is not in Quarto Live's documentation, which uses the knitr or Jupyter engines, but it rendered and ran in our tests, so test it again after you update Quarto or the extension. With Quarto 1.10.18, both boxes printed their results, and a correct answer to the exercise showed "Correct: 4 of the 6 bases are G or C." The first visit downloaded 50 MB and took 20 seconds. The rendered page comes with a folder of 2.3 MB of files and has Quarto's own look, not your site's, so publish it as a separate page. Quarto Live 0.2.0 loads webR 0.6.0 but an older Pyodide, 0.28.1 (Python 3.13); a newer Pyodide needs a new release of the extension.
 
 ## Stop runaway code without losing the session
 
@@ -372,7 +372,7 @@ Two of our own sites run complete practicals in the browser. They are fuller exa
 - **A class downloading at once.** Thirty students who each download 15 to 50 MB at the start of a session pull 0.5 to 1.5 GB through the room's network. Ask them to open the page beforehand: browsers keep webR's files for 7 days and Pyodide's for a year.
 - **Memory.** An R session took about 180 MB of the browser's memory, and about 500 MB with ggplot2 or Biostrings; Python took 130 to 610 MB. Use one session per page, as the examples do. A phone or Chromebook may reload the tab when memory runs short.
 - **Blocked addresses.** R needs `webr.r-wasm.org` and `repo.r-wasm.org`, Bioconductor packages need `bioc.r-universe.dev` and `r2.ropensci.org`, and Python needs `cdn.jsdelivr.net`. JupyterLite also needs `pypi.org` and `files.pythonhosted.org` unless you bundle `comm`. Try your page from the teaching room's network before the class.
-- **Offline.** webR does not start without a network, even after a visit, because it asks its server for a file at every start, in a kind of request (`HEAD`) that browsers never answer from their cache. Pyodide starts offline only while the page itself is still in the cache, which is 10 minutes for a page on GitHub Pages. Working offline needs your own copies of the runtimes behind a caching service worker, which we have not tested.
+- **Offline.** webR does not start without a network, even after a visit, because it asks its server for a file at every start, in a kind of request (`HEAD`) that Chromium did not answer from its cache in our tests. Pyodide starts offline only while the page itself is still in the cache, which is 10 minutes for a page on GitHub Pages. Working offline needs your own copies of the runtimes behind a caching service worker, which we have not tested.
 - **Packages that change.** The webR and R-universe repositories change without notice. Run your pages again shortly before you teach.
 - **Updating old pages.** Pyodide 314 does not load in a classic worker, so a page built for Pyodide 0.29 or earlier needs a module worker before it can move to 314.
 - **Screen readers.** The code boxes are plain labelled text areas, without syntax colours. The Tab key moves on as usual, results arrive as text, status messages are announced, and plots have descriptions, but we have not tested the boxes with a screen reader. See [accessibility](../accessibility/).

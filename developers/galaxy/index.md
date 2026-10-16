@@ -18,7 +18,7 @@ description: How to list Galaxy Training Network tutorials live, build links int
 
 </div>
 
-One fact shapes everything here. Galaxy servers do not send the headers (CORS headers) that let JavaScript on another website read their answers: in our tests in Chromium, a page on another site could not even read `/api/version` from usegalaxy.eu, usegalaxy.org or usegalaxy.org.au. The two exceptions are the GTN's API and Galaxy's landing requests, both described below. Everything else happens on Galaxy's own pages or in scripts on your computer.
+Galaxy servers do not send the headers (CORS headers) that let JavaScript on another website read their answers. In our tests in Chromium, a page on another site could not even read `/api/version` from usegalaxy.eu, usegalaxy.org or usegalaxy.org.au. The two exceptions are the GTN's API and Galaxy's landing requests, both described below. Everything else happens on Galaxy's own pages or in scripts on your computer.
 
 Galaxy is free software for running analyses through a web browser, on public servers such as usegalaxy.eu [1]. The Galaxy Training Network (GTN) is its collection of teaching material [2, 3]. Everything on this page was tested on 15 October 2026 against usegalaxy.eu, usegalaxy.org and usegalaxy.org.au, which ran Galaxy 26.1, and usegalaxy.fr, which ran 26.0, with BioBlend 1.9.0.
 
@@ -67,7 +67,7 @@ These paths work on any Galaxy server. Put the server's address, such as `https:
 How it works:
 
 - **Tool IDs** come from the GTN API (`tools`, in each tutorial) or from a server's tool search: `/api/tools?q=fastqc` on [usegalaxy.eu](https://usegalaxy.eu/api/tools?q=fastqc) lists matching IDs, best first. IDs from the Galaxy Tool Shed end in the tool's version.
-- **Versions differ between servers.** On 15 October 2026, FastQC 0.74+galaxy1 was on all four big servers, but fastp was version 1.3.7 on three of them and 1.4.0 on usegalaxy.org.au. A server answers 200 at `/api/tools/` followed by the encoded ID if it has that exact version.
+- **Versions differ between servers.** On 15 October 2026, FastQC 0.74+galaxy1 was on all four big servers, but fastp was version 1.3.7 on three of them and 1.4.0 on usegalaxy.org.au. To check a server, ask for `/api/tools/` followed by the encoded ID. Galaxy answers even when it lacks that version, with another version it has, so compare the `version` field in the reply with the one you want.
 - **Workflows by TRS address.** A Tool Registry Service (TRS) address names one version of a workflow in a public registry. Galaxy accepts any address that contains `/ga4gh/trs/v2/tools/`, then the workflow's ID, `/versions/` and a version. The GTN API gives one for each tutorial workflow, and the "run in Galaxy" buttons of WorkflowHub and Dockstore send people to the same import page.
 - **Students who are logged out lose workflow links.** In our test, Galaxy sent a logged-out visitor to its login page with nothing to bring them back to the import. Ask students to log in first, then click.
 - **my.galaxy.training** is a GTN service. The first time, it asks each student to choose a server, then sends them to the same path there. The GTN says the choice stays in the student's browser and is never sent to the GTN.
@@ -92,17 +92,17 @@ curl -s -X POST https://usegalaxy.eu/api/file_landings \
 
 Galaxy's default settings stop its pages from appearing in a frame on another website, with one exception: published workflows and Galaxy Pages, when the address includes `embed=true`. This example frames a variant-calling workflow that the Intergalactic Workflow Commission (IWC) published on usegalaxy.eu.
 
-{% include example.html file="examples/galaxy-embed.html" title="A published workflow from usegalaxy.eu, in a frame" height="630" load="click" note="This example loads Galaxy's own interface from usegalaxy.eu, about 3.5 MB, so it waits for you." %}
+{% include example.html file="examples/galaxy-embed.html" title="A published workflow from usegalaxy.eu, in a frame" height="630" load="click" note="This example loads Galaxy's own interface from usegalaxy.eu, about 3.5 MB, with its visit counting and error reporting, so it waits for you." %}
 
 How it works:
 
 - **Galaxy writes the code for you.** Once a workflow or Page is shared by link or published, its sharing page offers the iframe code. For workflows the options are `buttons`, `about`, `heading`, `minimap`, `zoom_controls`, `initialX`, `initialY` and `zoom`. We tested only the settings that Galaxy writes by default.
-- **Why only these addresses.** By default Galaxy sends `X-Frame-Options: SAMEORIGIN`, which tells browsers to refuse frames on other sites, and leaves it out only for `/published/` addresses whose query includes `embed=true`. usegalaxy.org, usegalaxy.org.au and usegalaxy.fr send the header on every other page, and Chromium refused to frame them.
+- **Why only these addresses.** By default Galaxy sends `X-Frame-Options: SAMEORIGIN`, which tells browsers to refuse frames on other sites, and leaves it out only for `/published/` addresses whose query includes `embed=true`. usegalaxy.org and usegalaxy.org.au send the header on every other page, and Chromium refused to frame them. On 16 October 2026, usegalaxy.fr sent it on `embed=true` pages as well, so its published workflows could not be framed either.
 - **usegalaxy.eu is different.** It sends no such header, so its other pages do appear in a frame. We did not test logging in inside one, and browsers limit the [cookies that a framed site can use](https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/Third-party_cookies), so open Galaxy in a new tab instead.
 - **Speed.** The frame downloads Galaxy's interface before it draws anything. usegalaxy.eu drew this workflow in 7 to 10 seconds in our tests, and usegalaxy.org took about 16 seconds for a similar one. Load it on a click, as this page does.
 - **A text version.** A screen reader cannot follow the diagram, so list the steps as text as well, as the example does under the frame.
 
-The framed page is Galaxy's own, served by usegalaxy.eu under that server's privacy policy, and it counts visits as the rest of usegalaxy.eu does. GTN tutorial pages can be framed too, because they send no `X-Frame-Options` header, but a tutorial needs room next to Galaxy, so a link that opens a new tab works better for students.
+The framed page is Galaxy's own, served by usegalaxy.eu under that server's privacy policy, and it counts visits (with Plausible) and reports errors (with Sentry), as the rest of usegalaxy.eu does. GTN tutorial pages can be framed too, because they send no `X-Frame-Options` header, but a tutorial needs room next to Galaxy, so a link that opens a new tab works better for students.
 
 {% include ad.html slot="in_article" %}
 
@@ -146,7 +146,7 @@ gi = GalaxyInstance(url="https://usegalaxy.eu", key=os.environ["GALAXY_API_KEY"]
 COURSE = "BIOL2001 Practical 3"
 FASTQ = "https://zenodo.org/records/582600/files/mutant_R1.fastq"     # GTN training data, CC BY 4.0
 TRS = ("https://training.galaxyproject.org/training-material/api/ga4gh/trs/v2/tools/"
-       "introduction-galaxy-intro-short/versions/galaxy-workflowlaxy-intro-short")
+       "introduction-galaxy-intro-short/versions/galaxy-workflowlaxy-intro-short")   # the GTN's own version ID, odd as it looks
 students = [line.strip() for line in open("students.txt") if line.strip()]   # their Galaxy email addresses
 
 # Import the GTN workflow once. BioBlend has no TRS helper, so call POST /api/workflows.
@@ -195,7 +195,7 @@ Things to know:
 - **PDF reports.** BioBlend's `get_invocation_report_pdf()` saves a run's report as a PDF on servers that allow it. usegalaxy.eu and usegalaxy.org did; usegalaxy.org.au and usegalaxy.fr did not.
 - **More.** The GTN's [slides on BioBlend and the Galaxy API](https://training.galaxyproject.org/training-material/topics/dev/tutorials/bioblend-api/slides.html) go further.
 
-## The same calls with curl
+## Make the same calls with curl
 
 The same steps as plain HTTP requests, for shell scripts or other languages. Each needs your key in an `x-api-key` header. This needs `curl` and `jq`, and was not run against Galaxy, for the same reason as above.
 
@@ -203,6 +203,7 @@ The same steps as plain HTTP requests, for shell scripts or other languages. Eac
 G=https://usegalaxy.eu
 K=(-H "x-api-key: $GALAXY_API_KEY")
 J=(-H "Content-Type: application/json")
+# "galaxy-workflowlaxy-intro-short" is the GTN's own version ID, odd as it looks
 TRS=https://training.galaxyproject.org/training-material/api/ga4gh/trs/v2/tools/introduction-galaxy-intro-short/versions/galaxy-workflowlaxy-intro-short
 
 # A history for one student
@@ -249,7 +250,7 @@ Galaxy Tours are short guided walks through the interface: a series of pop-ups, 
 - **Records you cannot delete.** Landing requests are permanent and public to anyone with the link. Make them by hand, once.
 - **Servers differ.** usegalaxy.org.au lets people sign in only through Australian BioCommons Access, with no Galaxy username and password. Tool versions differ, and on 15 October 2026 usegalaxy.fr ran Galaxy 26.0 while the others ran 26.1. Test every link on the server you will use.
 - **Things change.** The GTN API may change without warning, and Galaxy's screens change between releases. Check your links and examples before each course, and put a date on your instructions.
-- **Accessibility.** The GTN aims for WCAG 2.0 level AA and is tested with a screen reader. Galaxy has reduced the number of tasks that need a mouse and improved keyboard navigation [1], but we found no accessibility statement for Galaxy itself. Give a text version of every workflow diagram, and see [accessibility](../accessibility/).
+- **Accessibility.** The GTN aims for WCAG 2.0 level AA, and one of its developers uses a screen reader regularly. Galaxy has reduced the number of tasks that need a mouse and improved keyboard navigation [1], but we found no accessibility statement for Galaxy itself. Give a text version of every workflow diagram, and see [accessibility](../accessibility/).
 
 ## Licences and credits
 

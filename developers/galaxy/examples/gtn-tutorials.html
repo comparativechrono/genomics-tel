@@ -60,8 +60,21 @@
       statusEl.className = isError ? "error" : "";
     }
 
+    // Give up after 20 seconds rather than wait for ever when a server hangs
+    async function fetchWithin(url, options = {}, ms = 20000) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), ms);
+      try {
+        return await fetch(url, { ...options, signal: ctrl.signal });
+      } catch (err) {
+        throw err.name === "AbortError" ? new Error("no answer within " + ms / 1000 + " seconds") : err;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     async function getJSON(url) {
-      const r = await fetch(url);
+      const r = await fetchWithin(url);
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     }
@@ -177,6 +190,9 @@
       } catch (err) {
         topicSelect.textContent = "";
         topicSelect.appendChild(el("option", null, "Topics unavailable"));
+        // The topic comes from the same server, so do not wait for it too
+        setStatus("The GTN did not send its list of topics (" + err.message + "). Browse the tutorials at training.galaxyproject.org instead.", true);
+        return;
       }
       loadTopic(first);
     })();

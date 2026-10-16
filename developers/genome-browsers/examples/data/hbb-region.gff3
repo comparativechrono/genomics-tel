@@ -2,17 +2,17 @@
 ##sequence-region HBB_region 1 20000
 HBB_region	RefSeq	gene	8464	10071	.	-	.	ID=gene-HBB;Name=HBB
 HBB_region	RefSeq	mRNA	8464	10071	.	-	.	ID=rna-NM_000518.5;Parent=gene-HBB;Name=NM_000518.5;gene=HBB
-HBB_region	RefSeq	exon	8464	8726	.	-	.	ID=exon-NM_000518.5-1;Parent=rna-NM_000518.5
+HBB_region	RefSeq	exon	8464	8726	.	-	.	ID=exon-NM_000518.5-3;Parent=rna-NM_000518.5
 HBB_region	RefSeq	exon	9577	9799	.	-	.	ID=exon-NM_000518.5-2;Parent=rna-NM_000518.5
-HBB_region	RefSeq	exon	9930	10071	.	-	.	ID=exon-NM_000518.5-3;Parent=rna-NM_000518.5
+HBB_region	RefSeq	exon	9930	10071	.	-	.	ID=exon-NM_000518.5-1;Parent=rna-NM_000518.5
 HBB_region	RefSeq	CDS	9930	10021	.	-	0	ID=cds-NM_000518.5;Parent=rna-NM_000518.5
 HBB_region	RefSeq	CDS	9577	9799	.	-	1	ID=cds-NM_000518.5;Parent=rna-NM_000518.5
 HBB_region	RefSeq	CDS	8598	8726	.	-	0	ID=cds-NM_000518.5;Parent=rna-NM_000518.5
 HBB_region	RefSeq	gene	15838	17483	.	-	.	ID=gene-HBD;Name=HBD
 HBB_region	RefSeq	mRNA	15838	17483	.	-	.	ID=rna-NM_000519.4;Parent=gene-HBD;Name=NM_000519.4;gene=HBD
-HBB_region	RefSeq	exon	15838	16092	.	-	.	ID=exon-NM_000519.4-1;Parent=rna-NM_000519.4
+HBB_region	RefSeq	exon	15838	16092	.	-	.	ID=exon-NM_000519.4-3;Parent=rna-NM_000519.4
 HBB_region	RefSeq	exon	16991	17213	.	-	.	ID=exon-NM_000519.4-2;Parent=rna-NM_000519.4
-HBB_region	RefSeq	exon	17342	17483	.	-	.	ID=exon-NM_000519.4-3;Parent=rna-NM_000519.4
+HBB_region	RefSeq	exon	17342	17483	.	-	.	ID=exon-NM_000519.4-1;Parent=rna-NM_000519.4
 HBB_region	RefSeq	CDS	17342	17433	.	-	0	ID=cds-NM_000519.4;Parent=rna-NM_000519.4
 HBB_region	RefSeq	CDS	16991	17213	.	-	1	ID=cds-NM_000519.4;Parent=rna-NM_000519.4
 HBB_region	RefSeq	CDS	15964	16092	.	-	0	ID=cds-NM_000519.4;Parent=rna-NM_000519.4

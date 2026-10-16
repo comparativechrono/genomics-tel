@@ -104,7 +104,7 @@ Teams produce a short report or a poster, marked with a rubric. In the source co
 
 pLDDT is local: two domains can each have very high pLDDT while their positions relative to each other are uncertain, as in calmodulin. And "colour by B-factor" on an AlphaFold model shows pLDDT, not how much the atoms move [8].
 
-**Residue 6 or residue 7.** PDB entries often number the finished protein, while UniProt, AlphaFold and HGVS variant names count from the first methionine, which is removed from the finished protein. So the sickle-cell residue is Glu6 in 4HHB and in older papers, but p.Glu7Val in ClinVar. The [developers' page](../../developers/structures/#residue-6-or-residue-7) has a table.
+**Residue 6 or residue 7.** PDB entries often number the finished protein, while UniProt, AlphaFold and HGVS variant names count from the first methionine, which is removed from the finished protein. So the sickle-cell residue is Glu6 in 4HHB and in older papers, but p.Glu7Val in ClinVar. The [developers' page](../../developers/structures/#match-the-pdb-and-uniprot-numbering) has a table.
 
 **"One chain is the protein."** Haemoglobin works as four chains holding four haem groups. The AlphaFold DB model of β-globin is one chain with no haem, and the sickle-cell change acts between whole haemoglobin molecules, so no single-chain model can show it.
 

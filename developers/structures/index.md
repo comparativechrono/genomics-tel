@@ -1,7 +1,7 @@
 ---
 title: Embedding 3D structure viewers
 topic: structures
-lede: Put a protein structure in a teaching page, turned to the part that matters, with the residue you are teaching marked and labelled. Mol* suits most pages. Use the PDBe Mol* tag if you would rather not write code, and 3Dmol.js when the page must stay small.
+lede: Put a protein structure in a teaching page, turned to the region you need, with the residue you are teaching marked and labelled. Mol* suits most pages. Use the PDBe Mol* tag if you would rather not write code, and 3Dmol.js when the page must stay small.
 description: How to embed Mol*, PDBe Mol*, 3Dmol.js and NGL in a teaching web page, load PDB entries and AlphaFold models through their APIs, and mark, label and zoom to residues, with live examples.
 ---
 
@@ -24,7 +24,7 @@ The examples below all show human haemoglobin and the residue changed in sickle-
 
 ## A viewer in a few lines
 
-A stylesheet, a script and one call to `molstar.Viewer.create` give you a working viewer [2]. `loadPdb` then fetches an entry from the RCSB PDB.
+A stylesheet, a script and one call to `molstar.Viewer.create` give you a working viewer [2]. `loadPdb` then fetches an entry from the Protein Data Bank.
 
 {% include example.html file="examples/molstar-basic.html" title="Mol* open at haemoglobin" height="465" load="click" note="This example downloads Mol* (1.5 MB compressed) when it starts." %}
 
@@ -32,12 +32,13 @@ How it works:
 
 - **The container** needs a height and `position: relative`, because Mol\* fills it. Label it with `role="region"` and an `aria-label` that says what is shown; `role="img"` would hide Mol\*'s own buttons from screen readers.
 - **Options** switch parts of the interface on and off. `layoutIsExpanded: false` keeps Mol\* inside the page, and `layoutShowControls: false` hides the side panels and the sequence. The expand button in the corner still lets students fill the screen.
-- **`loadPdb("4hhb")`** fetches the entry from `models.rcsb.org/4hhb.bcif` as BinaryCIF, a compact binary form of the PDB's mmCIF format: 553 kB, or 123 kB compressed. Add `pdbProvider: "pdbe"` to the options to fetch PDBe's copy instead. `loadStructureFromUrl` loads any file, and `loadAlphaFoldDb` an AlphaFold model.
-- **Hovering** over a residue names it in the corner. For glutamate 6 of chain B, Mol\* shows `B | GLU 6` and `UNP P68871 7 E`: the same residue is number 7 in UniProt. The [numbering section](#residue-6-or-residue-7) explains why.
+- **`loadPdb("4hhb")`** fetches the entry as BinaryCIF, a compact binary form of the PDB's mmCIF format. By default it comes from PDBe, at `www.ebi.ac.uk/pdbe/entry-files/download/4hhb.bcif`: 344 kB, or 86 kB compressed. The viewer option `pdbProvider: "rcsb"` fetches the RCSB PDB's copy instead (553 kB, or 126 kB compressed).
+- **Failures.** When the download fails, Mol\* can finish without a structure and without an error, so the example checks that a structure arrived and says so if not. `loadStructureFromUrl` loads any file, and `loadAlphaFoldDb` an AlphaFold model.
+- **Hovering** over a residue names it in the corner. For glutamate 6 of chain B, Mol\* shows `B | GLU 6` and `UNP P68871 7 E`: the same residue is number 7 in UniProt. The [numbering section](#match-the-pdb-and-uniprot-numbering) explains why.
 
 ## Mark and label a residue
 
-A teaching view usually needs three things: colours that make the point, the residue that matters marked and labelled, and buttons that take students to the right place. Mol\* builds the first two from a MolViewSpec scene, a description of what to load and how to draw it [3], and does the third with `structureInteractivity`.
+For teaching, colour the molecule to make the point, mark and label the residue you are teaching, and add buttons that take students to the right place. Mol\* handles the first two with a MolViewSpec scene, a description of what to load and how to draw it [3], and the third with `structureInteractivity`.
 
 {% include example.html file="examples/molstar-hbs.html" title="Haemoglobin with glutamate 6 of each β chain marked and labelled" height="590" load="click" note="This example downloads Mol* (1.5 MB compressed) when it starts." %}
 
@@ -51,7 +52,7 @@ How it works:
 - **A chain letter is more than the chain.** `auth_asym_id: "B"` also matches chain B's haem, a phosphate ion and 57 water molecules, because they carry the same letter. `label_asym_id: "B"`, the file's own name for the chain, is the protein alone, which is why the highlight button uses it.
 - **Saving a scene.** `MVSData.toMVSJ()` turns a scene's state into a small JSON file, and the viewer's `loadMvsFromUrl()` loads one. A colleague can then change the colours or a label in the file without touching the code.
 
-### Residue 6 or residue 7
+### Match the PDB and UniProt numbering
 
 The same glutamate has two numbers, and both are correct. The gene's first codon codes for a methionine, which is removed from the finished protein. The PDB entry numbers the finished chain, so in 4HHB each β chain starts at valine 1 and the sickle-cell residue is Glu6. UniProt and AlphaFold number the sequence the gene codes for, so the same residue is 7. Variant names follow the gene: ClinVar records the sickle-cell change as `NM_000518.5(HBB):c.20A>T (p.Glu7Val)`, while older papers and textbooks call it Glu6Val.
 
@@ -99,7 +100,7 @@ How it works:
 - **The API.** A request for `/api/prediction/P04637` on `alphafold.ebi.ac.uk` returns a list with one record for each model. A record gives the model files (`bcifUrl`, `cifUrl`, `pdbUrl`), the scores for each residue (`plddtDocUrl`), the predicted aligned error as a picture (`paeImageUrl`) and as numbers (`paeDocUrl`), the version (`latestVersion`), the mean pLDDT (`globalMetricValue`) and the share of residues in each band (`fractionPlddtVeryHigh` and three more). The API and the files allow use from other websites.
 - **pLDDT** is AlphaFold's confidence in the local structure around each residue, on a scale of 0 to 100. AlphaFold DB colours it in four bands: very high (90 and above), confident (70 to 90), low (50 to 70) and very low (below 50) [5]. `theme: { globalName: "plddt-confidence" }` gives the same colours in Mol\*. The viewer's `loadAlphaFoldDb("P04637")` does the lookup and the loading in one line, if you do not need the record.
 - **Finding low-confidence residues.** AlphaFold files keep pLDDT in the B-factor column [5], so a query on `B_iso_or_equiv` below 50 selects the very low residues: 117 of p53's 393.
-- **A text version.** The file of scores gives each band's share of the residues and its longest unbroken stretch, so the colours are not the only way to read the model.
+- **A text version.** The API gives each band's share of the residues, and the file of scores its longest unbroken stretch, so the colours are not the only way to read the model.
 - **The predicted aligned error (PAE)** is the error, in ångströms, that AlphaFold expects in the position of one residue when the model and the true structure are lined up on another. Low values between two domains mean that AlphaFold is confident about their positions relative to each other [5]. AlphaFold DB's picture of it is a bare 320-pixel square, so the page adds a key and a caption. Values stop at 31.75 Å [5].
 - **Three proteins, three lessons.** p53's DNA-binding domain (residues 94 to 292) is mostly very high, while most of its first 90 residues and much of its far end are very low. Calmodulin's two lobes are each confident, but the PAE between them is high: from the PAE file, about 4 Å within each lobe and 22 Å between them. β-globin is very high almost everywhere, yet the model is one chain without its haem.
 
@@ -125,7 +126,7 @@ How it works:
 - **Labels.** `data-labelres2` labels each chosen residue with its name and number. Options inside options need the attribute written as JSON.
 - **More control** needs JavaScript, and the API is small: `$3Dmol.createViewer`, `addModel`, `setStyle`, `addLabel` and `setClickable`, whose callback receives the clicked atom with its `chain`, `resi` and `resn`. `data-callback` can run code after loading, but through `eval`, which a strict content security policy blocks.
 
-## NGL, briefly
+## Draw the same view with NGL
 
 NGL [7] is one of the two viewers that Mol\* grew from [2], and it still works. Its selection language is short and readable, but version 2.5.0 came nearly two years after 2.4.0, and two problems matter for teaching: labels cannot show Greek letters, and its built-in AlphaFold shortcut asks for files that no longer exist.
 
@@ -144,7 +145,7 @@ NGL [7] is one of the two viewers that Mol\* grew from [2], and it still works. 
 - **Several viewers on one page.** Each viewer uses its own WebGL context, and browsers allow only a limited number at once (about 16 in Chrome). Load viewers when they are needed, as this page does.
 - **Phones and tablets.** The examples worked without sideways scrolling in Chrome's emulation of a Pixel 7 phone and at 350 pixels wide, but we have not tested real phones or touch gestures. Mol\*'s expand button gives the viewer the whole screen, and Mol\* runs on iPads, which many students use instead of laptops [8].
 - **Screen readers and keyboards.** The 3D view is a picture drawn on a canvas, which screen readers cannot read, and turning it needs a drag. Give every task another route: buttons, a form, a text list of the key residues, and alt text that states the structural point [9]. Turning by dragging needs an alternative that does not drag ([WCAG 2.2](https://www.w3.org/TR/WCAG22/), success criterion 2.5.7), and a molecule that spins by itself needs a pause button (2.2.2). See [accessibility](../accessibility/).
-- **Numbering.** PDB author numbers, PDB label numbers, UniProt numbers and HGVS names can all differ. Say which you use, and test each selection on the file you load. The [haemoglobin table](#residue-6-or-residue-7) shows one case.
+- **Numbering.** PDB author numbers, PDB label numbers, UniProt numbers and HGVS names can all differ. Say which you use, and test each selection on the file you load. The [haemoglobin table](#match-the-pdb-and-uniprot-numbering) shows one case.
 - **AlphaFold versions.** Never write a file address with a version in it, such as `…model_v4.pdb`. Ask the API.
 - **Versions.** Mol\* releases about once a month (5.10.0 in June 2026, 5.13.0 in October), and its options change between releases. We tested 5.12.0. Pin the version, and read the release notes before you update.
 

@@ -101,9 +101,10 @@
 
       const spec = {
         $schema: "https://vega.github.io/schema/vega-lite/v6.json",
-        description: "Manhattan plot of FinnGen genome-wide association results for alcohol use disorder. " +
-          "The strongest signal is on chromosome 4 at " + top.id + " near " + top.gene + ", p = " + top.p.toExponential(1) +
-          ". 19 lead variants pass the genome-wide significance line at p = 5e-8.",
+        // Built from the data, so that it stays true when you change the endpoint
+        description: "Manhattan plot of FinnGen genome-wide association results. " +
+          "The strongest signal is on chromosome " + top.chrom + " at " + top.id + " near " + top.gene + ", p = " + top.p.toExponential(1) +
+          ". " + listed.filter(v => v.lead).length + " lead variants pass the genome-wide significance line at p = 5e-8.",
         width: "container", height: 300,
         layer: [
           { data: { values: binRanges },               // aria: false keeps thousands of background marks away from screen readers
@@ -161,7 +162,7 @@
         binDots.length.toLocaleString("en-GB") + " binned values. " + tbody.rows.length + " peaks pass p = 5 × 10⁻⁸.";
     }).catch(err => {
       document.getElementById("status").textContent =
-        "FinnGen's server did not answer (" + err.message + "). Try again later.";
+        "FinnGen's data did not arrive (" + (err.name === "AbortError" ? "no answer within 20 seconds" : err.message) + "). Try again later.";
     });
   </script>
 </body>

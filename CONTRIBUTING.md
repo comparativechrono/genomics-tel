@@ -82,8 +82,9 @@ Each example is one HTML file in the topic's `examples/` folder that works on it
 - Load libraries from a CDN with an **exact version** (`igv@3.8.9`, never `@latest`), and add an `integrity` hash and `crossorigin="anonymous"` to `<script>` tags where the library is a single file. To make a hash: `curl -s URL | openssl dgst -sha384 -binary | openssl base64 -A`.
 - **Do not use two opening curly braces, or a curly brace followed by a percent sign, anywhere in an example.** Jekyll reads the file as a template when it shows the code, and the build breaks. In JavaScript, write `{ {` with a space if you ever need it. `tools/check.py` tests for this.
 - Use public data that allow use from other websites (they send `Access-Control-Allow-Origin`), or small files in `examples/data/`. Write down where every data file came from in `data/README.txt`.
-- No API keys, no tracking, no ads inside examples.
+- No API keys, no tracking and no ads inside examples. An app from another site that an example frames (Galaxy, Nextstrain, JupyterLite) may count visits on its own pages: load it on a click, and name its analytics in the note and on the privacy page.
 - Comments in the code explain *why*, in plain English, because readers learn from them.
+- Say on the page when something fails. Give every request to another site a time limit (an `AbortController`, 20 seconds), check that a library arrived before using it, and check that a viewer really has its data: Mol\* can finish without a structure and without an error. Test with the host blocked and with it hanging.
 - Accessibility: label every input, use `<button type="button">`, and put feedback in an element with `aria-live="polite"`. Give a text version of anything that only appears in a picture.
 
 Show an example in a page with:

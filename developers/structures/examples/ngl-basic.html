@@ -46,7 +46,7 @@
         hb.autoView();
       }).catch(err => {
         console.error(err);
-        picked.textContent = "The structure could not be loaded: " + err.message;
+        picked.textContent = "The structure could not be loaded (" + ((err && err.message) || err) + "). Check your connection, or try again later.";
       });
 
       // Report the residue under the pointer when it is clicked

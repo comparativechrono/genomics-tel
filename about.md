@@ -17,7 +17,7 @@ genomics.tel is written by [Tim Hearn and the Chronomic Medicine Group]({{ site.
 
 ## How we check the examples
 
-Every live example is a standalone page that we run in a current Chromium browser before publishing. Library versions are fixed in each example, so an example keeps working when a library changes. Data come from public services that allow other websites to use them, or from small files we host next to the examples. If something has stopped working, or you spot a mistake, please [open an issue on GitHub](https://github.com/{{ site.repository }}/issues) or email [{{ site.owner.email }}](mailto:{{ site.owner.email }}).
+Every live example is a standalone page that we run in Chromium (version 141 in our tests) before publishing. Library versions are fixed in each example, so an example keeps working when a library changes. Data come from public services that allow other websites to use them, or from small files we host next to the examples. If something has stopped working, or you spot a mistake, please [open an issue on GitHub](https://github.com/{{ site.repository }}/issues) or email [{{ site.owner.email }}](mailto:{{ site.owner.email }}).
 
 ## Why there are ads {#ads}
 

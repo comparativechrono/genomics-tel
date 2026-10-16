@@ -165,7 +165,9 @@ c(first = min(rich), last = max(rich) + window - 1)</textarea>
             }
             const alt = box.dataset.plotAlt || 'Plot made by the R code above';
             result.images.forEach((bitmap) => plots.append(bitmapToImg(bitmap, alt)));
-            state.textContent = 'Done in ' + ((performance.now() - t0) / 1000).toFixed(1) + ' s.';
+            // Errors, including the time limit, arrive as text on stderr, starting "Error"
+            const ok = !result.output.some(line => line.type === 'stderr' && /^Error/.test(line.data));
+            state.textContent = (ok ? 'Done' : 'Stopped with an error') + ' (' + ((performance.now() - t0) / 1000).toFixed(1) + ' s).';
           } catch (e) {
             out.textContent += 'Error: ' + e.message;
             state.textContent = 'Failed.';

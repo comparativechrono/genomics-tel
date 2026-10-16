@@ -87,8 +87,9 @@
     }).then(async text => {
       // vega.read parses the tab-separated table; parse: "auto" turns numbers into numbers
       const genes = vega.read(text, { type: "tsv", parse: "auto" }).map(r => ({
-        gene: r.SYMBOL !== "NA" ? r.SYMBOL : "Entrez " + r.ENTREZID,
-        name: r.GENENAME, lfc: r.logFC, p: r["P.Value"], fdr: r["adj.P.Val"]   // names with dots need brackets
+        // 163 genes have no symbol or name in the annotation, and the file keeps no other identifier for them
+        gene: r.SYMBOL !== "NA" ? r.SYMBOL : "(no symbol)",
+        name: r.GENENAME !== "NA" ? r.GENENAME : "not annotated", lfc: r.logFC, p: r["P.Value"], fdr: r["adj.P.Val"]   // names with dots need brackets
       }));
 
       const spec = {
@@ -180,7 +181,9 @@
         });
       });
     }).catch(err => {
-      status.textContent = "The results table did not load (" + err.message + ").";
+      status.textContent = window.vegaEmbed
+        ? "The results table did not load (" + err.message + ")."
+        : "The chart library (Vega) did not load. Check the connection and reload the page.";
     });
   </script>
 </body>

@@ -40,7 +40,7 @@ How it works:
 
 To try changes without a page of your own, use the online [Vega Editor](https://vega.github.io/editor/). It takes the same specification written as JSON, so students can paste one in and change it.
 
-## A Manhattan plot from FinnGen
+## Draw a Manhattan plot from FinnGen's results
 
 A Manhattan plot places every tested variant along the genome, with −log₁₀ of its p-value upwards, so the strongest associations stand tallest. This one reads FinnGen's published results for alcohol use disorder [2] from FinnGen's own server each time it opens.
 
@@ -48,7 +48,7 @@ A Manhattan plot places every tested variant along the genome, with −log₁₀
 
 How it works:
 
-- **The data** come from FinnGen's results browser, PheWeb [3], as one 145 kB file from `r13.finngen.fi` at `/api/manhattan/pheno/AUD_SWEDISH`. It lists the 2,080 strongest variants one by one and sends the rest already summarised in 3 Mb bins, which is all a picture of the whole genome needs. Other endpoints work the same way: change the code at the end of the address (`T2D` gives type 2 diabetes, 663 kB with 10,122 variants listed).
+- **The data** come from FinnGen's results browser, PheWeb [3], as one file from `r13.finngen.fi` (145 kB to download, 1 MB unpacked) at `/api/manhattan/pheno/AUD_SWEDISH`. It lists the 2,080 strongest variants one by one and sends the rest already summarised in 3 Mb bins, which is all a picture of the whole genome needs. Other endpoints work the same way: change the code at the end of the address (`T2D` gives type 2 diabetes, 663 kB with 10,122 variants listed).
 - **One axis for 23 chromosomes.** Each variant goes at its chromosome's start plus its own position, using the GRCh38 chromosome lengths. The labels sit at each chromosome's middle, and any chromosome narrower than 13 pixels loses its label, so that they do not overlap on a phone.
 - **Layers** draw the binned ranges, the binned values, the listed variants, the line at p = 5 × 10⁻⁸ (7.3 on the −log₁₀ scale) and the labels. Each layer can have its own `data`.
 - **Tooltips that are easy to hit.** A `params` entry with `nearest: true` gives the variants an invisible Voronoi layer, so the tooltip opens for whichever point is nearest and the pointer need not land on a dot a few pixels wide.
@@ -65,7 +65,7 @@ A scan of a genome with no real associations still produces peaks. This example 
 
 How it works:
 
-- **With no real effect, a p-value is equally likely to fall anywhere between 0 and 1**, so `1 - Math.random()` stands in for one test. A scan of a million took 0.4 seconds in our tests, and 100 scans took 2 seconds.
+- **With no real effect, a p-value is equally likely to fall anywhere between 0 and 1**, so `1 - Math.random()` stands in for one test. In our tests, one scan of a million, drawn on the chart, took about 0.4 seconds, and 100 scans, of which only the last is drawn, took about 2 seconds.
 - **Only tests with p < 0.01 are drawn**, about 10,000 of them, in the same spirit as FinnGen's bins.
 - **A named dataset.** The points sit in `datasets: { points: … }`, so each new scan replaces them with `view.data("points", …).runAsync()` instead of rebuilding the chart.
 - **The table** sets each count beside what chance predicts: a million times the threshold.
@@ -91,7 +91,7 @@ How it works:
 
 The columns `adj.P.Val` and `P.Value` have dots in their names, which Vega reads as paths into nested objects. The page renames them as it reads the table. Inside a Vega expression you can also write `datum['adj.P.Val']`.
 
-## A clustered heatmap, and worse ones
+## Choose the scaling, order and colours of a heatmap
 
 A heatmap shows a table of numbers as colours, and what it shows depends on three choices: how the values are scaled, how the rows are ordered and which colours are used. This example lets students change all three, so it can carry a "makeover" activity.
 
@@ -108,7 +108,7 @@ How it works:
 
 The file next to the page holds the 31 rows the chart needs, unchanged: 8 kB, where the full table on Zenodo is 4 MB.
 
-## Sequencing depth across exons
+## Plot sequencing depth across exons
 
 A coverage plot shows how many sequencing reads cover each base. This one sets gnomAD's genomes beside its exomes across exons 4 to 9 of *CFTR* [11, 12]. It shows students that exome sequencing reads little beyond the exons, and that its depth changes from exon to exon.
 

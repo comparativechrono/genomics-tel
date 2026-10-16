@@ -17,7 +17,7 @@ Every example is a single HTML file. It loads its libraries from a public CDN at
 
 The data come from public services that allow other websites to use them, such as the UCSC Genome Browser, the RCSB Protein Data Bank, AlphaFold DB and STRING, or from small files that sit next to the examples. Each guide says which, so you know what your page depends on.
 
-We test every example in a current Chromium browser before we publish it, and we date the versions we use. If an example stops working, [tell us on GitHub](https://github.com/comparativechrono/genomics-tel/issues).
+We test every example in Chromium (version 141 in our tests) before we publish it, and we date the versions we use. If an example stops working, [tell us on GitHub](https://github.com/comparativechrono/genomics-tel/issues).
 
 ## Before you build
 

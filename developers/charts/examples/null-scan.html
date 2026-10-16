@@ -143,14 +143,12 @@
       });
       document.getElementById("hundred").addEventListener("click", async () => {
         buttons.forEach(b => (b.disabled = true));
+        status.textContent = "Running 100 scans…";       // one message now, and one with the result at the end
         let last;
         for (let k = 1; k <= 100; k++) {
           last = runScan(k === 100);                   // keep the points of the last scan only
           if (k < 100) { scans++; if (last.counts[3] > 0) scansPastLine++; }
-          if (k % 10 === 0) {                          // let the page redraw every ten scans
-            status.textContent = "Running: " + k + " of 100 scans done…";
-            await new Promise(r => setTimeout(r, 0));
-          }
+          if (k % 10 === 0) await new Promise(r => setTimeout(r, 0));   // let the page breathe every ten scans
         }
         record(last);                                  // counts the 100th scan and fills the table
         await draw(last);

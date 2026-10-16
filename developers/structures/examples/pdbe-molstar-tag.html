@@ -40,6 +40,11 @@
     const viewer = document.getElementById("hb").viewerInstance;   // the plugin inside the tag
     const say = text => { document.getElementById("status").textContent = text; };
 
+    // loadComplete reports true or false once the tag has tried to load its entry
+    viewer.events.loadComplete.subscribe(ok => {
+      if (!ok) say("The structure could not be loaded from PDBe. Check your connection, or try again later.");
+    });
+
     // PDBe's files map every residue to UniProt, so residues can be chosen by either numbering
     document.getElementById("uniprot").onclick = async () => {
       await viewer.visual.select({

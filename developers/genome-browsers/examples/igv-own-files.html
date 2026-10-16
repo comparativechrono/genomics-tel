@@ -60,7 +60,7 @@
       tracks: [
         { name: "MANE Select transcripts", url: UCSC + "/gbdb/hg38/mane/mane.1.0.bb", format: "bigBed", labelField: "geneName2" }
       ]
-    }).then(function (browser) {
+    }).then(function (browser) {   // a failure to start is reported by the catch at the end
 
       document.getElementById("ref-files").addEventListener("change", async e => {
         const files = Array.from(e.target.files);
@@ -91,7 +91,7 @@
         }
         e.target.value = "";                  // so the same files can be chosen again
       });
-    });
+    }).catch(err => log("The genome browser could not start (" + err.message + "). Check the connection, or try again later."));
   </script>
 </body>
 </html>

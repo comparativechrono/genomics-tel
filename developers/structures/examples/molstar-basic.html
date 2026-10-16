@@ -16,18 +16,33 @@
     h1 { font-size: 1.05rem; margin: 0 0 8px; }
     /* Mol* fills its container, so the container needs a height and a position */
     #viewer { position: relative; height: 400px; }
+    #status { margin: 6px 0 0; }
   </style>
 </head>
 <body>
   <h1>Human haemoglobin (PDB 4HHB)</h1>
   <div id="viewer" role="region" aria-label="Interactive 3D model of human deoxyhaemoglobin, PDB entry 4HHB"></div>
 
+  <p id="status" role="status" aria-live="polite"></p>
+
   <script>
+    const say = text => { document.getElementById("status").textContent = text; };
+
     molstar.Viewer.create("viewer", {
       layoutIsExpanded: false,     // stay inside the page rather than filling the window
       layoutShowControls: false,   // no side panels or sequence
-      viewportShowAnimation: false
-    }).then(viewer => viewer.loadPdb("4hhb"));   // fetches https://models.rcsb.org/4hhb.bcif
+      viewportShowAnimation: false,
+      pdbProvider: "pdbe"          // where loadPdb fetches entries: "pdbe" (the default), "rcsb" or "pdbj"
+    }).then(async viewer => {
+      await viewer.loadPdb("4hhb");   // fetches https://www.ebi.ac.uk/pdbe/entry-files/download/4hhb.bcif
+      // Mol* can finish without a structure when the download fails, so check
+      if (viewer.plugin.managers.structure.hierarchy.current.structures.length === 0) {
+        throw new Error("the file did not arrive");
+      }
+    }).catch(err => {
+      console.error(err);
+      say("The structure could not be loaded (" + ((err && err.message) || err) + "). Check your connection, or try again later.");
+    });
   </script>
 </body>
 </html>

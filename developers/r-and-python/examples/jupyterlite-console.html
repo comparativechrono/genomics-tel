@@ -62,11 +62,20 @@ print(f"GC content: {gc:.1%} of {len(hbb)} bases")</textarea>
     code.addEventListener('input', updateLink);
     updateLink();
 
+    const status = document.getElementById('status');
+    let slowTimer = null;
     document.getElementById('open').addEventListener('click', () => {
       document.getElementById('placeholder').hidden = true;
       frame.hidden = false;
       frame.src = consoleAddress(code.value);   // a new address reloads the console, with a new Python
-      document.getElementById('status').textContent = 'The console is starting. The first time, Python takes about 20 seconds.';
+      status.textContent = 'The console is starting. The first time, Python takes about 20 seconds.';
+      // The console belongs to another site, so this page cannot see whether Python started.
+      // After a minute, say what to check.
+      clearTimeout(slowTimer);
+      slowTimer = setTimeout(() => {
+        status.textContent = 'If the console still shows [*] after a minute, this network may block pypi.org or ' +
+          'files.pythonhosted.org, which the console needs. Try another network.';
+      }, 60000);
     });
   </script>
 </body>

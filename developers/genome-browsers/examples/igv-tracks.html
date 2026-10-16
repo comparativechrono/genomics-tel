@@ -136,6 +136,9 @@
           height: 250
         });
       });
+    }).catch(err => {                       // the reference or a track could not be read
+      document.getElementById("status").textContent =
+        "The genome browser could not start (" + err.message + "). Check the connection, or try again later.";
     });
   </script>
 </body>

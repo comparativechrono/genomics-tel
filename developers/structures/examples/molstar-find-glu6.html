@@ -116,6 +116,10 @@
       });
       const mvs = molstar.PluginExtensions.mvs;
       await mvs.loadMVS(viewer.plugin, scene(null));
+      // loadMVS finishes even when the download fails, so check that a structure arrived
+      if (viewer.plugin.managers.structure.hierarchy.current.structures.length === 0) {
+        throw new Error("the file did not arrive from the RCSB PDB");
+      }
       viewer.plugin.managers.snapshot.clear();
 
       // molstar.lib gives access to Mol*'s structure model, so the page can name what was clicked
@@ -191,7 +195,7 @@
 
     start().catch(err => {
       console.error(err);
-      say("The structure could not be loaded: " + err.message);
+      say("The structure could not be loaded (" + ((err && err.message) || err) + "). Check your connection, or try again later.");
     });
   </script>
 </body>

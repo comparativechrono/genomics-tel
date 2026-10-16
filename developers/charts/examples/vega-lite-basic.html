@@ -55,8 +55,12 @@
       config: { font: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }
     };
 
-    // actions: false hides vega-embed's menu, which can send the chart to the online Vega Editor
-    vegaEmbed("#chart", spec, { actions: false });
+    if (window.vegaEmbed) {
+      // actions: false hides vega-embed's menu, which can send the chart to the online Vega Editor
+      vegaEmbed("#chart", spec, { actions: false });
+    } else {                       // the library did not arrive: say so rather than leave a blank space
+      document.getElementById("chart").textContent = "The chart library did not load. Check the connection and reload the page.";
+    }
   </script>
 </body>
 </html>
