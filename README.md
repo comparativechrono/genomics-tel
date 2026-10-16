@@ -27,19 +27,16 @@ GitHub Pages builds the site with Jekyll whenever `main` changes. To add or chan
 
 In this repository, go to **Settings → Pages**. Under **Build and deployment**, choose **Deploy from a branch**, then branch **main** and folder **/ (root)**, and save. After a minute or two the site appears at <https://comparativechrono.github.io/genomics-tel/>.
 
-### 2. Move www.genomics.tel to this site
+### 2. The domain
 
-At the moment `www.genomics.tel` points to the old Google Sites page, and `genomics.tel` is a redirect set up at Namecheap. To move both:
+Done on 16 October 2026. The site is served at <https://genomics.tel/> with HTTPS enforced, and `www.genomics.tel` and the old `comparativechrono.github.io/genomics-tel/` address both redirect there. The domain is set in the `CNAME` file: keep it in the repository, or the site goes back to the github.io address.
 
-1. In **Settings → Pages → Custom domain**, enter `www.genomics.tel` and save. GitHub adds a `CNAME` file to the repository.
-2. In Namecheap's DNS settings for genomics.tel:
-   - change the `www` record to a **CNAME** pointing to `comparativechrono.github.io` (it now points to `ghs.googlehosted.com`);
-   - replace the redirect on the bare domain (`@`) with four **A** records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and `185.199.111.153`. If you want IPv6 as well, add four **AAAA** records: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153` and `2606:50c0:8003::153`.
-3. Wait for GitHub to issue the certificate (minutes to an hour), then tick **Enforce HTTPS**.
-4. Check that <https://www.genomics.tel/> shows the new site and that <http://genomics.tel/> redirects to it.
-5. Recommended: verify the domain in your GitHub account settings (**Settings → Pages → Add a domain**), which stops anyone else from claiming it.
+For reference, the DNS records GitHub Pages needs are:
 
-Links inside the site adapt by themselves: there is nothing to change in the files when the domain moves.
+- the bare domain (`@`): four **A** records, `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and `185.199.111.153` (and, for IPv6, four **AAAA** records, `2606:50c0:8000::153` to `2606:50c0:8003::153`);
+- `www`: a **CNAME** pointing to `comparativechrono.github.io`.
+
+Recommended: verify the domain in your GitHub account settings (**Settings → Pages → Add a domain**), which stops anyone else from claiming it. Links inside the site adapt by themselves, so nothing in the files depends on the domain.
 
 ### 3. Turn on the ads
 
