@@ -145,6 +145,31 @@
   var resizeTimer = null;
   window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(function () { markScrollableTables(); markScrollableCode(); }, 200); });
 
+  /* ─── Examples marked tall grow to fit their content ─── */
+  // The examples come from this site, so the page can measure them. Viewers that
+  // zoom with the mouse wheel keep their fixed height instead (see example.html).
+  function fitToContent(frame) {
+    function measure() {
+      var stage = frame.parentNode, doc;
+      try { doc = frame.contentDocument; } catch (e) { return; }
+      if (!stage || !doc || !doc.documentElement || doc.URL === 'about:blank') return;
+      var h = Math.ceil(doc.documentElement.getBoundingClientRect().height);
+      if (h > 120) stage.style.height = Math.min(h, 3000) + 'px';
+    }
+    function start() {
+      measure();
+      try {
+        if (window.ResizeObserver) new ResizeObserver(measure).observe(frame.contentDocument.body);
+      } catch (e) { /* a page from another site cannot be measured */ }
+    }
+    frame.addEventListener('load', start);
+    try {
+      var d = frame.contentDocument;
+      if (d && d.readyState === 'complete' && d.URL !== 'about:blank') start();
+    } catch (e) { /* not loaded yet */ }
+  }
+  document.querySelectorAll('.example--tall iframe').forEach(fitToContent);
+
   /* ─── Examples that wait for a click ─── */
   document.querySelectorAll('[data-load-example]').forEach(function (button) {
     button.addEventListener('click', function () {
@@ -153,6 +178,7 @@
       frame.src = button.getAttribute('data-load-example');
       frame.title = button.getAttribute('data-title') || 'Live example';
       frame.setAttribute('allow', 'fullscreen; clipboard-write');
+      if (stage.closest('.example--tall')) fitToContent(frame);
       stage.innerHTML = '';
       stage.appendChild(frame);
       frame.focus();
@@ -217,6 +243,7 @@
     var toggle = hbb.querySelector('.seq-toggle');
     var base = hbb.querySelector('[data-c20]');
     var aa = hbb.querySelector('[data-codon7-aa]');
+    var spoken = hbb.querySelector('[data-codon7-text]');   // the text version read by screen readers
     var note = hbb.querySelector('.seq-note');
     var usual = note.innerHTML;
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -227,6 +254,7 @@
       base.className = 'nt ' + (on ? 'T' : 'A');
       if (!reduce) { void base.offsetWidth; base.classList.add('is-flipping'); }
       aa.textContent = on ? 'Val' : 'Glu';
+      if (spoken) spoken.textContent = on ? 'GTG' : 'GAG';
       toggle.textContent = on ? 'Show the usual sequence' : 'Make the sickle-cell change';
       note.innerHTML = on ? hbb.getAttribute('data-variant-note') : usual;
     });

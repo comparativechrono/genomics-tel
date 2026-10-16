@@ -8,7 +8,7 @@ This page collects the research that applies to every tool on this site. The top
 
 ## Give students a task, not a demonstration
 
-Active learning means that students work on something in class and think about it, rather than listen. The evidence for it is strong. A meta-analysis of 225 studies of undergraduate science, engineering and mathematics courses found that examination and concept-inventory scores were on average 0.47 standard deviations higher with active learning, and that students taught by traditional lecturing were 1.5 times more likely to fail [1]. A second meta-analysis found that active learning narrowed the gaps between under-represented students and their classmates, by 33% in examination scores and 45% in pass rates, but only in classes that spent much of their time on activities [2].
+Active learning means that students work on something in class and think about it, rather than listen. The evidence for it is strong. A meta-analysis of 225 studies of undergraduate science, engineering and mathematics courses found that examination and concept-inventory scores were on average 0.47 standard deviations higher with active learning. Students taught by traditional lecturing were 1.5 times more likely to fail [1]. A second meta-analysis found that active learning narrowed the gaps between under-represented students and their classmates, by 33% in examination scores and 45% in pass rates. It did so only in classes that spent much of their time on activities [2].
 
 Students do not always like it at first. In a randomised comparison in physics classes, students in active classes learned more, but felt that they had learned less than students who heard polished lectures [3]. They took the extra effort as a sign of poor learning. Tell students early in the course why the class works this way.
 
@@ -29,7 +29,7 @@ The same pattern works for any tool:
 3. **An independent problem.** A new gene, structure or dataset, with only the step names.
 4. **An open problem.** A question that nobody in the room knows the answer to, as in a research project ([below](#run-a-research-project-inside-a-course)).
 
-Leave out the early stages for students who already use the tool well [8]. Galaxy Training Network tutorials are built this way: each one lists learning objectives written with Bloom's taxonomy, prerequisites and a time estimate, and mixes hands-on boxes with question boxes [10].
+Leave out the early stages for students who already use the tool well [8]. Galaxy Training Network tutorials give you the first stage ready-made: each one lists learning objectives written with Bloom's taxonomy, prerequisites and a time estimate, and mixes hands-on boxes with question boxes [10].
 
 ## Keep the interface from using up students' attention
 
@@ -42,11 +42,11 @@ New information passes through working memory, which holds only a little, for a 
 - **Time to look around.** Give learners time to get used to a new interface [15]. About ten minutes suits a genome browser.
 - **Instructions that last.** Teach what to look for rather than where to click, and put a date on handouts, because interfaces change [15].
 
-Interactivity is not automatically better. The nearest evidence comes from animations: meta-analyses comparing animations with static pictures found only small advantages for animations, and a review of 194 studies, which re-analysed one of them, found a clear advantage only when students had to learn how something changes [16]. Use an interactive tool when change or movement is the point, such as rotating a binding site, zooming from a chromosome to a single base, or re-rooting a tree. Otherwise consider an annotated figure, which also works for students who cannot use the tool.
+Interactivity is not automatically better. The nearest evidence comes from animations: meta-analyses comparing animations with static pictures found only small advantages for animations. When Ploetzner and colleagues re-analysed one of those meta-analyses, animations did clearly better when students had to learn how something changes [16]. Use an interactive tool when change or movement is the point, such as rotating a binding site, zooming from a chromosome to a single base, or re-rooting a tree. Otherwise consider an annotated figure, which also works for students who cannot use the tool.
 
 ## Line up outcomes, activities and assessment
 
-Constructive alignment means that the intended learning outcomes, the activities and the assessment all point at the same thing [17]. It changes how students study: in one study, students on more closely aligned courses were more likely to take a deep approach to learning and less likely to take a surface approach [18].
+Constructive alignment means that the intended learning outcomes, the activities and the assessment all point at the same thing [17]. It may change how students study: in one study, students on more closely aligned courses reported deeper approaches to learning and fewer surface approaches [18].
 
 Bloom's taxonomy, in its revised form, sorts what students do into six levels: remember, understand, apply, analyse, evaluate and create [19]. The Blooming Biology Tool helps biology teachers check which level their assessment questions reach, and write questions at the higher levels [20].
 
@@ -61,9 +61,9 @@ Interactive tools invite vague outcomes such as "explore the genome browser" or 
 | 3D structures | Locate a variant in the structure and say what it touches | Judge whether a predicted model can be trusted, from pLDDT and PAE |
 | Networks | Classify each edge by the kind of evidence behind it | Design a network figure for a stated purpose |
 | Galaxy | Run a pipeline and explain each step | Test how a parameter or a reference genome changes the result |
-| R and Python | Read, run and change code that filters and plots a table | Judge whether someone else's notebook reproduces its results |
+| R and Python in the browser | Read, run and change code that filters and plots a table | Judge whether someone else's notebook reproduces its results |
 | Phylogenetic trees | Infer relatedness from the most recent common ancestor | Build a tree from an alignment and critique it |
-| Charts of genomic data | Separate statistical significance from effect size in a volcano plot | Explain what a genome-wide significance threshold assumes |
+| Charts of genomic data | Separate statistical significance from effect size in a volcano plot | Judge whether 5 × 10⁻⁸ suits a study of rare variants or of an isolated population |
 
 </div>
 
@@ -87,9 +87,9 @@ Write the assessment before the activity. Then check that the activity gives stu
 
 A course-based undergraduate research experience (CURE) puts a real research question into a timetabled course. Its five dimensions are the use of scientific practices, discovery, work that matters beyond the class, collaboration and iteration [21]. Bioinformatics projects suit the format: they are free, safe and possible to run remotely, and may be more accessible for students with disabilities [22].
 
-A long-running example is the Genomics Education Partnership, in which students improve draft genome sequence and build gene models from the evidence in a genome browser. By 2010 its students had improved more than 2 million bases and produced hundreds of gene models, and they showed knowledge gains on quizzes taken before and after the course [23]. Time matters. Teachers typically gave the project 25 to 45 hours of class time, and students needed more than 36 hours to gain the full benefit of a research experience [24]. A shared central support system made up for what individual campuses lacked, such as time to develop a curriculum and IT services [25].
+A long-running example is the Genomics Education Partnership, in which students improve draft genome sequence and build gene models from the evidence in a genome browser. By 2010 its students had improved more than 2 million bases and produced hundreds of gene models, and they showed knowledge gains on quizzes taken before and after the course [23]. Time matters. When the project was the centre of the course, most teachers gave it 25 to 45 hours of class time. Students' reported gains rose with time: the quarter of courses that gave it more than 36 hours (45.5 on average) had the largest gains, although they did not differ significantly from the next quarter down [24]. A shared central support system made up for some of what individual campuses lacked, such as time to develop a curriculum and IT services [25].
 
-Students who completed all three semesters of one large CURE programme were more likely than matched students to earn a degree in science, technology, engineering or mathematics, and to graduate within six years, with no effect on their final grades [26]. CUREs vary widely, though, and which of their parts produce these benefits is not yet known [27].
+Students who completed all three semesters of one large CURE programme were more likely than matched students to earn a degree in science, technology, engineering or mathematics, and to graduate within six years. Taking part had no effect on their final grades [26]. CUREs vary widely, though, and which of their parts produce these benefits is not yet known [27].
 
 Genomics CUREs that you can adapt include:
 
@@ -104,9 +104,28 @@ Almost all of this research comes from the United States. In a UK degree, a seco
 
 Two frameworks describe what bioinformatics teaching should cover. The International Society for Computational Biology (ISCB) competencies were written to apply across careers and kinds of training [31]. The NIBLSE competencies are written for undergraduate life scientists, and came from a survey of 1,260 biology faculty in the United States [32].
 
-The 14 ISCB competencies run from A to N: general biology (A), depth in an area of biology (B), data-generation technologies (C), the scientific discovery process (D), statistical methods (E), bioinformatics tools and their use (F), whether a computing system meets a scientific need (G), computing requirements (H), web and graphical computing skills (I), the command line and scripting (J), building software (K), the impact of bioinformatics on people and society (L), professional, ethical, legal, security and social issues (M), and communication (N) [31].
+The two lists, side by side:
 
-The nine NIBLSE competencies are the role of computation and data mining (C1), computational concepts such as algorithms and databases (C2), statistical concepts (C3), using bioinformatics tools on biological problems (C4), finding, retrieving and organising data (C5), networks and data integration (C6), command-line tools and scripts (C7), data types, structure and reproducibility (C8), and the ethical, legal, medical and social implications of biological data (C9) [32].
+<div class="table-wrap" markdown="1">
+
+| The 14 ISCB competencies [31] | The nine NIBLSE competencies [32] |
+|---|---|
+| A. General biology | C1. The role of computation and data mining |
+| B. Depth in an area of biology | C2. Computational concepts, such as algorithms and databases |
+| C. Data-generation technologies | C3. Statistical concepts |
+| D. The scientific discovery process | C4. Using bioinformatics tools on biological problems |
+| E. Statistical methods | C5. Finding, retrieving and organising data |
+| F. Bioinformatics tools and their use | C6. Networks and data integration |
+| G. Whether a computing system meets a scientific need | C7. Command-line tools and scripts |
+| H. Computing requirements | C8. Data types, structure and reproducibility |
+| I. Web and graphical computing skills | C9. Ethical, legal, medical and social implications of biological data |
+| J. The command line and scripting | |
+| K. Building software | |
+| L. The impact of bioinformatics on people and society | |
+| M. Professional, ethical, legal, security and social issues | |
+| N. Communication | |
+
+</div>
 
 This is how we suggest the tools on this site map onto them:
 

@@ -1,13 +1,13 @@
 ---
 title: Teaching with sequences and alignments
 topic: sequences
-lede: A multiple alignment lines up the same protein from several species, so students can see which positions never change and ask why. Used well, it also teaches them that an alignment is computed rather than observed, and that a residue number means little until you say whose numbering it is.
+lede: A multiple alignment lines up the same protein from several species, so students can see which positions never change and ask why. It can also teach them that an alignment is computed rather than observed, and that a residue number means little until you say whose numbering it is.
 description: How to teach with protein sequences, BLAST searches and multiple sequence alignments in university courses, with activities, assessment ideas, common misconceptions and references.
 ---
 
 ## What sequences and alignments teach well
 
-A multiple alignment puts related sequences in rows and lines up the positions that correspond in columns. That makes it good for teaching ideas that are hard to see in one sequence: that some positions are held in place by what the protein does, that similarity is evidence of shared ancestry rather than proof of it, and that the columns come from a program with settings that someone chose. A search tool such as BLAST adds the statistics: how often a match this good would turn up by chance.
+A multiple alignment puts related sequences in rows and lines up the positions that correspond in columns. With several species side by side, students can see what one sequence cannot show. Some positions are held in place by what the protein does. Similarity is evidence of shared ancestry, not proof of it. And the columns come from a program, with settings that someone chose. A search tool such as BLAST adds the statistics: how often a match this good would turn up by chance.
 
 After a well-designed session, students should be able to:
 
@@ -42,9 +42,9 @@ The sources students read give the sickle-cell change different numbers. This ac
 
 1. Give each pair four descriptions of the same change: "HbS, β6 Glu→Val" as older textbooks write it, `NM_000518.5(HBB):c.20A>T` and `p.Glu7Val` from ClinVar, and "chain B, residue 6" from PDB entry 4HHB.
 2. Work through the first one together, then let pairs do the rest. Worked examples help most early on, and the support can then be faded [4].
-3. Pairs find the change in three views: codon 7 and base c.20 in the [exon viewer](../../developers/sequences/examples/seqviz-exon.html), column 7 in [the alignment](../../developers/sequences/examples/nightingale-msa.html), and residue 7 in the [UniProt look-up](../../developers/sequences/examples/uniprot-residue.html), which shows that UniProt records the first methionine as removed from the mature protein.
+3. Pairs find the change in three views: codon 7 and base c.20 in the [exon viewer](../../developers/sequences/examples/seqviz-exon.html), column 7 in [the alignment](../../developers/sequences/examples/nightingale-msa.html), and residue 7 in the [UniProt look-up](../../developers/sequences/examples/uniprot-residue.html). The look-up also shows that UniProt records the first methionine as removed from the mature protein.
 4. Each pair writes one sentence for each source, saying why it uses the number it does.
-5. Finish with a question that everyone votes on, then discusses in pairs, then votes on again [3]: "The haem-binding histidine is His63 in PDB entry 4HHB. Which residue is it in UniProt entry P68871?" (Answer: 64.) A harder follow-up: "Which residue is it in UniProt's horse entry, P02062?" (Answer: 63, because that entry starts at the mature protein.)
+5. Finish with a question that everyone votes on, then discusses in pairs, then votes on again [3]: "The distal histidine, which sits above the haem iron, is His63 in PDB entry 4HHB. Which residue is it in UniProt entry P68871?" (Answer: 64.) A harder follow-up: "Which residue is it in UniProt's horse entry, P02062?" (Answer: 63, because that entry starts at the mature protein.)
 
 Students produce a conversion table and the rule they used for each source.
 
@@ -73,7 +73,7 @@ Students produce a table of predictions and observations, and a three-sentence e
 1. Give each pair a protein family whose members share little identity, with 10 to 20 sequences.
 2. Pairs align the family twice, with two programs or two gap settings, for example [Clustal Omega](https://www.ebi.ac.uk/jdispatcher/msa/clustalo) and [MAFFT](https://www.ebi.ac.uk/jdispatcher/msa/mafft) on EBI's servers, saving each result in FASTA format.
 3. They open both results in one viewer, such as Jalview [5] or the [SVG alignment viewer](../../developers/sequences/examples/svg-alignment.html), which opens aligned FASTA files without uploading them, and mark the columns where the two alignments disagree.
-4. They remove the most gappy columns, build a quick tree from each alignment, and compare the trees (see [teaching with phylogenetic trees](../trees/)).
+4. They remove the most gappy columns, build a quick tree from each alignment (for example with Jalview's average-distance tree), and compare the trees (see [teaching with phylogenetic trees](../trees/)).
 5. Each pair writes a short critique: which alignment would they trust for which question, and why?
 
 Students produce two alignments, two trees and a one-page critique.
@@ -101,7 +101,7 @@ Students produce two alignments, two trees and a one-page critique.
 
 **"Residue 6 and residue 7 are different residues."** The sickle-cell glutamate is Glu6 in the older numbering and in PDB structures, and residue 7 in UniProt and in HGVS variant names, because UniProt counts the first methionine. Each species' entry can start at a different point too: the same glutamate is residue 6 in UniProt's horse entry and residue 5 in its cow entry. Ask students to say whose numbering they are using, every time.
 
-**"A gap means the species lost those residues."** Gaps are where the program put them. At the ends of a sequence they often mean that the database entry starts or stops at a different point. In the β-globin alignment, the horse and dog rows begin with a gap because their entries describe the mature protein, without its first methionine.
+**"A gap means the species lost those residues."** Gaps are where the program put them. At the ends of a sequence they often mean that the database entry starts or stops at a different point. In the β-globin alignment, the horse and dog rows begin with one gap because their entries describe the mature protein, without its first methionine. The cow row begins with two, because the cow chain is one residue shorter at its start.
 
 **"If a position matters, it never changes."** Column 7 holds glutamate in six of the eight species and alanine in mouse and rat, yet valine at that position in human β-globin causes sickle-cell disease. Conservation is evidence that a position is constrained. Variation between species does not show that every change is harmless.
 
@@ -115,7 +115,7 @@ Students produce two alignments, two trees and a one-page critique.
 
 ## The evidence
 
-We found no classroom studies that test alignment viewers or BLAST exercises themselves, and no studies of what students misunderstand about E-values. The activities on this page rest on general findings instead. Across 225 studies, students in active-learning classes scored better and were less likely to fail than students in lectures [10]. Peer instruction works best with questions that 40 to 60% of students answer correctly the first time [3]. A survey of 1,260 life-science faculty in the United States produced a list of core bioinformatics competencies for undergraduates, which includes statistical ideas such as E-values and using tools to answer biological questions [2].
+We found no classroom studies that test alignment viewers or BLAST exercises themselves, and no studies of what students misunderstand about E-values. The activities on this page rest on general findings instead. The general case for active learning is set out on the [planning page](../planning/). Peer instruction works best with questions that 40 to 60% of students answer correctly the first time [3]. A survey of 1,260 life-science faculty in the United States produced a list of core bioinformatics competencies for undergraduates, which includes statistical ideas such as E-values and using tools to answer biological questions [2].
 
 We found no studies that measure how common the misconceptions above are among students. They come from the sources cited with them and from teaching experience.
 
@@ -131,4 +131,3 @@ We found no studies that measure how common the misconceptions above are among s
 7. Via A, De Las Rivas J, Attwood TK, et al. (2011). Ten simple rules for developing a short bioinformatics training course. *PLoS Computational Biology* 7(10): e1002245. [doi:10.1371/journal.pcbi.1002245](https://doi.org/10.1371/journal.pcbi.1002245)
 8. Offerdahl EG, Arneson JB, Byrne N (2017). Lighten the load: scaffolding visual literacy in biochemistry and molecular biology. *CBE—Life Sciences Education* 16(1): es1. [doi:10.1187/cbe.16-06-0193](https://doi.org/10.1187/cbe.16-06-0193)
 9. Birch J (2012). Worldwide prevalence of red-green color deficiency. *Journal of the Optical Society of America A* 29(3): 313–320. [doi:10.1364/JOSAA.29.000313](https://doi.org/10.1364/JOSAA.29.000313)
-10. Freeman S, Eddy SL, McDonough M, et al. (2014). Active learning increases student performance in science, engineering, and mathematics. *PNAS* 111(23): 8410–8415. [doi:10.1073/pnas.1319030111](https://doi.org/10.1073/pnas.1319030111)

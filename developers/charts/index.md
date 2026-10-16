@@ -9,7 +9,7 @@ description: How to build interactive Manhattan plots, volcano plots, expression
 
 <div class="table-wrap" markdown="1">
 
-| | Vega-Lite | Observable Plot | Plotly.js |
+| <span class="visually-hidden">Feature</span> | Vega-Lite | Observable Plot | Plotly.js |
 |---|---|---|---|
 | What it is | A chart written as a description: the data, the marks, and which field goes where | A chart built by a short JavaScript function, from the makers of d3 | Charts built from "traces", with zooming and selection built in |
 | Download, compressed | 280 kB for three scripts | 160 kB with d3 | 500 kB for the common chart types |
@@ -95,7 +95,7 @@ The columns `adj.P.Val` and `P.Value` have dots in their names, which Vega reads
 
 A heatmap shows a table of numbers as colours, and what it shows depends on three choices: how the values are scaled, how the rows are ordered and which colours are used. This example lets students change all three, so it can carry a "makeover" activity.
 
-{% include example.html file="examples/heatmap-makeover.html" title="Expression heatmap of 31 genes, with a choice of scaling, order and colours" height="770" caption="Normalised expression from the Galaxy Training Network's heatmap training data [10], CC BY 4.0. The address can set the starting choices, as in [this poor version](examples/heatmap-makeover.html?values=raw&order=alpha&colours=rainbow)." %}
+{% include example.html file="examples/heatmap-makeover.html" title="Expression heatmap of 31 genes, with a choice of scaling, order and colours" height="770" tall=true caption="Normalised expression from the Galaxy Training Network's heatmap training data [10], CC BY 4.0. The address can set the starting choices, as in [this poor version](examples/heatmap-makeover.html?values=raw&order=alpha&colours=rainbow)." %}
 
 How it works:
 

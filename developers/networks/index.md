@@ -9,7 +9,7 @@ description: How to draw interactive biological networks with Cytoscape.js 3.34.
 
 <div class="table-wrap" markdown="1">
 
-| | Write the network in the page | Ask the STRING API | Export from Cytoscape desktop |
+| <span class="visually-hidden">Feature</span> | Write the network in the page | Ask the STRING API | Export from Cytoscape desktop |
 |---|---|---|---|
 | What it is | Nodes and edges typed into the page's code | A live request for the links among proteins you name | A network file and a style file saved from the desktop program |
 | Best for | Pathways you teach, where every arrow needs a source | What is known about a set of proteins, and the evidence for each link | Networks you have already arranged and styled by hand |

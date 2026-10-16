@@ -26,7 +26,7 @@
     <li id="t1">Type <b>HBB</b> in the search box above the tracks and press Enter.</li>
     <li id="t2">Zoom in until you can read single DNA letters (less than 150 bases across).</li>
     <li id="t3">In the <b>Teaching variants</b> track, click the variant that causes sickle-cell disease.</li>
-    <li id="t4">Which person has sickle-cell disease, with two copies? Click their genotype under that variant.</li>
+    <li id="t4">Which person has two copies of the sickle-cell allele? Click their genotype under that variant.</li>
   </ol>
   <p id="feedback" role="status" aria-live="polite"></p>
   <div id="igv"></div>
@@ -52,7 +52,7 @@
       },
       loadDefaultGenomes: false,
       showSampleNames: true,                 // label genotype rows with the people's names
-      locus: "chr11:5,000,000-5,500,000",
+      locus: "chr11:1,000,000-1,100,000",        // away from HBB, so that step 1 needs a search
       tracks: [
         { name: "MANE Select transcripts", url: UCSC + "/gbdb/hg38/mane/mane.1.0.bb", format: "bigBed", labelField: "geneName2" },
         {
@@ -72,7 +72,7 @@
       browser.on("locuschange", function (frames) {
         const f = frames[0];
         const onHBB = f.chr === HBB.chr && f.start < HBB.end && f.end > HBB.start;
-        if (onHBB) done("t1");
+        if (onHBB && f.end - f.start < 100000) done("t1");     // a search for HBB shows about 4 kb
         if (onHBB && f.end - f.start < 150) done("t2");
       });
 
@@ -85,11 +85,15 @@
 
         if (field("Sample")) {                               // a genotype was clicked
           if (!onHbS) { say("That genotype is not at the sickle-cell variant. Click the column under rs334."); return false; }
-          if (field("Zygosity") === "Homozygous variant") {
+          const zygosity = field("Zygosity");
+          if (zygosity === "Homozygous variant") {
             done("t4");
-            say(field("Sample") + " has two copies of the HbS allele (" + field("Genotype") + "), so has sickle-cell disease.");
+            say(field("Sample") + " has two copies of the HbS allele (" + field("Genotype") + "): sickle-cell anaemia, the commonest form of sickle-cell disease.");
+          } else if (zygosity === "Heterozygous") {
+            say(field("Sample") + " has one copy of HbS, which on its own gives sickle-cell trait, not disease. " +
+                "But check their other HBB variants: HbS with HbC, or with a β-thalassaemia variant, does cause sickle-cell disease.");
           } else {
-            say(field("Sample") + " is " + (field("Zygosity") || "").toLowerCase() + ", so does not have sickle-cell disease. Try another row.");
+            say(field("Sample") + " has no copy of HbS. Try another row.");
           }
           return false;
         }

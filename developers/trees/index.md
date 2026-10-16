@@ -9,7 +9,7 @@ description: How to draw phylogenetic trees in a teaching web page with phylotre
 
 <div class="table-wrap" markdown="1">
 
-| | phylotree.js | d3, by hand | Phylocanvas.gl | Nextstrain or Microreact |
+| <span class="visually-hidden">Feature</span> | phylotree.js | d3, by hand | Phylocanvas.gl | Nextstrain or Microreact |
 |---|---|---|---|---|
 | What it is | A tree library built on d3, drawing SVG | Your own code: a short Newick parser and d3's tree layout | A tree library that draws with WebGL | Outbreak websites, shown in an iframe |
 | Download | 209 kB with underscore (66 kB compressed) | 280 kB for d3 (94 kB compressed) | 637 kB (176 kB compressed) | About 0.8 MB for Nextstrain, 2 MB for Microreact |

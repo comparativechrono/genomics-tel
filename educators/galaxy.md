@@ -1,7 +1,7 @@
 ---
 title: Teaching with Galaxy
 topic: galaxy
-lede: Galaxy lets students run real analyses in a web browser, with nothing to install, and records every step they take. Used well, it teaches what each step of an analysis does, and why a record of those steps matters.
+lede: Galaxy lets students run real analyses in a web browser, with nothing to install, and records every step they take. Students can see what each step of an analysis does, and why a record of those steps matters.
 description: How to teach with Galaxy and the Galaxy Training Network in university courses, with activities, training queues (TIaaS), catch-up histories, assessment, accounts, data privacy, common misconceptions and references.
 ---
 
@@ -10,6 +10,8 @@ description: How to teach with Galaxy and the Galaxy Training Network in univers
 Galaxy puts command-line bioinformatics tools behind web forms, on free public servers such as usegalaxy.eu and usegalaxy.org. Every result lands in a **history**, which records each dataset with the tool, version and settings that made it [1]. Because nobody has to install software or learn the command line first, class time goes on the analysis itself: what each step does to the data, how data types fit the tools, and why tool versions matter [2].
 
 That makes Galaxy good for teaching the shape of an analysis, from raw reads to a result, and the habits of reproducible work. It does not teach programming; for that, see [R and Python in the browser](../r-and-python/).
+
+Most Galaxy teaching builds on the **Galaxy Training Network (GTN)**. On 15 October 2026 it had 534 tutorials in 35 topics, with slides, captioned videos, short answers to common questions and 28 learning pathways, all free to reuse under CC BY 4.0. Each tutorial pairs a hands-on guide with data on Zenodo, so that students run the analysis themselves in a browser [3]. Each starts with learning objectives, prerequisites and a time estimate, and uses a small subset of real data so that tools finish quickly. Many include questions with hidden answers that students can check themselves [2]. The [live list of tutorials](../../developers/galaxy/examples/gtn-tutorials.html) on the developers' page shows each topic's tutorials, with their level, time and whether your server has all their tools.
 
 After a well-designed session, students should be able to:
 
@@ -23,19 +25,11 @@ The first two suit a first-year practical. The others suit later years and proje
 
 ## Activities
 
-Most Galaxy teaching builds on the **Galaxy Training Network (GTN)**. On 15 October 2026 it had 534 tutorials in 35 topics, with slides, captioned videos, short answers to common questions and 28 learning pathways, all free to reuse under CC BY 4.0. Each tutorial pairs a hands-on guide with data on Zenodo, so that students run the analysis themselves in a browser [3]. Each starts with learning objectives, prerequisites and a time estimate, and uses a small subset of real data so that tools finish quickly; many include questions with hidden answers that students can check themselves [2]. The [live list of tutorials](../../developers/galaxy/examples/gtn-tutorials.html) on the developers' page shows each topic's tutorials, with their level, time and whether your server has all their tools.
-
-How to use the GTN in class:
-
-- **Side by side, or inside Galaxy.** Students open the tutorial in one window and Galaxy in another. Or they use **Tutorial mode**, which opens the GTN inside Galaxy from Galaxy's top menu and turns tool names into buttons that open each tool at the version the tutorial uses. Without it, Galaxy opens the newest version, which may not match the tutorial. The buttons need the server to host a copy of the GTN: on 15 October 2026, usegalaxy.eu and usegalaxy.org did, and usegalaxy.org.au and usegalaxy.fr did not. The GTN warns that Tutorial mode can have problems in Safari.
-- **Together or at their own pace.** GTN tutorials work as a demonstration, as self-paced work, or with the class following you step by step [2]. The GTN's guide to [running a workshop](https://training.galaxyproject.org/training-material/topics/teaching/tutorials/running-workshop/tutorial.html) suggests deciding which before you start, running the tutorial several times on your server and on a backup server, and asking students to put up sticky notes so you can see at a glance who has finished.
-- **Planning a course.** The GTN topic [Teaching and Hosting Galaxy Training](https://training.galaxyproject.org/training-material/topics/teaching/) covers organising a workshop, assessment and feedback, and training queues.
-
 ### A first analysis with nothing to install
 
 *First year. 50 minutes, alone or in pairs.*
 
-1. Before the session, students register on the server you have chosen and confirm their email address (see [accounts](#accounts-quotas-and-timing)).
+1. Before the session, students register on the server you have chosen and confirm their email address (see [practical tips](#practical-tips)).
 2. Students follow the GTN's [A short introduction to Galaxy](https://gxy.io/GTN:T00190), which takes about 40 minutes. They import a FASTQ file of bacterial reads from Zenodo by its web address, run FastQC on it, read the quality report, and filter out low-quality reads. To save typing, give them a link that opens the import directly; the [link builder](../../developers/galaxy/examples/galaxy-links.html) on the developers' page makes one.
 3. The tutorial then asks students to rerun the filter with a stricter setting. Before they do, each pair writes down how many reads they expect to lose. People who only watch a result appear learn little from it, which is why Brown and Wilson recommend a recorded prediction first [4].
 4. Students share their history by link and paste the link into your virtual learning environment.
@@ -46,7 +40,7 @@ Students produce a shared history, their prediction, and two sentences on which 
 
 *Second or third year. 2 to 3 hours, in pairs.*
 
-1. Choose a GTN tutorial in your subject that has all its tools on your server, such as "Mapping" (1 hour) or "Calling variants in diploid systems" (3 hours). The [live list](../../developers/galaxy/examples/gtn-tutorials.html) shows which ones qualify.
+1. Choose a GTN tutorial in your subject that has all its tools on your server, such as "Mapping" (1 hour), or split a longer one, such as "Calling variants in diploid systems" (3 hours), across two sessions. The [live list](../../developers/galaxy/examples/gtn-tutorials.html) shows which ones qualify.
 2. Pairs work through it, answering the tutorial's questions as they go.
 3. Each pair then changes one thing, such as a mapping setting, the gene annotation or the reference genome, and runs that part again. **Run Job Again** on any dataset reopens its tool with the earlier settings.
 4. Pairs compare the two results and explain the differences.
@@ -65,7 +59,7 @@ Students produce an audit checklist, the history of their rerun and a list of re
 
 ### A semester research project
 
-*Second year. One 50-minute session a week for 14 weeks.*
+*Second year. One 50-minute session a week for 14 weeks; each student studies one protein.*
 
 Schmidt and colleagues ran a course-based research project in the weekly discussion period of a second-year genetics course [6]:
 
@@ -86,9 +80,8 @@ A history records every step, so you can mark how students reached a result as w
 - **A workflow invocation report.** Each time a workflow runs (an invocation), Galaxy writes a report of that run. Students can edit it to add their interpretation, which makes an editable copy, a Galaxy Notebook attached to the history, and download it as a PDF on usegalaxy.eu and usegalaxy.org. We took this from Galaxy 26.1's code and release notes, and did not test it with a student account.
 - **The workflow itself.** Ask students to extract a workflow from their history and run it on a second dataset. If it runs and gives the same kind of result, they have captured every step.
 - **A short reflection** on one decision, such as why they chose a quality cut-off.
+- **A short viva.** If marks depend on interpretation, also check it in person, for example with a 5-minute conversation. Since version 26.0, Galaxy has an AI assistant, GalaxyAI, which answers questions about tools, results and errors and points students to GTN tutorials. Version 26.1 added the drafting of workflow invocation reports. On 15 October 2026, usegalaxy.eu and usegalaxy.org had an AI service configured, and usegalaxy.org.au and usegalaxy.fr did not.
 - **During class**, a training queue's dashboard shows the state of every student's jobs, so you can see who is stuck [1].
-
-Since version 26.0, Galaxy has an AI assistant, GalaxyAI, which answers questions about tools, results and errors and points students to GTN tutorials. Version 26.1 added the drafting of workflow invocation reports. On 15 October 2026, usegalaxy.eu and usegalaxy.org had an AI service configured, and usegalaxy.org.au and usegalaxy.fr did not. If marks depend on interpretation, check it in person as well, for example with a 5-minute viva.
 
 ## Where students go wrong
 
@@ -105,6 +98,18 @@ Since version 26.0, Galaxy has an AI assistant, GalaxyAI, which answers question
 **Thinking a shared history is private.** Anyone with the link can view and copy a history shared by link, and published histories are public and may be indexed or copied by other sites ([usegalaxy.eu terms](https://usegalaxy-eu.github.io/gdpr/tos.html)). Explain the difference between sharing with a person, sharing by link and publishing before students share anything.
 
 ## Practical tips
+
+- **Devices.** Any up-to-date browser works. Galaxy shows the tools, the main panel and the history side by side, so laptops work better than tablets.
+- **Accounts.** Ask students to register and confirm their email address before the first session, and to keep to one account each. usegalaxy.eu's terms ask users to keep to its published quotas, and warn that "attempts to subvert these limits by creating multiple accounts or through any other method may result in termination of all associated accounts" ([terms](https://usegalaxy-eu.github.io/gdpr/tos.html)). usegalaxy.eu also accepts LifeScience Login and other research logins, usegalaxy.org accepts Google accounts, and usegalaxy.org.au accepts only Australian BioCommons Access. The storage each server gives an account is [listed below](#storage-and-limits).
+- **Network.** Students import data from Zenodo or from a shared data library straight to the server, so large files never cross the classroom's network [2]. usegalaxy.eu keeps the GTN's data in a [shared library](https://usegalaxy.eu/libraries/folders/Fa21272e5bd712216).
+- **Timing.** The GTN asks tutorial authors to choose data on which no tool runs for more than 10 to 15 minutes. No server publishes typical waiting times, although usegalaxy.eu shows its [live queue](https://stats.galaxyproject.eu/d/bdyro3fwl2ccga/queued-jobs-tools). Book a [training queue](#book-a-training-queue-tiaas) for any timetabled class.
+- **Accessibility.** The GTN aims for WCAG 2.0 level AA, is tested with a screen reader, captions its videos, offers plain-text versions of its slides, and works without JavaScript ([statement](https://training.galaxyproject.org/training-material/accessibility.html)). Adding `?expand-all=true` to a tutorial's address opens every folded box. Galaxy has reduced the number of tasks that need a mouse and improved its keyboard navigation [11], but we found no accessibility statement for Galaxy itself, so try your tutorial's steps with a keyboard before the class. Workflow diagrams and most plots are pictures: give students a text version of anything they must read from one, and see [accessibility](../accessibility/).
+
+### Run a GTN tutorial in class
+
+- **Side by side, or inside Galaxy.** Students open the tutorial in one window and Galaxy in another. Or they use **Tutorial mode**, which opens the GTN inside Galaxy from Galaxy's top menu and turns tool names into buttons that open each tool at the version the tutorial uses. Without it, Galaxy opens the newest version, which may not match the tutorial. The buttons need the server to host a copy of the GTN: on 15 October 2026, usegalaxy.eu and usegalaxy.org did, and usegalaxy.org.au and usegalaxy.fr did not. The GTN warns that Tutorial mode can have problems in Safari.
+- **Together or at their own pace.** GTN tutorials work as a demonstration, as self-paced work, or with the class following you step by step [2]. The GTN's guide to [running a workshop](https://training.galaxyproject.org/training-material/topics/teaching/tutorials/running-workshop/tutorial.html) suggests deciding which before you start, and running the tutorial several times on your server and on a backup server. It also suggests asking students to put up sticky notes, so that you can see at a glance who has finished.
+- **Planning a course.** The GTN topic [Teaching and Hosting Galaxy Training](https://training.galaxyproject.org/training-material/topics/teaching/) covers organising a workshop, assessment and feedback, and training queues.
 
 ### Book a training queue (TIaaS)
 
@@ -129,11 +134,9 @@ Each server's name links to its request form. The GTN also links to a form on us
 - **On the day.** Students log in first, then open the join link, such as `https://usegalaxy.eu/join-training/<identifier>`. A student who is not logged in sees only "Please login to Galaxy first!". Galaxy Europe has a [test training](https://usegalaxy.eu/join-training/test/) to try. usegalaxy.eu also recommends its short-term storage for classes: students choose **Preferred Storage** in the history panel, then the short-term option.
 - **The dashboard** is the join link with `/status` added. It shows the jobs your students started in the last 3 hours, by state and by tool, including jobs outside your course, under random names that stay the same for a day.
 
-### Accounts, quotas and timing
+### Storage and limits
 
-- **One account each.** The big servers allow one account per person, and warn that extra accounts may be closed and their data deleted. Ask students to register and confirm their email address before the first session.
-- **Signing in.** usegalaxy.eu also accepts LifeScience Login and other research logins, usegalaxy.org accepts Google accounts, and usegalaxy.org.au accepts only Australian BioCommons Access.
-- **Storage and limits**, as published on 15 October 2026:
+As published on 15 October 2026:
 
 <div class="table-wrap" markdown="1">
 
@@ -145,10 +148,7 @@ Each server's name links to its request form. The GTN also links to a form on us
 
 </div>
 
-- **Full accounts.** When an account reaches its quota, Galaxy pauses new jobs, which turn light blue. Ask students to delete and purge old histories before a large practical.
-- **Timing.** The GTN asks tutorial authors to choose data on which no tool runs for more than 10 to 15 minutes. No server publishes typical waiting times, although usegalaxy.eu shows its [live queue](https://stats.galaxyproject.eu/d/bdyro3fwl2ccga/queued-jobs-tools). Book a training queue for any timetabled class.
-- **Network.** Students import data from Zenodo or from a shared data library straight to the server, so large files never cross the classroom's network [2]. usegalaxy.eu keeps the GTN's data in a [shared library](https://usegalaxy.eu/libraries/folders/Fa21272e5bd712216).
-- **Devices.** Any up-to-date browser works. Galaxy shows the tools, the main panel and the history side by side, so laptops work better than tablets.
+When an account reaches its quota, Galaxy pauses new jobs, which turn light blue. Ask students to delete and purge old histories before a large practical.
 
 ### Help students who fall behind
 
@@ -161,23 +161,17 @@ Each server's name links to its request form. The GTN also links to a form on us
 
 Public Galaxy servers are for open data, and their terms say so:
 
-- usegalaxy.org strictly prohibits personally identifiable information and data covered by US health privacy law, "including but not limited to potentially personally identifying medical data" ([terms](https://usegalaxy.org/static/terms.html)).
+- usegalaxy.org strictly prohibits personally identifiable information and data covered by the US laws HIPAA and FISMA, "including but not limited to potentially personally identifying medical data" ([terms](https://usegalaxy.org/static/terms.html)).
 - Galaxy Australia prohibits personal and sensitive data, "including but not limited to personally identifying genetic, genomic or Health data" ([terms](https://site.usegalaxy.org.au/about)).
 - usegalaxy.eu, hosted at the University of Freiburg under European data protection law, states that "Data storage is not encrypted". It asks anyone whose data carry restrictions to consult their institutional review board before uploading, and suggests a local Galaxy for protected data ([terms](https://usegalaxy-eu.github.io/gdpr/tos.html)).
 
 Teach with the GTN's Zenodo datasets, public sequencing runs from ENA or SRA, or synthetic data. Never use patient data. The [genomic data and ethics](../data-and-ethics/) page has more.
 
-### Accessibility
-
-- The GTN aims for WCAG 2.0 level AA, is tested with a screen reader, captions its videos, offers plain-text versions of its slides, and works without JavaScript ([statement](https://training.galaxyproject.org/training-material/accessibility.html)). Adding `?expand-all=true` to a tutorial's address opens every folded box.
-- Galaxy has reduced the number of tasks that need a mouse and improved its keyboard navigation [11], but we found no accessibility statement for Galaxy itself. Try your tutorial's steps with a keyboard before the class.
-- Workflow diagrams and most plots are pictures. Give students a text version of anything they must read from one, and see [accessibility](../accessibility/).
-
 ## The evidence
 
-The published evidence on Galaxy in teaching describes rather than compares. The GTN's own papers describe the materials, the training queues and how they are used [2, 3]. Between June 2018 and May 2022, the public servers supported more than 330 training events with more than 17,000 learners, and of more than 1,800 feedback forms on tutorials since September 2018, more than 88% gave a rating of 4 or 5 out of 5 [2]. Those figures measure use and satisfaction, not learning. Course reports describe research projects built on Galaxy [6, 7, 8]; the evidence from the Calgary course comes from a voluntary survey answered by 14% of students [7].
+The published evidence on Galaxy in teaching describes rather than compares. The GTN's own papers describe the materials, the training queues and how they are used [2, 3]. Between June 2018 and May 2022, the public servers supported more than 330 training events with more than 17,000 learners [2]. Of more than 1,800 feedback forms on tutorials since September 2018, more than 88% gave a rating of 4 or 5 out of 5 [2]. Those figures measure use and satisfaction, not learning. Course reports describe research projects built on Galaxy [6, 7, 8]; the evidence from the Calgary course comes from a voluntary survey answered by 14% of students [7].
 
-We found no controlled study that compares learning an analysis in Galaxy with learning it at the command line, or with not doing it at all. The case for hands-on analysis rests on broader evidence: across 225 studies, students in active-learning classes scored higher in exams and were less likely to fail than students taught by lecturing [12]. The advice on this page about short, structured tasks comes from that evidence, from the GTN's experience and from teaching practice.
+We found no controlled study that compares learning an analysis in Galaxy with learning it at the command line, or with not doing it at all. The case for hands-on analysis rests on broader evidence about active learning, set out on the [planning page](../planning/). The advice on this page about short, structured tasks comes from that evidence, from the GTN's experience and from teaching practice.
 
 ## References
 
@@ -188,9 +182,8 @@ We found no controlled study that compares learning an analysis in Galaxy with l
 4. Brown NCC, Wilson G (2018). Ten quick tips for teaching programming. *PLOS Computational Biology* 14(4): e1006023. [doi:10.1371/journal.pcbi.1006023](https://doi.org/10.1371/journal.pcbi.1006023)
 5. Sandve GK, Nekrutenko A, Taylor J, Hovig E (2013). Ten simple rules for reproducible computational research. *PLoS Computational Biology* 9(10): e1003285. [doi:10.1371/journal.pcbi.1003285](https://doi.org/10.1371/journal.pcbi.1003285)
 6. Schmidt CA, Hodkinson LJ, Comstra HS, et al. (2023). A cost-free CURE: using bioinformatics to identify DNA-binding factors at a specific genomic locus. *Journal of Microbiology & Biology Education* 24(3): e00120-23. [doi:10.1128/jmbe.00120-23](https://doi.org/10.1128/jmbe.00120-23)
-7. Maroilley T, Barbosa VRA, Mascarenhas R, et al. (2026). A course-undergraduate research experience (CURE) to explore the effect of structural variants on gene expression in *C. elegans* balancers. *PLOS One* 21(8): e0342806. [doi:10.1371/journal.pone.0342806](https://doi.org/10.1371/journal.pone.0342806)
-8. Ling GC, Jin C, Karadarevic D, et al. (2026). A course-based undergraduate research experience (CURE) using transposon-directed insertion-site sequencing (TraDIS) to identify genes that are essential for bacteriophage P1 propagation in *Escherichia coli*. *Journal of Microbiology & Biology Education*: e00221-26. [doi:10.1128/jmbe.00221-26](https://doi.org/10.1128/jmbe.00221-26)
+7. Maroilley T, Barbosa VRA, Mascarenhas R, et al. (2026). A course-undergraduate research experience (CURE) to explore the effect of structural variants on gene expression in *C. elegans* balancers. *PLOS ONE* 21(8): e0342806. [doi:10.1371/journal.pone.0342806](https://doi.org/10.1371/journal.pone.0342806)
+8. Ling GC, Jin C, Karadarevic D, et al. (2026). A course-based undergraduate research experience (CURE) using transposon-directed insertion-site sequencing (TraDIS) to identify genes that are essential for bacteriophage P1 propagation in *Escherichia coli*. *Journal of Microbiology & Biology Education*, published online 23 September 2026: e00221-26. [doi:10.1128/jmbe.00221-26](https://doi.org/10.1128/jmbe.00221-26)
 9. Nassar LR, Barber GP, Benet-Pagès A, et al. (2023). The UCSC Genome Browser database: 2023 update. *Nucleic Acids Research* 51(D1): D1188–D1195. [doi:10.1093/nar/gkac1072](https://doi.org/10.1093/nar/gkac1072)
 10. Ziemann M, Eren Y, El-Osta A (2016). Gene name errors are widespread in the scientific literature. *Genome Biology* 17: 177. [doi:10.1186/s13059-016-1044-7](https://doi.org/10.1186/s13059-016-1044-7)
 11. The Galaxy Community (2024). The Galaxy platform for accessible, reproducible, and collaborative data analyses: 2024 update. *Nucleic Acids Research* 52(W1): W83–W94. [doi:10.1093/nar/gkae410](https://doi.org/10.1093/nar/gkae410)
-12. Freeman S, Eddy SL, McDonough M, et al. (2014). Active learning increases student performance in science, engineering, and mathematics. *PNAS* 111(23): 8410–8415. [doi:10.1073/pnas.1319030111](https://doi.org/10.1073/pnas.1319030111)

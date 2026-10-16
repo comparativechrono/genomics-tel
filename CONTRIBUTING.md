@@ -89,18 +89,19 @@ Each example is one HTML file in the topic's `examples/` folder that works on it
 Show an example in a page with:
 
 ```liquid
-{% include example.html file="examples/igv-basic.html" title="igv.js open at HBB" height="430" %}
+{% include example.html file="examples/igv-self-hosted.html" title="A 20 kb region around HBB, hosted with the page" height="440" %}
 ```
 
 | Option | Meaning |
 |---|---|
 | `file` | Path of the example, relative to the page (required) |
 | `title` | What the example shows (required) |
-| `height` | Height of the live view in pixels; measure it so there is no big empty space |
+| `height` | Height of the live view in pixels; measure it so there is no big empty space. The view is never taller than 80% of the window, so that readers can scroll the page past viewers that zoom with the mouse wheel. |
 | `caption` | A sentence or two under the example. Markdown links work. |
 | `load="click"` | Wait for a click before loading. Use it for anything that downloads more than about 2 MB, such as webR, Pyodide or JBrowse. |
 | `note` | The sentence shown before a `load="click"` example starts |
 | `open=false` | Start with the code folded away |
+| `tall=true` | For a list or a form with no zooming viewer inside. The view grows to fit its content, so the page scrolls instead of the frame. |
 
 ## Links
 

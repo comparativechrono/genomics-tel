@@ -10,6 +10,8 @@
   load     "click" to wait for a click before loading (for large downloads)
   note     text shown before a "click" example loads
   open     false to start with the code folded away
+  tall     true for a list or form with no zooming viewer inside: the frame then
+           grows to fit its content instead of scrolling inside the page
 
   Example files must not contain two opening curly braces, or a curly brace
   followed by a percent sign, because Jekyll reads the file as a template when
@@ -17,7 +19,7 @@
 {%- endcomment -%}
 {%- assign ex_name = include.file | split: '/' | last -%}
 {%- assign ex_id = ex_name | replace: '.html', '' -%}
-<figure class="example" id="example-{{ ex_id }}">
+<figure class="example{% if include.tall %} example--tall{% endif %}" id="example-{{ ex_id }}">
   <div class="example-bar">
     <p class="example-title">{{ include.title }}</p>
     <p class="example-links">

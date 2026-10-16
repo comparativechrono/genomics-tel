@@ -38,7 +38,7 @@ UK GDPR gives extra protection to some kinds of personal data, called special ca
 
 Whether genetic information counts depends on whether it can be linked to a person. According to the ICO, a sample is not personal data until it is analysed, and the results are personal data only if they can be linked back to an identifiable individual. Genetic analysis with enough markers to be unique to one person is personal data even without a name. Anonymised or aggregated partial sequences or test results that can no longer be linked back to a genetic identity, sample, profile, patient record or other identifier are not identifiable personal data [6].
 
-To use special category data at all, an organisation needs both a lawful basis under Article 6 and one of the conditions in Article 9. A data protection impact assessment (DPIA) is required for processing that is likely to be high risk, including special category data processed on a large scale, and genetic data when other risk factors apply; the ICO recommends a DPIA whenever you are in doubt [16]. The ICO marks this guidance as under review following the Data (Use and Access) Act, so check it again before each academic year [6].
+To use special category data at all, an organisation needs both a lawful basis under Article 6 and one of the conditions in Article 9. A data protection impact assessment (DPIA) is required for processing that is likely to be high risk, including special category data processed on a large scale, and genetic data when other risk factors apply. The ICO recommends a DPIA whenever you are in doubt [16]. The ICO marks this guidance as under review following the Data (Use and Access) Act, so check it again before each academic year [6].
 
 How this applies to your course is a question for your institution. If students will handle genetic data about identifiable people, including their own, talk to your data protection officer before the course starts.
 
@@ -65,7 +65,7 @@ Testing students' own genomes in class is engaging, but it brings risks that pub
 - in follow-up interviews, they recalled the details of the consent and biobanking agreements poorly;
 - they explored their raw data on their own, and wanted more support with what they found.
 
-The authors conclude that students need support of a different kind from traditional genetic counselling, and that institutions should discuss the ethical, legal and social issues across disciplines before adding personal genotyping to a course [23]. This was one small study, but its warnings are specific. Do not make personal genotyping a default activity. If you offer it, make it optional with an equally good alternative that uses public genomes, keep each student's results private, plan support for unexpected findings before the course starts, and involve your ethics committee and data protection officer.
+The authors conclude that students need support of a different kind from traditional genetic counselling, and that institutions should discuss the ethical, legal and social issues across disciplines before adding personal genotyping to a course [23]. This was one small study, but its warnings are specific. Do not make personal genotyping a default activity. If you offer it, make it optional, with an equally good alternative that uses public genomes, and keep each student's results private. Plan support for unexpected findings before the course starts, and involve your ethics committee and data protection officer.
 
 ## Teach the ethics, not only the rules
 

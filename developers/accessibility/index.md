@@ -53,7 +53,7 @@ One exception: for Mol\*, put `role="region"` and a label on the viewer's contai
 
 This example draws seven ClinVar variants in *HBB* on a canvas, with no library. Students can choose a variant with a button or by clicking the picture, hear a message, and read the same records in a table.
 
-{% include example.html file="examples/accessible-variant-view.html" title="A canvas view with buttons, a live message and a table" height="800" caption="The variants are real ClinVar records from this site's HBB teaching data. Try it with the keyboard alone, and again with reduced motion switched on in your device's settings." %}
+{% include example.html file="examples/accessible-variant-view.html" title="A canvas view with buttons, a live message and a table" height="740" tall=true caption="The variants are real ClinVar records from this site's HBB teaching data. Try it with the keyboard alone, and again with reduced motion switched on in your device's settings." %}
 
 How it works:
 
@@ -81,7 +81,7 @@ Red-green colour vision deficiency affects about 8% of men and 0.4% of women of 
 
 Anything that starts moving by itself, lasts more than five seconds and sits alongside other content needs a way to pause, stop or hide it [1]. 3Dmol.js's `data-spin` attribute, for example, sets a molecule spinning, so add a pause button next to it. Motion that follows a click, such as a view sliding to a new place, should be easy to switch off: WCAG asks for this at level AAA [1].
 
-Devices let people ask for less motion, because animations such as scaling or panning large objects can cause discomfort for people with vestibular motion disorders ([MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)). Read the setting in CSS with `@media (prefers-reduced-motion: reduce)`, or in JavaScript:
+Devices let people ask for less motion, because animations such as scaling or panning large objects can cause discomfort for people with vestibular motion disorders ([MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion)). Read the setting in CSS with `@media (prefers-reduced-motion: reduce)`, or in JavaScript:
 
 ```javascript
 // true when the device asks for less motion; listen for changes too
@@ -100,7 +100,7 @@ We found the following with the keyboard and by reading each library's code and 
 
 | Library | Draws with | Keyboard and screen readers | What to add |
 |---|---|---|---|
-| igv.js 3.8.9 | Canvas | The search box works from the keyboard, and on a selected track F and B jump to the next and previous feature. The source has only 3 ARIA labels; screen readers cannot read the tracks. | Buttons for the places that matter, a feature table, and a text version of each task |
+| igv.js 3.8.9 | Canvas | The search box works from the keyboard. F and B jump to the next and previous feature on a selected track, but selecting one needs a pointer. The source has only 3 ARIA labels; screen readers cannot read the tracks. | Buttons for the places that matter, a feature table, and a text version of each task |
 | JBrowse 2 4.3.0 | Canvas tracks | Buttons and menus have ARIA labels (75 in the script); the tracks are pictures. | As for igv.js |
 | Nightingale 5.11.0 and react-msaview 8.4.1 | Canvas | The alignment is a picture. | A text read-out of the chosen column; a plain SVG viewer with a native slider is the accessible fallback |
 | SeqViz 3.10.25 | SVG | The bases, amino acids and labels are text in the page, but a screen reader meets the sequence one letter at a time. Tab does not reach the viewer. | A sentence that states the point, the sequence as plain text, and buttons for the bases that matter |

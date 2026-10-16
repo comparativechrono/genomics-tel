@@ -1,6 +1,7 @@
 ---
 title: For developers
 lede: How to put genomic tools into a teaching web page, with live examples you can open, read, download and change.
+description: How to embed genome browsers, alignment viewers, 3D structures, Cytoscape.js networks, Galaxy, R and Python, phylogenetic trees and charts in teaching pages, with live examples and code to copy.
 ads: false
 ---
 

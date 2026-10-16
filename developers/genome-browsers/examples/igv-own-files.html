@@ -42,9 +42,24 @@
       (i.name.startsWith(f.name + ".") || i.name.replace(/\.[^.]+$/, "") === f.name.replace(/\.[^.]+$/, "")));
     const log = msg => { document.getElementById("log").textContent += msg + "\n"; };
 
+    // GRCh38 from UCSC's files, which costs far less to download than genome: "hg38".
+    // A FASTA chosen in step 1 replaces it.
+    const UCSC = "https://hgdownload.soe.ucsc.edu";
     igv.createBrowser(document.getElementById("igv"), {
-      genome: "hg38",
-      locus: "HBB"
+      reference: {
+        id: "hg38",
+        name: "Human (GRCh38/hg38)",
+        twoBitURL: UCSC + "/goldenPath/hg38/bigZips/hg38.2bit",
+        chromSizesURL: UCSC + "/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+        cytobandURL: UCSC + "/goldenPath/hg38/database/cytoBandIdeo.txt.gz",
+        maneBbURL: UCSC + "/gbdb/hg38/mane/mane.1.0.bb",
+        maneTrixURL: UCSC + "/gbdb/hg38/mane/mane.1.0.ix"
+      },
+      loadDefaultGenomes: false,
+      locus: "HBB",
+      tracks: [
+        { name: "MANE Select transcripts", url: UCSC + "/gbdb/hg38/mane/mane.1.0.bb", format: "bigBed", labelField: "geneName2" }
+      ]
     }).then(function (browser) {
 
       document.getElementById("ref-files").addEventListener("change", async e => {

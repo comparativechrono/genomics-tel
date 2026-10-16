@@ -9,7 +9,7 @@ description: How to teach students to read and use phylogenetic trees, with acti
 
 A phylogenetic tree is a hypothesis about common ancestry: which species, genes or virus samples share a more recent common ancestor with which. Reading trees and reasoning from them is called tree-thinking [1]. Trees appear throughout genomics, from gene families to outbreak reports, yet many students misread them. In one introductory biology course, only about half of the students could judge correctly how closely the taxa on a tree were related [2].
 
-Interactive trees earn their place when students change the tree themselves: rotating branches, moving the root, collapsing clades. A review of 194 studies found that animations taught better than static pictures when the change itself was what students had to learn, and only slightly better on average [3].
+Interactive trees earn their place when students change the tree themselves: rotating branches, moving the root, collapsing clades. Earlier meta-analyses found only small advantages for animations over static pictures, but when Ploetzner and colleagues re-analysed one of them, animations did clearly better when the change itself was what students had to learn [3].
 
 After a well-designed session, students should be able to:
 
@@ -96,7 +96,7 @@ Students produce two annotated trees and a one-page critique. Students who have 
 
 **Reading the order of the tips.** Students judge relatedness by how close two names sit on the page. The branches at any node can be rotated, so the order of the tips is arbitrary [2]. In one study this misreading was less common in higher-level courses than in an introductory one [11].
 
-**Counting nodes.** Students count the nodes between two species and take fewer nodes to mean closer relatives. In an introductory biology course, counting nodes and counting the shared characters marked on a tree were the commonest wrong ways of reasoning [2], and in another study node counting was more common in higher-level courses than in an introductory one [11]. What matters is how recent the most recent common ancestor is. The gibbon question in the clade quiz is built to catch node counting.
+**Counting nodes.** Students count the nodes between two species and take fewer nodes to mean closer relatives. In an introductory biology course, counting nodes and counting the shared characters marked on a tree were the commonest wrong ways of reasoning [2]. In another study, node counting was more common in higher-level courses than in an introductory one [11]. What matters is how recent the most recent common ancestor is. The gibbon question in the clade quiz is built to catch node counting.
 
 **Ladder thinking.** Students read a tree as a ladder of progress, from "primitive" species near the root to "advanced" ones, often humans, at the far end. Omland and colleagues call its most serious form the "primitive lineage fallacy": taking a lineage with few species that branches off early to be ancestral [12]. On most trees students meet, every tip is a living species, and every lineage has been evolving for the same length of time since the root. In one study, ladder thinking, and the belief that species that look alike must be close relatives, persisted through a typical undergraduate degree [11].
 
@@ -127,7 +127,7 @@ Tree-thinking has better evidence than most topics on this site: comparative stu
 - In a study of 117 students, a research-based curriculum of a booklet, a laboratory and lectures gave a medium-sized gain over usual teaching, on a test five to six weeks later. Novick and Catley concluded that the key idea for expert tree-reading is that any one tree is a small part of the whole tree of life [10].
 - Broad teaching that left students to draw their own conclusions added very little to their understanding, while teaching aimed at relationships helped to some extent [2].
 - Students read trees more easily than ladders [5], and learn to read trees before they learn to build them [4].
-- More generally, across 225 studies, students taught by lecturing were 1.5 times more likely to fail than students in active-learning classes [18].
+- More generally, the case for active learning is set out on the [planning page](../planning/).
 
 The research does not show that tree viewers like those on our developers' page help. We found no studies of them, so the clade quiz is built on the research into misconceptions, not on trials of the quiz itself. Most of the classroom studies cited here come from universities in the United States, and many from introductory biology courses.
 
@@ -151,4 +151,3 @@ The research does not show that tree viewers like those on our developers' page 
 15. Gregory TR (2008). Understanding evolutionary trees. *Evolution: Education and Outreach* 1(2): 121–137. [doi:10.1007/s12052-008-0035-x](https://doi.org/10.1007/s12052-008-0035-x)
 16. Wong Y, Rosindell J (2022). Dynamic visualisation of million-tip trees: the OneZoom project. *Methods in Ecology and Evolution* 13(2): 303–313. [doi:10.1111/2041-210X.13766](https://doi.org/10.1111/2041-210X.13766)
 17. Perry J, Meir E, Herron JC, Maruca S, Stal D (2008). Evaluating two approaches to helping college students understand evolutionary trees through diagramming tasks. *CBE—Life Sciences Education* 7(2): 193–201. [doi:10.1187/cbe.07-01-0007](https://doi.org/10.1187/cbe.07-01-0007)
-18. Freeman S, Eddy SL, McDonough M, et al. (2014). Active learning increases student performance in science, engineering, and mathematics. *PNAS* 111(23): 8410–8415. [doi:10.1073/pnas.1319030111](https://doi.org/10.1073/pnas.1319030111)

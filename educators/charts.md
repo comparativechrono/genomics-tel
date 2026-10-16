@@ -28,9 +28,9 @@ The first three suit first- and second-year classes in genetics or statistics. T
 
 1. Before showing anything, ask pairs to sketch what a scan of the whole genome would look like if no variant affected the trait.
 2. Open the [FinnGen Manhattan plot](../../developers/charts/examples/manhattan-finngen.html) of alcohol use disorder. Pairs say what one point is, what the two axes show and what the dashed line means.
-3. They find the tallest point, read its height from the axis (about 22.8) and turn it into a p-value: 10<sup>−22.8</sup>, about 1.5 × 10⁻²³. The tooltip lets them check.
+3. They find the tallest point, read its height from the axis (about 22.83) and turn it into a p-value: 10<sup>−22.83</sup>, about 1.5 × 10⁻²³. The tooltip lets them check.
 4. They count the peaks above the line, then open the table under the chart: there are 19.
-5. The table gives each peak's effect size (beta) and allele frequency. The peak on chromosome 5 (variant 5:156995417:A:AT) has an effect about four times larger than most (beta 0.25 against about 0.06), but only about 1% of chromosomes carry it, and it stands lower than peaks of common variants with small effects. Pairs explain why.
+5. The table gives each peak's effect size (beta) and allele frequency. The tallest peak, at *ADH1B*, also has the largest effect. But the peak on chromosome 5 (variant 5:156995417:A:AT) has an effect about four times larger than most (beta 0.25 against about 0.06), and only about 1% of chromosomes carry it. It stands lower than the second-tallest peak, on chromosome 6, whose variant has a small effect (beta 0.06) and is carried by about 31% of chromosomes. Pairs explain why.
 
 Students hand in an annotated screenshot and three sentences on why the height of a peak is not the size of the effect.
 
@@ -49,7 +49,7 @@ Students hand in the plot and a five-sentence explanation of where 5 × 10⁻⁸
 
 *Second or third year. 60 minutes, in groups of three.*
 
-1. Explain the axes. Across is the log₂ fold change: 1 means twice as much, 0.58 means 1.5 times and −1 means half. Up is −log₁₀ of the p-value. The adjusted p-values control the false discovery rate: among genes with an adjusted p-value below 0.01, about 1 in 100 is expected to be a false discovery [3].
+1. Explain the axes. Across is the log₂ fold change: 1 means twice as much, 0.58 means 1.5 times and −1 means half. Up is −log₁₀ of the p-value. The adjusted p-values control the false discovery rate: if you keep the genes with an adjusted p-value below 0.01, you can expect at most 1 in 100 of them, on average, to be false discoveries [3].
 2. Groups open the [volcano plot](../../developers/charts/examples/volcano-thresholds.html), choose a fold-change cut-off and a p-value cut-off, and write down their reasons before they look at the count.
 3. They switch between adjusted and raw p-values and record what changes. At p < 0.05 and a 1.5-fold change, the count rises from 5,444 genes with adjusted p-values to 5,897 with raw ones.
 4. Groups compare their lists and discuss why they differ, and which list they would hand to a colleague for follow-up experiments.
@@ -104,11 +104,11 @@ Students hand in three sentences comparing exome and genome sequencing for this 
 
 **"5 × 10⁻⁸ is a law of nature."** It is roughly a Bonferroni correction: 0.05 divided by about a million independent tests of common variants in people of European ancestry [2]. Estimated directly from UK data, the threshold came out at about 7.2 × 10⁻⁸ [9]. The threshold needed depends on allele frequency, linkage disequilibrium and ancestry, and for rare and low-frequency variants the burden of testing is smaller in recent genetic isolates [10]. FinnGen's own paper calls Finland's an isolated population [11].
 
-**"The tallest peak is the cause, or the biggest effect."** How high a peak stands depends on the size of the effect, on how common the allele is and on how many people were studied. In the FinnGen data, a rare variant with a large effect sits lower than common variants with small ones. The top variant of a peak also shares its signal with every variant inherited along with it [5].
+**"The tallest peak is the cause, or the biggest effect."** How high a peak stands depends on the size of the effect, on how common the allele is and on how many people were studied. In the FinnGen data, a rare variant on chromosome 5 with a large effect sits lower than common variants with small ones. The *ADH1B* variant is rarer still, but its effect is so large that its peak stands highest. The top variant of a peak also shares its signal with every variant inherited along with it [5].
 
 **"The nearest gene is the gene."** Results tables name the nearest gene to each variant because it is easy to compute. It is a place to start looking, not a finding.
 
-**Raw p-values on a volcano plot.** If none of 15,804 genes really changed, a cut-off of p < 0.05 would still pass about 790 of them. Adjusted p-values guard against this, but correction is often skipped in practice: in a survey of 186 published articles, 43% of enrichment analyses had no correction for multiple tests [12].
+**Raw p-values on a volcano plot.** If none of 15,804 genes really changed, a cut-off of p < 0.05 would still pass about 790 of them. Adjusted p-values guard against this, but correction is often skipped in related analyses: in a survey of 186 articles, 43% of enrichment analyses had none [12].
 
 **Fold-change cut-offs as facts.** A log₂ fold change of 0.58 (1.5-fold) or 1 (2-fold) is a convention, not a biological boundary. A small change in a tightly controlled gene can matter more than a large change in one whose expression varies a lot.
 
@@ -126,15 +126,15 @@ Students hand in three sentences comparing exome and genome sequencing for this 
 
 - **Devices.** Laptops work best: the charts need width, and tooltips need a pointer. On phones the examples shrink and drop some labels, and a tap stands in for hovering. The tables under each chart work anywhere.
 - **Accounts.** None are needed. The examples run in any recent browser.
-- **Network.** The Manhattan plots read FinnGen's server and the coverage plot reads UCSC's each time they open, and UCSC asks for no more than one request a second, so a whole class starting at once may wait a little. The volcano plot and the heatmap read files stored with the examples. Keep screenshots in case a server is down.
+- **Network.** The Manhattan plots read FinnGen's server, and the coverage plot reads UCSC's, each time they open. UCSC asks for no more than one request a second, so a whole class starting at once may wait a little. The volcano plot and the heatmap read files stored with the examples. Keep screenshots in case a server is down.
 - **Timing.** Give students five minutes to try each chart's controls before the first question. The simulation and the threshold game each fit a 50- or 60-minute session.
 - **Accessibility.** About 8% of men and 0.4% of women of European ancestry have red-green colour-vision deficiency [20]: in a class of 200 with as many men as women, expect about eight students. The examples' colours were checked for this. Charts are pictures, so each example also gives its key values as text, in a table or in a status line that screen readers announce [21]. See the [accessibility page](../accessibility/) for more.
 
 ## The evidence
 
-Students' difficulties with graphs are well documented. Undergraduates tend to plot all the data they have, where experts start from the question [18], and a course that wove quantitative work through its biology content improved the quality of students' graphs [19]. The Graph Rubric gives a tested way to give feedback on them [6]. More generally, across 225 studies, students in active-learning classes scored better in exams and were less likely to fail than students in lectures [22].
+Students' difficulties with graphs are well documented. Undergraduates tend to plot all the data they have, where experts start from the question [18], and a course that wove quantitative work through its biology content improved the quality of students' graphs [19]. The Graph Rubric gives a tested way to give feedback on them [6]. The general case for active learning is set out on the [planning page](../planning/).
 
-Whether the interactive versions help more than static figures is less clear. A review of 194 studies, which re-analysed an earlier meta-analysis, found animations more effective than static pictures when the features of a change had to be learned [23]. That suggests using the live charts where change is the point, such as a moving cut-off or repeated simulations, and annotated static figures elsewhere.
+Whether the interactive versions help more than static figures is less clear. A review of 194 studies, which re-analysed an earlier meta-analysis, found animations more effective than static pictures when the features of a change had to be learned [22]. That suggests using the live charts where change is the point, such as a moving cut-off or repeated simulations, and annotated static figures elsewhere.
 
 We found no classroom studies that compare ways of teaching Manhattan plots, volcano plots or heatmaps. The advice on thresholds comes from statistical genetics, the advice on colour from vision science and visualisation research, and the activities from the general findings above and from teaching experience.
 
@@ -162,5 +162,4 @@ We found no classroom studies that compare ways of teaching Manhattan plots, vol
 19. Speth EB, Momsen JL, Moyerbrailean GA, et al. (2010). 1, 2, 3, 4: infusing quantitative literacy into introductory biology. *CBE—Life Sciences Education* 9(3): 323–332. [doi:10.1187/cbe.10-03-0033](https://doi.org/10.1187/cbe.10-03-0033)
 20. Birch J (2012). Worldwide prevalence of red-green color deficiency. *Journal of the Optical Society of America A* 29(3): 313–320. [doi:10.1364/JOSAA.29.000313](https://doi.org/10.1364/JOSAA.29.000313)
 21. Smits TC, Weru L, Gehlenborg N, L'Yi S (2025). Ten simple rules for making biomedical data resources accessible. *PLOS Computational Biology* 21(11): e1013657. [doi:10.1371/journal.pcbi.1013657](https://doi.org/10.1371/journal.pcbi.1013657)
-22. Freeman S, Eddy SL, McDonough M, et al. (2014). Active learning increases student performance in science, engineering, and mathematics. *PNAS* 111(23): 8410–8415. [doi:10.1073/pnas.1319030111](https://doi.org/10.1073/pnas.1319030111)
-23. Ploetzner R, Berney S, Bétrancourt M (2020). A review of learning demands in instructional animations: the educational effectiveness of animations unfolds if the features of change need to be learned. *Journal of Computer Assisted Learning* 36(6): 838–860. [doi:10.1111/jcal.12476](https://doi.org/10.1111/jcal.12476)
+22. Ploetzner R, Berney S, Bétrancourt M (2020). A review of learning demands in instructional animations: the educational effectiveness of animations unfolds if the features of change need to be learned. *Journal of Computer Assisted Learning* 36(6): 838–860. [doi:10.1111/jcal.12476](https://doi.org/10.1111/jcal.12476)

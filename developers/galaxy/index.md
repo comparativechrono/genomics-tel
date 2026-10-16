@@ -9,7 +9,7 @@ description: How to list Galaxy Training Network tutorials live, build links int
 
 <div class="table-wrap" markdown="1">
 
-| | GTN API | Links into Galaxy | Published items in a frame | BioBlend or the REST API |
+| <span class="visually-hidden">Feature</span> | GTN API | Links into Galaxy | Published items in a frame | BioBlend or the REST API |
 |---|---|---|---|---|
 | What it does | Lists training tutorials, with their level, time, workflows and the servers that have their tools | Opens Galaxy at a tool, a file to import or a workflow to run | Shows a published workflow or Galaxy Page inside your page | Makes histories, loads data, runs workflows and shares the results, for a whole class |
 | Where it runs | JavaScript in your page | Plain links | An iframe | Python or curl on your own computer |
@@ -26,7 +26,7 @@ Galaxy is free software for running analyses through a web browser, on public se
 
 The GTN publishes its whole catalogue as JSON files that any website may read. This example lists one topic's tutorials, grouped as the GTN groups them, and checks which ones have all their tools on the server you will teach on.
 
-{% include example.html file="examples/gtn-tutorials.html" title="Galaxy Training Network tutorials for one topic" height="640" caption="Choose a topic and a server. To start on another topic, add `?topic=variant-analysis` (or any topic's ID) to the example's address." %}
+{% include example.html file="examples/gtn-tutorials.html" title="Galaxy Training Network tutorials for one topic" height="1080" tall=true caption="Choose a topic and a server. To start on another topic, add `?topic=variant-analysis` (or any topic's ID) to the example's address." %}
 
 The GTN's description of its API says that the API is unstable and may change without warning, and asks anyone who builds on it to contact the GTN first. Do that before a course depends on it, and keep an error message ready, as the example does. The [API's documentation page](https://training.galaxyproject.org/training-material/api/) lists every file.
 {: .note}
@@ -46,7 +46,7 @@ If you want news rather than a full list, each topic's feed of new material has 
 
 Galaxy reads its own address to decide what to show, so a link can open a tool's form, start importing a workflow, or offer a file to import. Each student needs an account on the server, and the links work best when students have logged in before they click.
 
-{% include example.html file="examples/galaxy-links.html" title="Links into Galaxy for a tool, a workflow and a file" height="880" %}
+{% include example.html file="examples/galaxy-links.html" title="Links into Galaxy for a tool, a workflow and a file" height="880" tall=true %}
 
 These paths work on any Galaxy server. Put the server's address, such as `https://usegalaxy.eu`, in front of them:
 
@@ -239,7 +239,7 @@ Galaxy Tours are short guided walks through the interface: a series of pop-ups, 
 - **Only server administrators can add tours.** Tour files go in the server's tour folder, and reloading them needs administrator rights. On 15 October 2026, usegalaxy.org, usegalaxy.org.au and usegalaxy.fr had only Galaxy's five core tours, such as `core.galaxy_ui` and `core.history`. usegalaxy.eu had 12 more, for RNA analysis.
 - **Start a tour from a link** ending in `/tours/` and the tour's name, such as [the interface tour on usegalaxy.eu](https://usegalaxy.eu/tours/core.galaxy_ui) (tested). `/api/tours` lists a server's tours.
 - **Tours made from a tool's tests work for anyone.** For a tool that has tests, **Generate Tour** in the tool form's options menu builds a tour from them, after copying the test files into the current history. The API gives the same tour at `/api/tours/generate`, with the tool's ID and version as `tool_id` and `tool_version`. We generated one for the Cut tool on usegalaxy.eu: six steps that fill in the form with the test's values and end at the run button.
-- **Writing your own is a dead end for most teachers.** Your tour reaches students only if a server's administrators install it, and the GTN's guide to writing tours relies on the Tour Builder browser extension, which was last changed in November 2018. For teaching material, GTN tutorials with Galaxy's Tutorial mode are the maintained route; the [educators' page](../../educators/galaxy/#activities) explains it.
+- **Writing your own is a dead end for most teachers.** Your tour reaches students only if a server's administrators install it, and the GTN's guide to writing tours relies on the Tour Builder browser extension, which was last changed in November 2018. For teaching material, GTN tutorials with Galaxy's Tutorial mode are the maintained route; the [educators' page](../../educators/galaxy/#run-a-gtn-tutorial-in-class) explains it.
 
 ## Things that catch people out
 

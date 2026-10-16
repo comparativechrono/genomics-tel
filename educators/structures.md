@@ -1,7 +1,7 @@
 ---
 title: Teaching with 3D structures
 topic: structures
-lede: A structure viewer shows students where a residue sits in the folded protein and what surrounds it. Used well, it also teaches them to ask what a picture leaves out, and how far a predicted model can be trusted.
+lede: A structure viewer shows students where a residue sits in the folded protein and what surrounds it. It can also teach them to ask what a picture leaves out, and how far a predicted model can be trusted.
 description: How to teach with 3D structure viewers such as Mol* and AlphaFold DB, including how to read AlphaFold confidence, with activities, assessment ideas, common misconceptions and references.
 ---
 
@@ -25,9 +25,15 @@ The first three suit a first-year class. The last two take longer and suit later
 
 *First year. 20 to 30 minutes, alone or in pairs.*
 
-Students hover over haemoglobin's four chains to tell the α chains from the β chains, find glutamate 6 of a β chain in the 3D view or in the sequence, decide whether it lies on the surface or inside the molecule, and explain why UniProt numbers the same residue 7. The page checks each step and answers straight away, so students can work at their own pace while you circulate.
+The page checks each step and answers straight away, so students can work at their own pace while you go round the room. It uses PDB entry 4HHB, a structure of human deoxyhaemoglobin [2], and every step can also be done from the keyboard, with the form below the steps.
 
-[Open the activity](../../developers/structures/examples/molstar-find-glu6.html) in a new tab, or see how it is built on the [developers' page](../../developers/structures/#turn-the-viewer-into-an-activity). It uses PDB entry 4HHB, a structure of human deoxyhaemoglobin [2]. Every step can also be done from the keyboard, with the form below the steps.
+1. Students open [the activity](../../developers/structures/examples/molstar-find-glu6.html) in a new tab.
+2. They hover over haemoglobin's four chains to tell the α chains from the β chains.
+3. They find glutamate 6 of a β chain, in the 3D view or in the sequence.
+4. They decide whether it lies on the surface or inside the molecule.
+5. They explain why UniProt numbers the same residue 7.
+
+Students produce a screenshot of glutamate 6 with its label, and one sentence each on where it sits and why the numbering differs. The [developers' page](../../developers/structures/#turn-the-viewer-into-an-activity) shows how the activity is built.
 
 Follow it with a short discussion. The residue sits on the surface, 21 Å from the nearest haem group, so how can changing it cause a disease? (In sickle-cell haemoglobin, the valine sticks to a neighbouring haemoglobin molecule when oxygen is low, and the molecules join into long fibres.) The same change appears as one base in codon 7 in the [genome browser activity](../genome-browsers/#find-the-variant) and on the site's [home page](../../).
 
@@ -43,7 +49,7 @@ Molecular pictures combine several things at once, such as graphical conventions
 
 Students hand in the matching sheet and one figure with a legend that explains every colour.
 
-### Is this model trustworthy?
+### Judge how far a predicted model can be trusted
 
 *Second or third year. 90 minutes, in pairs.*
 
@@ -107,7 +113,7 @@ pLDDT is local: two domains can each have very high pLDDT while their positions 
 - **Devices.** Mol\* runs in the browser, including on iPads, which many students use instead of laptops [5]. Some tasks, such as converting file formats or changing a sequence, are hard or impossible in Mol\* and easier in desktop programs such as ChimeraX or PyMOL [5]. Turning and clicking are easiest with a mouse.
 - **Accounts.** None are needed to view PDB or AlphaFold DB entries, or the examples on this site.
 - **Network.** The viewer is about 1.5 MB and a structure such as 4HHB another 123 kB, so a class of 30 downloads about 50 MB in all. Open the pages before the class starts, and keep pictures of the key views in case the network fails.
-- **Timing.** Allow 10 to 15 minutes for students to learn to turn, zoom and hover before the first real task. In the variant project described above, teams get one or two class periods per project to get started with the software [5].
+- **Timing.** Allow 10 to 15 minutes for students to learn to turn, zoom and hover before the first real task. In the source course, each of the four projects gets one or two class periods for getting started with the software [5].
 - **Dated instructions.** AlphaFold DB redesigned its entry pages in 2025 [10], and every viewer changes its look from time to time. Put a date on your instructions and screenshots.
 - **Accessibility.** Turning a molecule by dragging needs an alternative that does not drag, and anything that spins by itself needs a pause button ([WCAG 2.2](https://www.w3.org/TR/WCAG22/), success criteria 2.5.7 and 2.2.2). Give a text list of the key residues and alt text that states the structural point [11], and let students use the keyboard routes in the activities here. Screen readers cannot read the 3D view itself, and most life-science data portals still have serious accessibility problems [12]. See the [accessibility page](../accessibility/).
 
@@ -115,7 +121,7 @@ pLDDT is local: two domains can each have very high pLDDT while their positions 
 
 Schönborn and Anderson argued in 2006 that visual literacy, the ability to read and use pictures of molecules, should be taught explicitly, and proposed 10 guidelines for doing so [13]. A decade later, Dries and colleagues noted that few instructors say they teach it explicitly [1]. Offerdahl and colleagues argue that reading molecular pictures carries a high cognitive load, which falls when students master one component at a time [3].
 
-Most reports of 3D viewers in courses are descriptive. A survey of 116 instructors found a wide spread of programs and no common standards for assessment [6]. Berndsen and colleagues describe a variant project in a large lecture course, with gains in students' self-assessed confidence [5]. The general case for active work is strong: across 225 studies, students in active-learning classes scored better and were less likely to fail than students in lectures [14]. A review of 194 studies of learning from animation found that animations did significantly better than static pictures when learners had to learn how something changes, and only slightly better overall [15].
+Most reports of 3D viewers in courses are descriptive. A survey of 116 instructors found a wide spread of programs and no common standards for assessment [6]. Berndsen and colleagues describe a variant project in a large lecture course, with gains in students' self-assessed confidence [5]. The general case for active learning is set out on the [planning page](../planning/). Earlier meta-analyses found only small advantages for animations over static pictures; when Ploetzner and colleagues re-analysed one of them, animations did clearly better when students had to learn how something changes [14].
 
 We found no controlled study that compares learning with an interactive structure viewer against learning from static figures of the same structures, and none on how well students read pLDDT and the predicted aligned error. The advice on this page about short, checked activities and about reading confidence comes from these broader findings, from AlphaFold DB's documentation and from teaching experience.
 
@@ -126,7 +132,7 @@ We found no controlled study that compares learning with an interactive structur
 2. Fermi G, Perutz MF, Shaanan B, Fourme R (1984). The crystal structure of human deoxyhaemoglobin at 1.74 Å resolution. *Journal of Molecular Biology* 175(2): 159–174. [doi:10.1016/0022-2836(84)90472-8](https://doi.org/10.1016/0022-2836%2884%2990472-8)
 3. Offerdahl EG, Arneson JB, Byrne N (2017). Lighten the load: scaffolding visual literacy in biochemistry and molecular biology. *CBE—Life Sciences Education* 16(1): es1. [doi:10.1187/cbe.16-06-0193](https://doi.org/10.1187/cbe.16-06-0193)
 4. Terwilliger TC, Liebschner D, Croll TI, et al. (2024). AlphaFold predictions are valuable hypotheses and accelerate but do not replace experimental structure determination. *Nature Methods* 21(1): 110–116. [doi:10.1038/s41592-023-02087-4](https://doi.org/10.1038/s41592-023-02087-4)
-5. Berndsen CE, Shenk KE, Young A, et al. (2026). Breaking barriers in large classes: using cloud computing and computational biology to implement research-inspired curricula in Biochemistry I. *Biochemistry and Molecular Biology Education* 54(5): 442–449. [doi:10.1002/bmb.70069](https://doi.org/10.1002/bmb.70069)
+5. Berndsen CE, Shenk KE, Young A, Scanlan SE, Sardelli AM, Kayll AJ (2026). Breaking barriers in large classes: using cloud computing and computational biology to implement research-inspired curricula in Biochemistry I. *Biochemistry and Molecular Biology Education* 54(5): 442–449. [doi:10.1002/bmb.70069](https://doi.org/10.1002/bmb.70069)
 6. Craig PA, Michel LV, Bateman RC (2013). A survey of educational uses of molecular visualization freeware. *Biochemistry and Molecular Biology Education* 41(3): 193–205. [doi:10.1002/bmb.20693](https://doi.org/10.1002/bmb.20693)
 7. Hattab G, Rhyne TM, Heider D (2020). Ten simple rules to colorize biological data visualization. *PLOS Computational Biology* 16(10): e1008259. [doi:10.1371/journal.pcbi.1008259](https://doi.org/10.1371/journal.pcbi.1008259)
 8. Varadi M, Anyango S, Deshpande M, et al. (2022). AlphaFold Protein Structure Database: massively expanding the structural coverage of protein-sequence space with high-accuracy models. *Nucleic Acids Research* 50(D1): D439–D444. [doi:10.1093/nar/gkab1061](https://doi.org/10.1093/nar/gkab1061)
@@ -135,5 +141,4 @@ We found no controlled study that compares learning with an interactive structur
 11. Smits TC, Weru L, Gehlenborg N, L'Yi S (2025). Ten simple rules for making biomedical data resources accessible. *PLOS Computational Biology* 21(11): e1013657. [doi:10.1371/journal.pcbi.1013657](https://doi.org/10.1371/journal.pcbi.1013657)
 12. L'Yi S, Zhang HG, Mar AP, et al. (2025). A comprehensive evaluation of life sciences data resources reveals significant accessibility barriers. *Scientific Reports* 15: 23676. [doi:10.1038/s41598-025-08731-7](https://doi.org/10.1038/s41598-025-08731-7)
 13. Schönborn KJ, Anderson TR (2006). The importance of visual literacy in the education of biochemists. *Biochemistry and Molecular Biology Education* 34(2): 94–102. [doi:10.1002/bmb.2006.49403402094](https://doi.org/10.1002/bmb.2006.49403402094)
-14. Freeman S, Eddy SL, McDonough M, et al. (2014). Active learning increases student performance in science, engineering, and mathematics. *PNAS* 111(23): 8410–8415. [doi:10.1073/pnas.1319030111](https://doi.org/10.1073/pnas.1319030111)
-15. Ploetzner R, Berney S, Bétrancourt M (2020). A review of learning demands in instructional animations: the educational effectiveness of animations unfolds if the features of change need to be learned. *Journal of Computer Assisted Learning* 36(6): 838–860. [doi:10.1111/jcal.12476](https://doi.org/10.1111/jcal.12476)
+14. Ploetzner R, Berney S, Bétrancourt M (2020). A review of learning demands in instructional animations: the educational effectiveness of animations unfolds if the features of change need to be learned. *Journal of Computer Assisted Learning* 36(6): 838–860. [doi:10.1111/jcal.12476](https://doi.org/10.1111/jcal.12476)

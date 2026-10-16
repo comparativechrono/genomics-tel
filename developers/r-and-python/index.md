@@ -9,7 +9,7 @@ description: How to run R with webR and Python with Pyodide in a teaching web pa
 
 <div class="table-wrap" markdown="1">
 
-| | webR | Pyodide | JupyterLite | Quarto Live | PyScript |
+| <span class="visually-hidden">Feature</span> | webR | Pyodide | JupyterLite | Quarto Live | PyScript |
 |---|---|---|---|---|---|
 | What it is | R compiled to WebAssembly, driven by your page's JavaScript | Python compiled to WebAssembly, driven the same way | JupyterLab and Jupyter Notebook as a static website, with Python or R running in the browser | A Quarto extension that turns code cells into boxes run by webR or Pyodide | Python written into a page's HTML, run by Pyodide |
 | First load, measured | 14 MB, 4–6 s; with ggplot2, 51 MB and 16–23 s | 6 MB, 3–6 s; with numpy, matplotlib and Biopython, 22 MB | A console: 14 MB, 16–21 s. A notebook with Biopython and a plot: 33 MB, 18–20 s | A page with R and Python: 50 MB, 20 s | 6 MB, 4–12 s |
@@ -364,7 +364,7 @@ Two cautions. `require-corp` blocks anything from another site that does not all
 
 Two of our own sites run complete practicals in the browser. They are fuller examples of everything on this page:
 
-- **[R workbench](https://comparativechrono.github.io/R-workbench/)** runs webR 0.6.0 behind an R console, an RStudio-style editor, notebooks, R Markdown, Quarto, Shiny and a terminal, next to the instructions of a practical that takes about 1¾ hours. A service worker makes it cross-origin isolated on GitHub Pages, its `install.packages()` warns when a package has no webR build, and its [repository](https://github.com/comparativechrono/R-workbench) has Playwright tests with more than 300 checks.
+- **[R workbench](https://comparativechrono.github.io/R-workbench/)** runs webR 0.6.0 behind the R console, an RStudio-style editor (with R Markdown, Quarto and Shiny), Jupyter-style notebooks and a terminal, next to the instructions of a practical that takes about 1¾ hours. A service worker makes it cross-origin isolated on GitHub Pages, its `install.packages()` warns when a package has no webR build, and its [repository](https://github.com/comparativechrono/R-workbench) has Playwright tests with more than 300 checks.
 - **[Bioinformatics algorithms in Python](https://comparativechrono.github.io/bioinformatics-algorithms-python/)** runs Pyodide behind a notebook of cells in the page, for a three-hour practical with exercises that check themselves and plain-English hints for beginners' errors. It loads later chapters' packages in the background, and students can download their answers, and all their code as one Jupyter notebook. It uses Pyodide 0.29.5 in a classic worker, so moving it to Pyodide 314 means switching to a module worker.
 
 ## Things that catch people out

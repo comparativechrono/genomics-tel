@@ -9,7 +9,7 @@ description: How to show protein sequences and multiple alignments in a teaching
 
 <div class="table-wrap" markdown="1">
 
-| | Nightingale | react-msaview | Plain SVG | SeqViz |
+| <span class="visually-hidden">Feature</span> | Nightingale | react-msaview | Plain SVG | SeqViz |
 |---|---|---|---|---|
 | What it is | Web components for protein data, from EMBL-EBI | The JBrowse project's alignment viewer, as one script that includes React | About 100 lines of your own JavaScript | A viewer for one DNA sequence with its annotations and translation |
 | Download | Five modules, 341 kB (115 kB compressed) | 1.3 MB (425 kB compressed) | Nothing | 0.63 MB (166 kB compressed) |

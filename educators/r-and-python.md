@@ -1,13 +1,13 @@
 ---
 title: Teaching with R and Python in the browser
 topic: r-and-python
-lede: When R and Python run inside a web page, students can write and run code from the first minute, on any computer with a current browser and nothing to install. Used well, that leaves class time for reading, predicting and explaining code.
+lede: When R and Python run inside a web page, students can write and run code from the first minute, on any computer with a current browser and nothing to install. That leaves more class time for reading, predicting and explaining code.
 description: How to teach genomics with R and Python running in the browser (webR, Pyodide and JupyterLite), with activities, assessment ideas, common mistakes, practical tips and references.
 ---
 
 ## What R and Python in the browser teach well
 
-Code that runs inside a web page takes away the installation step. Students open a link and start, on a university computer, their own laptop or a borrowed one, and one page can hold the instructions, the data and the code. That suits short, focused tasks: reading code and predicting what it does, changing one thing and seeing what happens, and building an analysis one step at a time. It suits sequences, small tables and plots. It does not suit large data, command-line programs such as BLAST, or the few packages that have not been built for the browser, such as DESeq2.
+Code that runs inside a web page takes away the installation step. Students open a link and start, on a university computer, their own laptop or a borrowed one, and one page can hold the instructions, the data and the code. That suits short, focused tasks: reading code and predicting what it does, changing one thing and seeing what happens, and building an analysis one step at a time. It suits sequences, small tables and plots. It does not suit large data, command-line programs such as BLAST, or packages that do not work in the browser, such as DESeq2, which installs in webR but does not load.
 
 After a well-designed session, students should be able to:
 
@@ -47,7 +47,7 @@ Students produce the completed table and two sentences on how one changed base c
 
 ### A faded notebook in JupyterLite
 
-*First or second year. Two 50-minute sessions.*
+*First or second year. Two 50-minute sessions, alone.*
 
 Use a JupyterLite site with your own notebooks, published as the [developers' page](../../developers/r-and-python/#publish-a-jupyterlite-site-with-your-notebooks) describes.
 
@@ -65,7 +65,7 @@ Students hand in notebook 3, completed and downloaded as an `.ipynb` file.
 
 Two of our sites run complete practicals in the browser:
 
-- The [R workbench](https://comparativechrono.github.io/R-workbench/) introduces four ways of using R: the console, an RStudio-style editor, notebooks and documents, and the terminal. Students work with measurements of 344 penguins, and steps tick themselves when done.
+- The [R workbench](https://comparativechrono.github.io/R-workbench/) introduces four ways of using R: the R console, an RStudio-style editor, Jupyter-style notebooks and a terminal. The editor also handles R Markdown, Quarto and Shiny. Students work with measurements of 344 penguins, and steps tick themselves when done.
 - [Bioinformatics algorithms in Python](https://comparativechrono.github.io/bioinformatics-algorithms-python/) starts with Python for DNA and protein sequences, then uses it to look inside hash tables, graph searches, regular expressions, Smith–Waterman alignment, BLAST, multiple alignments, phylogenetic trees and protein networks. Exercises check themselves, and every error comes with a hint in plain English.
 
 1. Open the site yourself on a classroom computer before the session.
@@ -105,7 +105,7 @@ Pointing out common mistakes explicitly helps students avoid them [7].
 
 **Hidden state.** Code boxes and notebook cells share one session, so code can work only because of something run earlier, or fail when the cells run in another order. Restarting and running everything from the top is the test [4], and published notebooks often fail it: of 10,388 notebooks from biomedical papers whose packages could be installed, 1,203 ran without errors, and 879 gave the same results as their authors' [8].
 
-**"It runs in my browser, so it is private."** webR, Pyodide and JupyterLite run code on the student's own computer, and [JupyterLite's documentation](https://jupyterlite.readthedocs.io/en/stable/quickstart/using.html) says that none of your data leaves the browser unless an extension or the notebook's own code sends it. But the page still downloads R or Python from other websites, which see the student's address, and services such as Google Colab run code on Google's computers. Keep patient data out of teaching notebooks: see [genomic data and ethics](../data-and-ethics/).
+**"It runs in my browser, so it is private."** webR, Pyodide and JupyterLite run code on the student's own computer. [JupyterLite's documentation](https://jupyterlite.readthedocs.io/en/stable/quickstart/using.html) says that none of your data leaves the browser unless an extension or the notebook's own code sends it. But the page still downloads R or Python from other websites, which see the student's address, and services such as Google Colab run code on Google's computers. Keep patient data out of teaching notebooks: see [genomic data and ethics](../data-and-ethics/).
 
 **"My work is saved."** Code boxes keep nothing when the page closes. JupyterLite saves notebooks in the browser, but only in that browser on that computer. The work disappears when the student clears the browser's data, works in a private window or on a shared computer that wipes its profiles, or, in Safari, after seven days of use without a visit to the site. Make downloading the work part of every task.
 
@@ -115,7 +115,7 @@ Pointing out common mistakes explicitly helps students avoid them [7].
 
 ## Practical tips
 
-- **First load.** The first visit downloads R (about 14 MB) or Python (about 6 MB, and more for packages such as matplotlib), and a JupyterLite notebook with Biopython and a plot downloaded 33 MB. A class of 30 starting at once pulls up to 1.5 GB through the room's network. Ask students to open the page before the class: their browser then keeps R for 7 days and Python for a year. On a 20 Mbit/s connection, every 10 MB takes about 4 seconds.
+- **First load.** The first visit downloads R (about 14 MB) or Python (about 6 MB, and more for packages such as matplotlib), and a JupyterLite notebook with Biopython and a plot downloaded 33 MB. A class of 30 starting at once pulls about 1 GB through the room's network, or 1.5 GB if they open both R and Python. Ask students to open the page before the class: their browser then keeps R for 7 days and Python for a year. On a 20 Mbit/s connection, every 10 MB takes about 4 seconds.
 - **Saving work.** Code boxes save nothing, and JupyterLite and the two practicals save only in the browser. Build downloading into the task, and keep the starting files where students can fetch them again.
 - **Offline.** R does not start without a network, even after a visit. Python starts offline only for a short time after a visit: 10 minutes for a page on GitHub Pages. Keep screenshots, printed code and the data on local devices, and plan the most important parts of the session so that they work without technology [10].
 - **Old and low-memory computers.** Every current browser runs WebAssembly, but memory matters: an R session took 180 to 500 MB of the browser's memory, depending on the packages, and Python 130 to 610 MB. Ask students to close other tabs. Phones, Chromebooks and old laptops may reload the page when memory runs out, which loses the session. We tested in Chromium on a desktop computer, not on old computers, Firefox or Safari, so try your page on the computers students will use.
@@ -126,9 +126,9 @@ Pointing out common mistakes explicitly helps students avoid them [7].
 
 ## The evidence
 
-The case for this kind of teaching rests on general findings rather than on studies of these tools. In a meta-analysis of 225 studies, students taught by lecturing were 1.5 times more likely to fail than students in active-learning classes [13]. Students in active classes learn more but can feel that they learn less [14], so tell them that the effort is a sign of learning. For novices, worked examples work better than solving problems, but later the reverse is true, so examples should fade into problems as students gain skill [2]. Labelled steps also help students learn to program [1, 5].
+The case for this kind of teaching rests on general findings rather than on studies of these tools. The general case for active learning is set out on the [planning page](../planning/). Students in active classes learn more but can feel that they learn less [13], so tell them that the effort is a sign of learning. For novices, worked examples work better than solving problems, but later the reverse is true, so examples should fade into problems as students gain skill [2]. Labelled steps also help students learn to program [1, 5].
 
-Course reports describe Jupyter notebooks for teaching Python with DNA sequences remotely [15], and Google Colab in a large biochemistry class, where more than 250 students reported more confidence afterwards [16]. Neither compared students' learning with another way of teaching. We know of no published classroom studies of webR, Pyodide or JupyterLite. The advice on this page comes from the general findings above, from how the tools behaved in our tests, and from teaching experience.
+Course reports describe Jupyter notebooks for teaching Python with DNA sequences remotely [14], and Google Colab in a large biochemistry class, where more than 250 students took part and their self-assessed confidence rose [15]. Neither compared students' learning with another way of teaching. We know of no published classroom studies of webR, Pyodide or JupyterLite. The advice on this page comes from the general findings above, from how the tools behaved in our tests, and from teaching experience.
 
 ## References
 
@@ -145,7 +145,6 @@ Course reports describe Jupyter notebooks for teaching Python with DNA sequences
 10. Moore B, Carvajal-López P, Chauke PA, et al. (2021). Ten simple rules for organizing a bioinformatics training course in low- and middle-income countries. *PLOS Computational Biology* 17(8): e1009218. [doi:10.1371/journal.pcbi.1009218](https://doi.org/10.1371/journal.pcbi.1009218)
 11. Nederbragt A, Harris RM, Hill AP, Wilson G (2020). Ten quick tips for teaching with participatory live coding. *PLOS Computational Biology* 16(9): e1008090. [doi:10.1371/journal.pcbi.1008090](https://doi.org/10.1371/journal.pcbi.1008090)
 12. Smits TC, Weru L, Gehlenborg N, L'Yi S (2025). Ten simple rules for making biomedical data resources accessible. *PLOS Computational Biology* 21(11): e1013657. [doi:10.1371/journal.pcbi.1013657](https://doi.org/10.1371/journal.pcbi.1013657)
-13. Freeman S, Eddy SL, McDonough M, et al. (2014). Active learning increases student performance in science, engineering, and mathematics. *PNAS* 111(23): 8410–8415. [doi:10.1073/pnas.1319030111](https://doi.org/10.1073/pnas.1319030111)
-14. Deslauriers L, McCarty LS, Miller K, Callaghan K, Kestin G (2019). Measuring actual learning versus feeling of learning in response to being actively engaged in the classroom. *PNAS* 116(39): 19251–19257. [doi:10.1073/pnas.1821936116](https://doi.org/10.1073/pnas.1821936116)
-15. Gupta YM, Kirana SN, Homchan S, Tanasarnpaiboon S (2023). Teaching Python programming for bioinformatics with Jupyter notebook in the post-COVID-19 era. *Biochemistry and Molecular Biology Education* 51(5): 537–539. [doi:10.1002/bmb.21746](https://doi.org/10.1002/bmb.21746)
-16. Berndsen CE, Shenk KE, Young A, Scanlan SE, Sardelli AM, Kayll AJ (2026). Breaking barriers in large classes: using cloud computing and computational biology to implement research-inspired curricula in Biochemistry I. *Biochemistry and Molecular Biology Education* 54(5): 442–449. [doi:10.1002/bmb.70069](https://doi.org/10.1002/bmb.70069)
+13. Deslauriers L, McCarty LS, Miller K, Callaghan K, Kestin G (2019). Measuring actual learning versus feeling of learning in response to being actively engaged in the classroom. *PNAS* 116(39): 19251–19257. [doi:10.1073/pnas.1821936116](https://doi.org/10.1073/pnas.1821936116)
+14. Gupta YM, Kirana SN, Homchan S, Tanasarnpaiboon S (2023). Teaching Python programming for bioinformatics with Jupyter notebook in the post-COVID-19 era. *Biochemistry and Molecular Biology Education* 51(5): 537–539. [doi:10.1002/bmb.21746](https://doi.org/10.1002/bmb.21746)
+15. Berndsen CE, Shenk KE, Young A, Scanlan SE, Sardelli AM, Kayll AJ (2026). Breaking barriers in large classes: using cloud computing and computational biology to implement research-inspired curricula in Biochemistry I. *Biochemistry and Molecular Biology Education* 54(5): 442–449. [doi:10.1002/bmb.70069](https://doi.org/10.1002/bmb.70069)

@@ -342,6 +342,8 @@ pre.highlight, figure.highlight pre { margin: 0; padding: 1rem 1.1rem; overflow:
 .example-links { margin: 0; display: flex; gap: 1.1rem; font-size: 0.88rem; }
 .example-stage { height: min(var(--stage-h, 460px), 80vh); background: var(--stage); position: relative; }
 .example-stage iframe { display: block; width: 100%; height: 100%; border: 0; background: var(--stage); }
+/* Lists and forms have no viewer that catches the mouse wheel, so they may be taller than the screen. */
+.example--tall .example-stage { height: var(--stage-h, 460px); }
 .example-start { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.9rem; padding: 1.5rem; text-align: center; background: var(--paper-2); color: var(--ink-2); }
 .example-start p { max-width: 30rem; margin: 0; }
 .example-caption { padding: 0.75rem 1rem; border-top: 1px solid var(--line); font-size: 0.93rem; color: var(--ink-2); }

@@ -7,7 +7,7 @@ lede: A free site about teaching genomics with interactive tools, written for th
 
 ## What the site is for
 
-Students learn genomics best by doing it: finding a variant in a genome browser, turning a protein to see where a mutation sits, running an analysis and looking hard at the result. The tools that make this possible were built for research, and they are free. The hard part is fitting them into a course. This site collects what we have learned about that, from both sides: how to teach with these tools, and how to put them into a web page.
+Students learn more when they do something with the material than when they only listen (the [planning page]({{ '/educators/planning/' | relative_url }}) has the evidence). Genomics gives them plenty to do: finding a variant in a genome browser, turning a protein to see where a mutation sits, running an analysis and looking hard at the result. The tools that make this possible were built for research, and they are free. The hard part is fitting them into a course. This site collects what we have learned about that, from both sides: how to teach with these tools, and how to put them into a web page.
 
 The name comes from TEL, short for technology-enhanced learning.
 
@@ -29,13 +29,13 @@ genomics.tel is going to show a small number of Google ads, to pay for the genom
 
 - Ads appear only on guide pages: at most two on a page, between sections of text, and never inside or next to a live example or its code.
 - Advertisers have no say in what we write, and nobody pays us to recommend a tool.
-- Google chooses the ads. In the UK, the European Economic Area and Switzerland, you are asked whether Google may use cookies to personalise them, and you can change your answer at any time from the "Privacy and cookie settings" link at the bottom of each page{% unless ads_live %}, which will appear with the ads{% endunless %}.
+- Google chooses the ads. In the UK, the European Economic Area and Switzerland, you are asked whether Google may use cookies and personal data for ads. You can change your answer at any time from the "Privacy and cookie settings" link at the bottom of each page{% unless ads_live %}, which will appear with the ads{% endunless %}.
 
 Our [privacy page]({{ '/privacy/' | relative_url }}) explains what Google collects and how to opt out of personalised ads.
 
 ## Reusing our material
 
-- **Text** is licensed under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/). You may adapt it for your own teaching, with credit to genomics.tel.
+- **Text** is licensed under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/). You may copy and adapt it for any purpose, including your own teaching, if you credit genomics.tel.
 - **Code**, including every example file, is under the [MIT licence](https://github.com/{{ site.repository }}/blob/main/LICENSE.md), so you can copy it into your own pages, commercial or not.
 - **Libraries and data** used by the examples keep their own licences, which each guide names.
 - **Fonts** are Atkinson Hyperlegible Next and Mono from the Braille Institute, under the [SIL Open Font Licence]({{ '/assets/fonts/OFL-atkinson-hyperlegible-next.txt' | relative_url }}). They were designed to be easy to read for people with low vision.

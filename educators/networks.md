@@ -7,7 +7,7 @@ description: How to teach with biological networks and pathway diagrams, such as
 
 ## What networks teach well
 
-A network diagram puts many relationships on one page: which proteins act on which, in what direction, and with what evidence. That makes it good for teaching ideas that are hard to hold in words, such as feedback loops and pathways that branch, and the difference between knowing that two proteins are linked and knowing how. It also makes it easy to mislead, because readers find meaning in every part of the picture, including the parts the drawing chose at random.
+A network diagram puts many relationships on one page: which proteins act on which, in what direction, and with what evidence. Students can follow ideas there that are hard to hold in words, such as feedback loops and pathways that branch, and the difference between knowing that two proteins are linked and knowing how. It also makes it easy to mislead, because readers find meaning in every part of the picture, including the parts the drawing chose at random.
 
 After a well-designed session, students should be able to:
 
@@ -70,7 +70,7 @@ Students produce the evidence table, and a paragraph on which links they would t
 
 1. Start from a public list of differentially expressed genes. Students run an enrichment analysis, state the background set of genes they used, and correct for multiple testing. In a survey of 186 articles, 95% of analyses with over-representation tests did not use an appropriate background list or did not describe one, and 43% did not correct for multiple tests [4]. Other sources of bias call for caution even when both are done [7].
 2. They build a network of the genes behind the top result, in STRING or Cytoscape desktop, and show fold change with a colour scale that still works in greyscale and for colour-blind readers [3].
-3. They revise the figure against Marai and colleagues' ten rules, which cover purpose, layout, labels, colour, level of detail, layering and splitting into several figures [3].
+3. They revise the figure against Marai and colleagues' ten rules, which cover, among other things, purpose, layout, labels, colour, level of detail, layering and splitting into several figures [3].
 4. They write a caption that says what the layout means, and a methods paragraph that names the STRING version, the network type and the score threshold.
 
 Students produce a figure, a caption and a methods paragraph, reviewed by another pair against a checklist built from the ten rules. To put the finished network on a web page, students can export it from Cytoscape desktop, as the [developers' page](../../developers/networks/#show-a-network-made-in-cytoscape-desktop) describes.
@@ -98,7 +98,7 @@ Network diagrams suit short tasks that test reading and judgement rather than re
 
 **Reading every arrow as the same thing.** Diagrams with arrows tend to be read as sequences of actions and outcomes [3], but an arrow in a pathway summarises experiments of different kinds. In the p53 pathway, arrows stand for phosphorylation, for switching on a gene, and for less direct effects such as "needed for". Ask students what each arrow stands for and what evidence supports it.
 
-**Trusting enrichment results.** An enrichment p-value means little without its background set and a correction for multiple testing, yet published analyses often lack them: in a survey of research articles, almost all over-representation analyses failed to use or describe a suitable background set [4]. Other biases remain even when the methods are sound [7]. Ask students for both before they interpret a result.
+**Trusting enrichment results.** An enrichment p-value means little without its background set and a correction for multiple testing, yet published analyses often lack them. In a survey of research articles, almost all over-representation analyses failed to use or describe a suitable background set [4]. Other biases remain even when the methods are sound [7]. Ask students for both before they interpret a result.
 
 **Names that mean two things.** When we tested it on 15 October 2026, STRING read "p21" as TCEAL1 rather than CDKN1A. Many proteins have several names, so teach students to use official gene symbols and to check which protein a tool has matched.
 
@@ -112,7 +112,7 @@ Network diagrams suit short tasks that test reading and judgement rather than re
 
 ## The evidence
 
-We found no classroom studies of teaching with network diagrams or network viewers in genomics, so none of the advice here has been tested against a comparison group. It comes from three other kinds of evidence. Visualisation and accessibility research gives rules for drawing network figures [3] and for making data resources accessible [8], drawn from design principles and experience rather than from classroom trials. The general case for active learning is strong: across 225 studies, students in active-learning classes did better in examinations and were less likely to fail than students in lectures [9]. And in a review of 194 studies of animation, animations beat static pictures mainly when students had to learn how something changes [10].
+We found no classroom studies of teaching with network diagrams or network viewers in genomics, so none of the advice here has been tested against a comparison group. It comes from three other kinds of evidence. Visualisation and accessibility research gives rules for drawing network figures [3] and for making data resources accessible [8], drawn from design principles and experience rather than from classroom trials. The general case for active learning is set out on the [planning page](../planning/). Earlier meta-analyses found only small advantages for animations over static pictures, and when Ploetzner and colleagues re-analysed one of them, animations did clearly better when students had to learn how something changes [9].
 
 So use the interactive features for tasks, such as predicting the next step or watching links disappear as the threshold rises, rather than for display. A network that students only look at may teach no more than a static figure with a good caption. That conclusion is our reading of the evidence, and it has not been tested for networks.
 
@@ -127,5 +127,4 @@ So use the interactive features for tasks, such as predicting the next step or w
 6. Haynes WA, Tomczak A, Khatri P (2018). Gene annotation bias impedes biomedical research. *Scientific Reports* 8: 1362. [doi:10.1038/s41598-018-19333-x](https://doi.org/10.1038/s41598-018-19333-x)
 7. Timmons JA, Szkop KJ, Gallagher IJ (2015). Multiple sources of bias confound functional enrichment analysis of global -omics data. *Genome Biology* 16: 186. [doi:10.1186/s13059-015-0761-7](https://doi.org/10.1186/s13059-015-0761-7)
 8. Smits TC, Weru L, Gehlenborg N, L'Yi S (2025). Ten simple rules for making biomedical data resources accessible. *PLOS Computational Biology* 21(11): e1013657. [doi:10.1371/journal.pcbi.1013657](https://doi.org/10.1371/journal.pcbi.1013657)
-9. Freeman S, Eddy SL, McDonough M, et al. (2014). Active learning increases student performance in science, engineering, and mathematics. *PNAS* 111(23): 8410–8415. [doi:10.1073/pnas.1319030111](https://doi.org/10.1073/pnas.1319030111)
-10. Ploetzner R, Berney S, Bétrancourt M (2020). A review of learning demands in instructional animations: the educational effectiveness of animations unfolds if the features of change need to be learned. *Journal of Computer Assisted Learning* 36(6): 838–860. [doi:10.1111/jcal.12476](https://doi.org/10.1111/jcal.12476)
+9. Ploetzner R, Berney S, Bétrancourt M (2020). A review of learning demands in instructional animations: the educational effectiveness of animations unfolds if the features of change need to be learned. *Journal of Computer Assisted Learning* 36(6): 838–860. [doi:10.1111/jcal.12476](https://doi.org/10.1111/jcal.12476)

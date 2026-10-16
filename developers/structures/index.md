@@ -9,7 +9,7 @@ description: How to embed Mol*, PDBe Mol*, 3Dmol.js and NGL in a teaching web pa
 
 <div class="table-wrap" markdown="1">
 
-| | Mol\* | PDBe Mol\* | 3Dmol.js | NGL |
+| <span class="visually-hidden">Feature</span> | Mol\* | PDBe Mol\* | 3Dmol.js | NGL |
 |---|---|---|---|---|
 | What it is | The viewer used by the RCSB PDB and PDBe websites, as one script | PDBe's packaging of Mol\*, with a `<pdbe-molstar>` tag | A small viewer with a JavaScript API and a no-code mode | An older viewer, one of the two that Mol\* grew from |
 | Version tested | 5.12.0 | 3.12.0, which contains Mol\* 5.8.0 | 2.5.5 | 2.5.0 |

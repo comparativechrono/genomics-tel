@@ -24,7 +24,7 @@
       url: https://comparativechrono.github.io/R-workbench/
       github: https://github.com/comparativechrono/R-workbench
       for: students and educators
-      description: R in the browser for practicals. An R console, an RStudio-style editor, notebooks, R Markdown, Quarto and Shiny sit next to the practical's instructions.
+      description: R in the browser for practicals. The R console, an RStudio-style editor (with R Markdown, Quarto and Shiny), Jupyter-style notebooks and a terminal sit next to the practical's instructions.
       notes: Runs on webR. The optional AI assistant needs each student's own API key.
       featured: true
     - name: Bioinformatics workbench
@@ -106,7 +106,7 @@
     - name: Genomics WebAssembly tools
       github: https://github.com/comparativechrono/genomics-wasm
       for: developers
-      description: Bioinformatics programs such as BWA, minimap2, HISAT2, Salmon, kallisto, FreeBayes and PLINK 2 compiled to run in a web browser, each tested against the original program. They power the Bioinformatics workbench.
+      description: Bioinformatics programs such as BWA, minimap2, HISAT2, Salmon, kallisto, FreeBayes and PLINK 2 compiled to run in a web browser, each tested against the original program. The Bioinformatics workbench runs on them.
 
 - group: Research
   intro: Our research group and the tools that come out of its work.

@@ -37,7 +37,7 @@ The Web Content Accessibility Guidelines (WCAG) 2.2 became a W3C Recommendation 
 
 ## Meet the UK rules for universities
 
-Jisc's guidance for colleges and universities says that the baseline for UK public sector bodies is WCAG 2.2 level AA, under the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018. The baseline covers content you produce yourself, and third-party content and systems you have paid for, including the virtual learning environment, and organisations must publish an accessibility statement. The regulations reinforced the duty to make reasonable adjustments to digital content that the Equality Act 2010 established, and Jisc notes that you must still make reasonable adjustments for disabled people when they are needed, for example by providing information in a more accessible format [4].
+Jisc's guidance for colleges and universities says that the baseline for UK public sector bodies is WCAG 2.2 level AA, under the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018. The baseline covers content you produce yourself, and third-party content and systems you have paid for, including the virtual learning environment, and organisations must publish an accessibility statement. The regulations reinforced the duty to make reasonable adjustments to digital content that the Equality Act 2010 established. Jisc notes that you must still make reasonable adjustments for disabled people when they are needed, for example by providing information in a more accessible format [4].
 
 Many of the tools on this site are free public services that your university does not control. Plan the alternative route for each activity before the session, and ask your institution's disability or accessibility team how the rules apply to the tools you use.
 
@@ -70,7 +70,7 @@ The most reliable fix is in the task, not the tool. For every step that needs a 
 - **Give tables alongside pictures.** List the features in view, the edges of a network or the residues around a site. Keep tables short, or let students filter them: a table of 100 rows and 100 columns takes 10,000 keystrokes to read [2].
 - **Give text versions of trees and structures.** A Newick string or a nested list for a tree, a list of residues and their contacts for a structure, and tactile prints where your institution can make them.
 - **Describe what to look for, not where or what colour it is.** Write "the variant in the seventh codon", not "the red mark on the left".
-- **Use the keyboard features the tools have.** In igv.js, the search box works from the keyboard, and on a selected track the F and B keys jump to the next and previous feature.
+- **Use the keyboard features the tools have.** In igv.js, the search box works from the keyboard. On a selected track, the F and B keys jump to the next and previous feature, but selecting a track needs a pointer: click **Select Tracks** in igv.js's toolbar, then tick the box beside the track. Set this up before handing over to a student who uses only a keyboard.
 - **Let students use their own set-up**, with their own screen reader, magnifier, colours and devices.
 - **Allow extra time**, and avoid timed tasks inside a tool. If time matters, let students extend it.
 - **Ask early.** Your institution's disability service can tell you before the session what each student needs.
@@ -95,7 +95,7 @@ Red-green colour vision deficiency affects about 8% of men and 0.4% of women of 
 
 ## Watch for new aids
 
-The genome browsers and 3D viewers tested for this site draw their content as pictures that screen readers cannot read, and purpose-built aids are at an early stage. AltGosling writes text descriptions of genomics visualisations made with the Gosling toolkit. It was designed with a blind screen-reader user, and described these visualisations better than large language models did [12]. VIJB shows the output of the JBrowse genome browser on a Braille display [13]. Both are early tools, so the second routes above remain the practical answer. There is an encouraging side: Schmidt and colleagues point out that research projects in bioinformatics may be more accessible for students with disabilities [14].
+The genome browsers and 3D viewers tested for this site draw their content as pictures that screen readers cannot read, and purpose-built aids are at an early stage. AltGosling writes text descriptions of genomics visualisations made with the Gosling toolkit. It was designed with a blind screen-reader user, and described these visualisations better than large language models did [12]. VIJB shows the output of the JBrowse genome browser on a Braille display [13]. Both are early tools, so the second routes above remain the practical answer. Schmidt and colleagues also point out that research projects in bioinformatics may be more accessible for students with disabilities [14].
 
 ## References
 
@@ -104,7 +104,7 @@ The genome browsers and 3D viewers tested for this site draw their content as pi
 2. Smits TC, Weru L, Gehlenborg N, L'Yi S (2025). Ten simple rules for making biomedical data resources accessible. *PLOS Computational Biology* 21(11): e1013657. [doi:10.1371/journal.pcbi.1013657](https://doi.org/10.1371/journal.pcbi.1013657)
 3. W3C (2023). *Web Content Accessibility Guidelines (WCAG) 2.2*. W3C Recommendation, 5 October 2023; current version 12 December 2024. [w3.org/TR/WCAG22](https://www.w3.org/TR/WCAG22/), and [What's new in WCAG 2.2](https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/)
 4. Jisc. *Practical steps to meeting accessibility regulations*. Read 15 October 2026. [jisc.ac.uk](https://jisc.ac.uk/guides/practical-steps-to-meeting-accessibility-regulations)
-5. Galaxy Community (2024). The Galaxy platform for accessible, reproducible, and collaborative data analyses: 2024 update. *Nucleic Acids Research* 52(W1): W83–W94. [doi:10.1093/nar/gkae410](https://doi.org/10.1093/nar/gkae410)
+5. The Galaxy Community (2024). The Galaxy platform for accessible, reproducible, and collaborative data analyses: 2024 update. *Nucleic Acids Research* 52(W1): W83–W94. [doi:10.1093/nar/gkae410](https://doi.org/10.1093/nar/gkae410)
 6. Galaxy Training Network. *Accessibility*. Read 15 October 2026. [training.galaxyproject.org](https://training.galaxyproject.org/training-material/accessibility.html)
 7. Birch J (2012). Worldwide prevalence of red-green color deficiency. *Journal of the Optical Society of America A* 29(3): 313–320. [doi:10.1364/JOSAA.29.000313](https://doi.org/10.1364/JOSAA.29.000313)
 8. Crameri F, Shephard GE, Heron PJ (2020). The misuse of colour in science communication. *Nature Communications* 11: 5444. [doi:10.1038/s41467-020-19160-7](https://doi.org/10.1038/s41467-020-19160-7)

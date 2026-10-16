@@ -66,7 +66,7 @@ Opened straight from the disk, with a `file://` address, a page can still load i
 
 ## Fix the version and check the hash
 
-Libraries change. An address such as `igv@latest`, or a version range such as `igv@3`, gets updates automatically, and jsDelivr warns that the code behind such an address "can change any time" ([jsDelivr](https://jsdelivr.com/using-sri-with-dynamic-files)). Name the exact version instead, as in `igv@3.8.9`. Libraries for teaching move quickly: Mol\* went from version 5.10 to 5.13 in about four months, and react-msaview released three major versions, 7.0, 8.0 and 9.0, between 14 September and 12 October 2026.
+Libraries change. An address such as `igv@latest`, or a version range such as `igv@3`, gets updates automatically, and jsDelivr warns that the code behind such an address "can change any time" ([jsDelivr](https://www.jsdelivr.com/using-sri-with-dynamic-files)). Name the exact version instead, as in `igv@3.8.9`. Libraries for teaching move quickly: Mol\* went from version 5.10 to 5.13 in about four months, and react-msaview released three major versions, 7.0, 8.0 and 9.0, between 14 September and 12 October 2026.
 
 Subresource integrity (SRI) adds a second check. The `integrity` attribute holds a hash of the exact file, and the browser refuses to run a download whose hash differs ([MDN](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Subresource_Integrity)). A file from another site also needs `crossorigin="anonymous"`, because the check works only when that site allows other websites to read the file. To make the hash:
 
@@ -76,7 +76,7 @@ curl -s https://cdn.jsdelivr.net/npm/igv@3.8.9/dist/igv.min.js | openssl dgst -s
 
 Some cautions:
 
-- **Hash only files that never change.** jsDelivr advises SRI only for full links to single files at fixed versions, because the files it minifies or combines on request can change ([jsDelivr](https://jsdelivr.com/using-sri-with-dynamic-files)).
+- **Hash only files that never change.** jsDelivr advises SRI only for full links to single files at fixed versions, because the files it minifies or combines on request can change ([jsDelivr](https://www.jsdelivr.com/using-sri-with-dynamic-files)).
 - **ES modules** can carry hashes in the `integrity` section of an import map. Chromium enforced them in our tests: a wrong hash blocked the module.
 - **Some libraries load more files themselves.** webR and Pyodide download many further files after the first, and a hash covers only the file named in the tag. For these, the exact version in the address is the protection.
 - **Update on purpose.** Read the release notes, change the version and the hash together, and test the page again.
