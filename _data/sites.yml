@@ -13,13 +13,6 @@
       description: An interactive tutorial on the algorithms inside sequence aligners and read mappers, from hashing and the Burrows–Wheeler transform to BLAST, multiple alignment and hidden Markov models, with exercises in every chapter.
       notes: Fourteen chapters, about eight hours in all. Runs entirely in the browser and works offline.
       featured: true
-    - name: Bioinformatics algorithms in Python
-      url: https://comparativechrono.github.io/bioinformatics-algorithms-python/
-      github: https://github.com/comparativechrono/bioinformatics-algorithms-python
-      for: students and educators
-      description: A three-hour practical in which students write Python in the browser and use it to look inside alignment, BLAST, trees and networks, with exercises that check themselves.
-      notes: Python runs in the page (Pyodide). Work can be saved as a Jupyter notebook.
-      featured: true
     - name: R workbench
       url: https://comparativechrono.github.io/R-workbench/
       github: https://github.com/comparativechrono/R-workbench
@@ -63,6 +56,7 @@
       for: students and educators
       description: A two-hour practical on AI assistants and AI agents. Students answer one question, which genotype NA12878 has at CYP2C19*2, with an assistant that writes commands and with an agent that runs them, and then turn the agent's run into an analysis they can repeat.
       notes: The programs are the real ones, compiled to WebAssembly, and the AI is a real model. Each student enters their own API key, and Google's Gemini API has a free tier.
+      featured: true
     - name: Yeast, data and AI
       url: https://comparativechrono.github.io/yeast-data-ai/
       github: https://github.com/comparativechrono/yeast-data-ai
@@ -75,6 +69,13 @@
       for: students and educators
       description: Students study the immune receptor TLR4, its co-receptor MD-2 and bacterial LPS with UniProt, the Protein Data Bank, a 3D viewer and AlphaFold, then make a figure of their own, without leaving the page.
       notes: Progress and answers are saved in the student's browser, and can be downloaded to keep or hand in.
+    - name: Bioinformatics algorithms in Python
+      url: https://comparativechrono.github.io/bioinformatics-algorithms-python/
+      github: https://github.com/comparativechrono/bioinformatics-algorithms-python
+      for: students and educators
+      description: A three-hour practical in which students write Python in the browser and use it to look inside alignment, BLAST, trees and networks, with exercises that check themselves.
+      notes: Python runs in the page (Pyodide). Work can be saved as a Jupyter notebook.
+      featured: true
     - name: Introduction to R
       url: https://comparativechrono.github.io/r-training/
       github: https://github.com/comparativechrono/r-training
