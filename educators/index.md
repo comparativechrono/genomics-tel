@@ -1,6 +1,6 @@
 ---
 title: For educators
-lede: What each tool is good for in class, how to run an activity with it, how to check what students learned, and where students usually go wrong.
+lede: These pages explain what each tool is good for in class, how to run an activity with it, how to check what students have learned, and where students usually go wrong.
 description: Guides for teaching genomics with genome browsers, alignments, 3D structures, networks, Galaxy, R and Python in the browser, phylogenetic trees and charts, with activities, assessment, common misconceptions and the evidence.
 ads: false
 ---
@@ -16,14 +16,14 @@ Each topic page has the same parts: what the tool teaches well, activities with 
 ## Before you plan
 
 [Planning a session](planning/)
-: Active learning, worked examples, and how to line up outcomes, activities and assessment.
+: How to use active learning and worked examples, and how to line up outcomes, activities and assessment.
 
 [Genomic data and ethics](data-and-ethics/)
 : Which data you can use in class, why public servers are no place for patient data, and where to find good open datasets.
 
 [Accessibility](accessibility/)
-: Making interactive activities work for students who use screen readers, keyboards or magnification, or who see colour differently.
+: How to make interactive activities work for students who use screen readers, keyboards or magnification, or who see colour differently.
 
 ## About the evidence
 
-Where a page says that an approach works, it cites a study. We have checked that each reference exists, and that its abstract, or the full text where we could read it, supports the sentence that cites it. The evidence is uneven. There is good research on active learning in general and on how students read evolutionary trees, but there are few classroom studies of genome browsers, network viewers or code in the browser. Where the evidence is thin, the pages say so, and their advice comes from teaching experience.
+Where a page says that an approach works, it cites a study. We have checked that each reference exists, and that its abstract, or the full text where we could read it, supports the sentence that cites it. The evidence is uneven: there is good research on active learning in general and on how students read evolutionary trees, but few classroom studies of genome browsers, network viewers or code in the browser. Where the evidence is thin, the pages say so, and their advice comes from teaching experience.

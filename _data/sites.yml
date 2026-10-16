@@ -4,32 +4,32 @@
 #         description, notes (optional, one or two short sentences)
 
 - group: Teaching sites
-  intro: Sites we use in our own teaching. They run in a web browser, so students have nothing to install.
+  intro: These are sites we use in our own teaching. They run in a web browser, so students have nothing to install.
   items:
     - name: How aligners work
       url: https://comparativechrono.github.io/how-aligners-work/
       github: https://github.com/comparativechrono/how-aligners-work
       for: students and educators
       description: An interactive tutorial on the algorithms inside sequence aligners and read mappers, from hashing and the Burrows–Wheeler transform to BLAST, multiple alignment and hidden Markov models, with exercises in every chapter.
-      notes: Fourteen chapters, about eight hours in all. Runs entirely in the browser and works offline.
+      notes: It has fourteen chapters, about eight hours of work in all, and runs entirely in the browser, even offline.
       featured: true
     - name: R workbench
       url: https://comparativechrono.github.io/R-workbench/
       github: https://github.com/comparativechrono/R-workbench
       for: students and educators
-      description: R in the browser for practicals. The R console, an RStudio-style editor (with R Markdown, Quarto and Shiny), Jupyter-style notebooks and a terminal sit next to the practical's instructions.
-      notes: Runs on webR. The optional AI assistant needs each student's own API key.
+      description: R running in the browser, built as a base for practicals. The R console, an RStudio-style editor (with R Markdown, Quarto and Shiny), Jupyter-style notebooks and a terminal sit next to the practical's instructions.
+      notes: It runs on webR. The optional AI assistant needs each student's own API key.
       featured: true
     - name: Bioinformatics workbench
       url: https://comparativechrono.github.io/bioinformatics-workbench/
       github: https://github.com/comparativechrono/bioinformatics-workbench
       for: students and educators
-      description: Real bioinformatics programs compiled to run in the browser, including fastp, minimap2, BWA, samtools, bcftools, Salmon and PLINK 2, with Python and R notebooks, a genome browser, a 3D structure viewer and a network viewer.
-      notes: Needs an internet connection to fetch Python, R and database results.
+      description: Real bioinformatics programs, such as fastp, minimap2, BWA, samtools, bcftools, Salmon and PLINK 2, compiled to run in the browser. Python and R notebooks, a genome browser, a 3D structure viewer and a network viewer sit alongside them.
+      notes: It needs an internet connection to fetch Python, R and results from online databases.
       featured: true
 
 - group: Practicals
-  intro: Complete practicals, with the instructions on one side of the screen and a workbench on the other. Each shows a different side of technology enhanced learning for genomics.
+  intro: These are complete practicals, each with the instructions on one side of the screen and a workbench on the other. Each one shows a different side of technology enhanced learning for genomics.
   items:
     - name: Genomic variant analysis practicals
       url: https://comparativechrono.github.io/variant-practicals/
@@ -84,7 +84,7 @@
       notes: Adapted from Babraham Bioinformatics' Introduction to R (with Tidyverse) by Simon Andrews and Laura Biggins. Built on the R workbench.
 
 - group: Learning through games
-  intro: An example of gamified learning, where the course is a game with tasks to choose, experience points to earn and levels to reach.
+  intro: This is an example of gamified learning, in which the course becomes a game, with tasks to choose, experience points to earn and levels to reach.
   items:
     - name: "Datascape: Cambridge"
       url: https://comparativechrono.github.io/datascape-cambridge/
@@ -94,17 +94,17 @@
       notes: Progress is saved in the browser.
 
 - group: Data and science communication
-  intro: An interactive chart for lectures and outreach.
+  intro: An interactive chart that we use in lectures and outreach.
   items:
     - name: Sequencing cost chart
       url: https://comparativechrono.github.io/sequencing-cost-visualisation/
       github: https://github.com/comparativechrono/sequencing-cost-visualisation
       for: educators, students and researchers
       description: How the cost of DNA sequencing per gigabase has fallen since 2001, by platform, with figures you can export for slides and papers.
-      notes: Data from the NHGRI and manufacturers' specifications. Check values against the sources before you publish them.
+      notes: The figures come from the NHGRI and from manufacturers' specifications. Check them against the sources before you publish them.
 
 - group: Teaching materials
-  intro: Notebooks for courses. These live on GitHub rather than as websites.
+  intro: Notebooks that we use in our courses. They live on GitHub rather than as websites.
   items:
     - name: Computational biology notebooks
       github: https://github.com/comparativechrono/computational_biology_notebooks
@@ -120,7 +120,7 @@
       description: Weekly notebooks to go with the textbook Principles of Data Science.
 
 - group: Code
-  intro: Software that you can build into your own teaching sites.
+  intro: Software that other developers can build into their own teaching sites.
   items:
     - name: Genomics WebAssembly tools
       github: https://github.com/comparativechrono/genomics-wasm

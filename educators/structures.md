@@ -37,7 +37,7 @@ Students produce a screenshot of glutamate 6 with its label, and one sentence ea
 
 Follow it with a short discussion. The residue sits on the surface, 21 Å from the nearest haem group, so how can changing it cause a disease? (In sickle-cell haemoglobin, the valine sticks to a neighbouring haemoglobin molecule when oxygen is low, and the molecules join into long fibres.) The same change appears as one base in codon 7 in the [genome browser activity](../genome-browsers/#find-the-variant) and on the site's [home page](../../).
 
-### Same molecule, five pictures
+### Choose the right picture of a molecule for each question
 
 *First year. 50 minutes, in pairs.*
 
@@ -60,7 +60,7 @@ Students hand in the matching sheet and one figure with a legend that explains e
 
 Students hand in an annotated figure and a 150-word statement of how far they would trust each model, region by region.
 
-### Variant in context
+### Explain a variant from its place in the structure
 
 *Third year, master's or clinical students. 2 to 4 weeks, part-time, in teams.*
 
@@ -111,7 +111,7 @@ pLDDT is local: two domains can each have very high pLDDT while their positions 
 ## Practical tips
 
 - **Devices.** Mol\* runs in the browser, including on iPads, which many students use instead of laptops [5]. Some tasks, such as converting file formats or changing a sequence, are hard or impossible in Mol\* and easier in desktop programs such as ChimeraX or PyMOL [5]. Turning and clicking are easiest with a mouse.
-- **Accounts.** None are needed to view PDB or AlphaFold DB entries, or the examples on this site.
+- **Accounts.** Students can view PDB and AlphaFold DB entries, and the examples on this site, without an account.
 - **Network.** The viewer is about 1.5 MB and a structure such as 4HHB another 123 kB, so a class of 30 downloads about 50 MB in all. Open the pages before the class starts, and keep pictures of the key views in case the network fails.
 - **Timing.** Allow 10 to 15 minutes for students to learn to turn, zoom and hover before the first real task. In the source course, each of the four projects gets one or two class periods for getting started with the software [5].
 - **Dated instructions.** AlphaFold DB redesigned its entry pages in 2025 [10], and every viewer changes its look from time to time. Put a date on your instructions and screenshots.

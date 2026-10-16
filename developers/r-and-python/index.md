@@ -55,7 +55,7 @@ How it works:
 - **Runaway code.** The page cannot interrupt R (see [stopping runaway code](#stop-runaway-code-without-losing-the-session)), so every run has a time limit, set with R's `setTimeLimit()`: 30 seconds, or what the box's `data-time-limit` says. An endless loop stops with "reached elapsed time limit", and R carries on with its variables intact.
 - **Packages.** `webr::shim_install()` lets `install.packages()` and `library()` fetch packages built for webR. List the packages every box needs in `<body data-r-packages="ape seqinr">`, so that they install while R starts rather than during a timed run.
 
-The [educators' page](../../educators/r-and-python/#predict-then-run-gc-content-in-windows) turns these boxes into an activity.
+The [educators' page](../../educators/r-and-python/#predict-the-gc-content-plot-then-run-the-code) turns these boxes into an activity.
 
 ## Run Python in the background with Pyodide
 
@@ -73,7 +73,7 @@ The example runs Python in a Web Worker instead, behind the same kind of code bo
 
 {% include example.html file="examples/pyodide-code-boxes.html" title="Python code boxes: the HBB coding sequence" height="760" load="click" note="This example runs Python in your browser. It downloads about 6 MB when you first click in a box or press Run, and about 15 MB more for Biopython and matplotlib when box 4 first runs." %}
 
-How it works:
+How the code works:
 
 - **A module worker.** Since version 314.0.0 (June 2026), a worker that runs Pyodide must be a module worker: `new Worker(url, { type: 'module' })`, with `import { loadPyodide } from '…/pyodide.mjs'` inside it. Classic workers that use `importScripts()` no longer load it.
 - **One file.** The worker's code sits in the page, in a `<script type="text/plain">` element, and starts from a Blob address, so the example is a single file. Opened from a computer's disk, Chromium refuses a module worker from a Blob, so there the page uses a `data:` address instead.
@@ -81,7 +81,7 @@ How it works:
 - **Charts** come back as SVG, with text kept as text, so they stay sharp at any size.
 - **Errors** show only the lines of the student's own code, not Pyodide's.
 - **Stop.** The page cannot interrupt Python either, so Stop, or the 60-second time limit, ends the worker and starts a new Python. Variables are lost, and the page says so. Downloads do not count towards the limit.
-- **`input()`** cannot wait for typing in a worker, so the boxes make it raise an error. Put values in the code instead.
+- **`input()`** cannot wait for typing in a worker, so the boxes make it raise an error. Put the values in the code instead.
 
 ## Install the packages a class needs
 
@@ -134,14 +134,14 @@ Code boxes suit one step at a time. When students need a console where they can 
 
 {% include example.html file="examples/jupyterlite-console.html" title="A JupyterLite console with the code in its address" height="680" load="click" note="This example opens a console from the JupyterLite project's demo site, which downloads about 14 MB when you press Run in the console." %}
 
-How it works:
+Points to note:
 
 - **The address** is the site's `repl/index.html`, with `kernel=python` and the code in `code=`, which `URLSearchParams` encodes. `toolbar=1` shows buttons to restart and clear, `showBanner=0` hides the welcome text, and, according to JupyterLite's documentation, `execute=0` puts the code at the prompt without running it.
 - **Time.** The first result took 16 to 21 seconds, while the console downloaded JupyterLite and Pyodide.
 - **The demo site changes** when its maintainers update it. For a class, use the same path on your own JupyterLite site (next section).
 - **It needs PyPI.** As the console starts, its Python kernel fetches a small package, `comm`, from pypi.org. When pypi.org could not be reached, the console never answered. On your own site you can bundle that package, as shown below.
 - **Separate storage.** In Chromium, files saved in a console embedded in another site are kept apart from those of the same site opened directly.
-- **One harmless error.** The demo logs an error of its own in the browser's console, from a part of JupyterLab that fails to start. The console works regardless.
+- **One harmless error.** The demo logs an error of its own in the browser's console, from a part of JupyterLab that fails to start. The console works despite it.
 
 webR's own app has an editor, a console, a plot pane and a file browser. It opens the files listed after `#code=` in its address, which makes an "Open in webR" link for a handout or a slide:
 

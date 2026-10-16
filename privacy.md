@@ -1,7 +1,7 @@
 ---
 title: Privacy
 description: What happens to information about you when you use genomics.tel, including the Google ads and the outside services the live examples use.
-lede: What happens to information about you when you use genomics.tel.
+lede: This page explains what happens to information about you when you use genomics.tel.
 last_updated: 16 October 2026
 ---
 {% include ads-flags.html %}

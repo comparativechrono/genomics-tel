@@ -20,7 +20,7 @@ Peer instruction is another way to make students think before they look [4]. Sho
 
 Early on, novices learn a new procedure better from worked examples than from solving problems, but problem solving becomes the better choice as they gain skill. Renkl and Atkinson propose fading: start with a complete example, then hand over the steps one at a time until students solve problems on their own [5]. Good examples label the steps of the solution, come several to a type of problem, sit next to matched practice problems, and prompt students to explain each step to themselves [6].
 
-Guidance matters most for novices: its advantage fades only once learners know enough to guide themselves [7]. The reverse is also true. Support that helps novices can get in the way of students who already have the skill [8]. In programming, naming each step of a worked example (a subgoal label) helps: students given subgoal labels were better at Parsons problems, in which they put jumbled lines of code in order, than students who were not [9].
+Guidance matters most for novices: its advantage fades only once learners know enough to guide themselves [7]. The reverse also holds: support that helps novices can get in the way of students who already have the skill [8]. In programming, naming each step of a worked example (a subgoal label) helps: students given subgoal labels were better at Parsons problems, in which they put jumbled lines of code in order, than students who were not [9].
 
 The same pattern works for any tool:
 
@@ -73,7 +73,7 @@ Here is one unit from the [genome browsers page](../genome-browsers/), lined up 
 
 | Intended outcome | Activity | Assessment |
 |---|---|---|
-| Convert between BED and VCF positions (apply) | [Off-by-one detective](../genome-browsers/#off-by-one-detective) | Peer-instruction questions and an annotated screenshot |
+| Convert between BED and VCF positions (apply) | [Find out why two positions disagree](../genome-browsers/#find-out-why-two-positions-disagree) | Peer-instruction questions and an annotated screenshot |
 | Judge a gene model against the evidence (evaluate) | [Build a gene model from evidence](../genome-browsers/#build-a-gene-model-from-evidence) | Accuracy of the model, and a marked written justification |
 | Report a finding about one locus (create) | A poster at the end of a research project | A poster rubric |
 
@@ -87,7 +87,7 @@ Write the assessment before the activity. Then check that the activity gives stu
 
 A course-based undergraduate research experience (CURE) puts a real research question into a timetabled course. Its five dimensions are the use of scientific practices, discovery, work that matters beyond the class, collaboration and iteration [21]. Bioinformatics projects suit the format: they are free, safe and possible to run remotely, and may be more accessible for students with disabilities [22].
 
-A long-running example is the Genomics Education Partnership, in which students improve draft genome sequence and build gene models from the evidence in a genome browser. By 2010 its students had improved more than 2 million bases and produced hundreds of gene models, and they showed knowledge gains on quizzes taken before and after the course [23]. Time matters. When the project was the centre of the course, most teachers gave it 25 to 45 hours of class time. Students' reported gains rose with time: the quarter of courses that gave it more than 36 hours (45.5 on average) had the largest gains, although they did not differ significantly from the next quarter down [24]. A shared central support system made up for some of what individual campuses lacked, such as time to develop a curriculum and IT services [25].
+A long-running example is the Genomics Education Partnership, in which students improve draft genome sequence and build gene models from the evidence in a genome browser. By 2010 its students had improved more than 2 million bases and produced hundreds of gene models, and they showed knowledge gains on quizzes taken before and after the course [23]. The time given to the project matters too. When the project was the centre of the course, most teachers gave it 25 to 45 hours of class time. Students' reported gains rose with time: the quarter of courses that gave it more than 36 hours (45.5 on average) had the largest gains, although they did not differ significantly from the next quarter down [24]. A shared central support system made up for some of what individual campuses lacked, such as time to develop a curriculum and IT services [25].
 
 Students who completed all three semesters of one large CURE programme were more likely than matched students to earn a degree in science, technology, engineering or mathematics, and to graduate within six years. Taking part had no effect on their final grades [26]. CUREs vary widely, though, and which of their parts produce these benefits is not yet known [27].
 
@@ -104,7 +104,7 @@ Almost all of this research comes from the United States. In a UK degree, a seco
 
 Two frameworks describe what bioinformatics teaching should cover. The International Society for Computational Biology (ISCB) competencies were written to apply across careers and kinds of training [31]. The NIBLSE competencies are written for undergraduate life scientists, and came from a survey of 1,260 biology faculty in the United States [32].
 
-The two lists, side by side:
+Here are the two lists side by side:
 
 <div class="table-wrap" markdown="1">
 

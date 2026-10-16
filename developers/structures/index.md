@@ -22,7 +22,7 @@ description: How to embed Mol*, PDBe Mol*, 3Dmol.js and NGL in a teaching web pa
 
 The examples below all show human haemoglobin and the residue changed in sickle-cell disease, glutamate 6 of the β chains, so that you can compare the viewers on the same view. The structure is PDB entry 4HHB, deoxyhaemoglobin at 1.74 Å resolution [1]. All the examples were tested on 15 October 2026 with the versions in the table. The Mol\* and PDBe Mol\* examples wait for a click before they load, because each downloads about 1.5 MB and opens its own WebGL context, the browser's connection to the graphics card.
 
-## A viewer in a few lines
+## Start with a basic viewer
 
 A stylesheet, a script and one call to `molstar.Viewer.create` give you a working viewer [2]. `loadPdb` then fetches an entry from the Protein Data Bank.
 
@@ -42,13 +42,13 @@ For teaching, colour the molecule to make the point, mark and label the residue 
 
 {% include example.html file="examples/molstar-hbs.html" title="Haemoglobin with glutamate 6 of each β chain marked and labelled" height="590" load="click" note="This example downloads Mol* (1.5 MB compressed) when it starts." %}
 
-How it works:
+How the code works:
 
 - **The scene** is built with `MVSData.createBuilder()`: download a file, parse it and make a structure, then add components (`"polymer"`, `"ligand"` or a list of residues), each with a representation (`cartoon`, `ball_and_stick`, `spacefill`) and colours. `loadMVS` draws it. A scene also adds a one-item list of scenes to the corner of the viewer, which the example removes with `managers.snapshot.clear()`.
 - **Residues** are named by chain and number, as in `{ auth_asym_id: "B", auth_seq_id: 6 }`. These are the author's chain letter and residue number, the ones printed in the PDB file.
 - **The label** is a MolViewSpec primitive with a background and a line to the residue. Its size is in ångströms (`label_size: 3`), so it grows as students zoom in.
-- **The starting view.** A label can hide behind nearer parts of the molecule, so the scene's `focus` has a `direction`: the camera looks from Glu6 of chain B towards the centre of the molecule, along a vector worked out once from the coordinates. Glu6 then faces the reader.
-- **Buttons** call the viewer's `structureInteractivity` with an `action`. `"focus"` moves the camera, `"select"` outlines residues in green until they are cleared, and `"highlight"` shows them as if the pointer were over them, until the pointer next moves over the molecule. With no target, it clears. It needs Mol\* 5.5 or later.
+- **The starting view.** A label can hide behind nearer parts of the molecule, so the scene's `focus` has a `direction`: the camera looks from Glu6 of chain B towards the centre of the molecule, along a vector worked out once from the coordinates, so that Glu6 faces the reader when the page opens.
+- **Buttons** call the viewer's `structureInteractivity` with an `action`. `"focus"` moves the camera, `"select"` outlines residues in green until they are cleared, and `"highlight"` shows them as if the pointer were over them, until the pointer next moves over the molecule. Called without a target, it clears both the selection and the highlight. It needs Mol\* 5.5 or later.
 - **A chain letter is more than the chain.** `auth_asym_id: "B"` also matches chain B's haem, a phosphate ion and 57 water molecules, because they carry the same letter. `label_asym_id: "B"`, the file's own name for the chain, is the protein alone, which is why the highlight button uses it.
 - **Saving a scene.** `MVSData.toMVSJ()` turns a scene's state into a small JSON file, and the viewer's `loadMvsFromUrl()` loads one. A colleague can then change the colours or a label in the file without touching the code.
 
@@ -78,7 +78,7 @@ Mol\* tells your page what students click, in the 3D view and in the sequence pa
 
 {% include example.html file="examples/molstar-find-glu6.html" title="Activity: find the sickle-cell residue" height="690" load="click" note="This example downloads Mol* (1.5 MB compressed) when it starts." %}
 
-The parts to reuse:
+To build your own version, reuse these parts:
 
 - **Listening for clicks.** `viewer.subscribe()` on the plugin's `behaviors.interaction.click` event runs your function on every click in the 3D view. A click on a letter in the sequence panel sends the same event.
 - **Naming what was clicked.** The event carries a "loci", Mol\*'s description of a set of atoms. `molstar.lib`, which the 5.12.0 bundle exposes, reads it: `Loci.getFirstLocation` from `StructureElement` gives one atom, and `StructureProperties` gives its chain, residue number, residue name and molecule name.
@@ -95,7 +95,7 @@ AlphaFold DB holds predicted structures for hundreds of millions of proteins [4]
 
 {% include example.html file="examples/molstar-alphafold.html" title="AlphaFold models coloured by pLDDT, with the predicted aligned error" height="640" load="click" note="This example downloads Mol* (1.5 MB compressed) and a model from AlphaFold DB when it starts." %}
 
-How it works:
+What the code does:
 
 - **The API.** A request for `/api/prediction/P04637` on `alphafold.ebi.ac.uk` returns a list with one record for each model. A record gives the model files (`bcifUrl`, `cifUrl`, `pdbUrl`), the scores for each residue (`plddtDocUrl`), the predicted aligned error as a picture (`paeImageUrl`) and as numbers (`paeDocUrl`), the version (`latestVersion`), the mean pLDDT (`globalMetricValue`) and the share of residues in each band (`fractionPlddtVeryHigh` and three more). The API and the files allow use from other websites.
 - **pLDDT** is AlphaFold's confidence in the local structure around each residue, on a scale of 0 to 100. AlphaFold DB colours it in four bands: very high (90 and above), confident (70 to 90), low (50 to 70) and very low (below 50) [5]. `theme: { globalName: "plddt-confidence" }` gives the same colours in Mol\*. The viewer's `loadAlphaFoldDb("P04637")` does the lookup and the loading in one line, if you do not need the record.
@@ -110,7 +110,7 @@ Two of the viewers can be set up in HTML alone. PDBe Mol\* gives you the whole o
 
 {% include example.html file="examples/pdbe-molstar-tag.html" title="PDBe Mol*: haemoglobin from one tag" height="515" load="click" note="This example downloads PDBe Mol* (1.6 MB compressed) when it starts." %}
 
-How it works:
+Points to note:
 
 - **Attributes** set everything: `molecule-id` (a PDB ID, fetched from PDBe), `custom-data-url` and `custom-data-format` for other files, `alphafold-view` for pLDDT colours, `hide-controls`, `sequence-panel`, `pdbe-link`, and the background as `bg-color-r`, `bg-color-g` and `bg-color-b`. An empty value counts as true, and `false`, `off` or `0` as false.
 - **Scripting.** The tag's `viewerInstance` is the PDBe Mol\* plugin. `visual.select` colours residues, shows their side chains and greys out the rest in one call; `visual.clearSelection` and `visual.reset` undo it.
@@ -119,7 +119,7 @@ How it works:
 
 {% include example.html file="examples/3dmol-no-code.html" title="3Dmol.js: haemoglobin with no JavaScript written" height="490" %}
 
-How it works:
+A few points about the code:
 
 - **Any element** with the class `viewer_3Dmoljs` becomes a viewer when the script loads. `data-pdb` fetches a PDB-format file from the RCSB PDB, and `data-href` loads any address, taking the format from the file name. The largest entries have no PDB-format file, so use `data-href` with an mmCIF file for those.
 - **Selections and styles** come in numbered pairs, applied in order: `data-select2` chooses atoms and `data-style2` says how to draw them. A style replaces the earlier style of those atoms, so style 2 repeats the cartoon.
@@ -141,13 +141,13 @@ NGL [7] is one of the two viewers that Mol\* grew from [2], and it still works. 
 ## Things that catch people out
 
 - **No WebGL.** All four viewers draw with WebGL, which some locked-down or old computers lack. Mol\* then shows its own message ("WebGL does not seem to be available") and NGL shows nothing. We could not test 3Dmol.js without WebGL, because Chromium fell back to drawing in software. Check with `canvas.getContext("webgl2") || canvas.getContext("webgl")`, as the NGL example does, and give a picture and a sentence of text instead.
-- **Computers without a graphics card** draw in software. In our tests Mol\* then took 3.5 to 7 seconds to show a structure, camera moves took a few seconds, and a molecular surface in NGL took more than 30 seconds. Make surfaces optional.
+- **Computers without a graphics card** draw in software. In our tests Mol\* then took 3.5 to 7 seconds to show a structure, camera moves took a few seconds, and a molecular surface in NGL took more than 30 seconds. So let students switch surfaces on, rather than showing them by default.
 - **Several viewers on one page.** Each viewer uses its own WebGL context, and browsers allow only a limited number at once (about 16 in Chrome). Load viewers when they are needed, as this page does.
 - **Phones and tablets.** The examples worked without sideways scrolling in Chrome's emulation of a Pixel 7 phone and at 350 pixels wide, but we have not tested real phones or touch gestures. Mol\*'s expand button gives the viewer the whole screen, and Mol\* runs on iPads, which many students use instead of laptops [8].
 - **Screen readers and keyboards.** The 3D view is a picture drawn on a canvas, which screen readers cannot read, and turning it needs a drag. Give every task another route: buttons, a form, a text list of the key residues, and alt text that states the structural point [9]. Turning by dragging needs an alternative that does not drag ([WCAG 2.2](https://www.w3.org/TR/WCAG22/), success criterion 2.5.7), and a molecule that spins by itself needs a pause button (2.2.2). See [accessibility](../accessibility/).
 - **Numbering.** PDB author numbers, PDB label numbers, UniProt numbers and HGVS names can all differ. Say which you use, and test each selection on the file you load. The [haemoglobin table](#match-the-pdb-and-uniprot-numbering) shows one case.
-- **AlphaFold versions.** Never write a file address with a version in it, such as `…model_v4.pdb`. Ask the API.
-- **Versions.** Mol\* releases about once a month (5.10.0 in June 2026, 5.13.0 in October), and its options change between releases. We tested 5.12.0. Pin the version, and read the release notes before you update.
+- **AlphaFold versions.** Never write a file address with a version in it, such as `…model_v4.pdb`. Ask the API for the current address instead.
+- **Versions.** Mol\* releases about once a month (5.10.0 in June 2026, 5.13.0 in October), and its options change between releases. We tested version 5.12.0. Pin the version, and read the release notes before you update.
 
 ## Licences and credits
 

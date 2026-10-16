@@ -21,7 +21,7 @@ description: How to embed igv.js and JBrowse 2 in a teaching web page, load publ
 
 The examples below use the human β-globin gene, *HBB*, and the sickle-cell variant rs334, so that you can compare the tools on the same view. All of them were tested on 15 October 2026, with igv.js 3.8.9 and JBrowse 2 version 4.3.0.
 
-## A browser in a few lines
+## Start with a basic browser
 
 One script tag and one call to `igv.createBrowser` give you a working browser [1]. The second argument says which genome to use and where to start.
 
@@ -69,7 +69,7 @@ igv.js tells your page what students are doing. `locuschange` reports every move
 
 {% include example.html file="examples/igv-find-the-variant.html" title="Activity: find the sickle-cell variant" height="620" caption="The variants are real ClinVar records, stored next to the page. The four people and their genotypes are made up for teaching." %}
 
-The parts to reuse:
+If you build your own version, these are the parts to reuse:
 
 - **Checking where students are.** `locuschange` receives a list of frames, one for each region on screen. Each frame has `chr`, `start` (counted from 0) and `end`. The browser starts away from *HBB*, so step 1 is done only when the frame overlaps the gene and is narrower than 100 kb, as it is after a search; step 2 when it is narrower than 150 bases.
 - **Checking what they clicked.** `trackclick` receives the track, the clicked feature's fields as a list of `{ name, value }` pairs, and the position. For a genotype, the fields include `Sample`, `Genotype` and `Zygosity`; for a variant, `ID` and the VCF's INFO fields.
@@ -94,7 +94,7 @@ For a class, the most reliable data are files you host yourself: they cannot mov
 
 {% include example.html file="examples/igv-self-hosted.html" title="A 20 kb region around HBB, hosted with the page" height="440" %}
 
-The folder holds:
+The folder holds these files:
 
 <div class="table-wrap" markdown="1">
 
@@ -127,7 +127,7 @@ JBrowse 2 [2] is heavier than igv.js, but clicking a feature opens a full table 
 
 {% include example.html file="examples/jbrowse-basic.html" title="JBrowse 2 open at HBB" height="480" load="click" note="This example downloads JBrowse 2 (1.4 MB compressed) when it starts." %}
 
-Two details matter:
+Two details are easy to get wrong:
 
 - **Chromosome names.** The JBrowse project's GRCh38 sequence calls chromosome 11 `11`, while UCSC's files call it `chr11`. Without the `refNameAliases` table, the view quietly shows the assembly picker instead of *HBB*.
 - **Reacting to students.** JBrowse has no `trackclick` event. Instead, `createViewState` accepts an `onChange` function that receives a description of every change. A change to `/session/view/offsetPx` means the view moved, and a change under `/session/widgets/…/featureData` means a feature was clicked.
@@ -158,7 +158,7 @@ UCSC builds the view from parameters in the address:
 
 Track names for these parameters are listed by `https://api.genome.ucsc.edu/list/tracks?genome=hg38`. The same parameters on `hgRenderTracks` return a PNG image, which is handy for slides and handouts; save a copy into your site rather than relying on UCSC to draw it every time.
 
-Ensembl moved to a new website in August 2026. Its addresses now name the assembly by accession (`GCA_000001405.29` is GRCh38), as in `https://www.ensembl.org/genome-browser/GCA_000001405.29?focus=gene:ENSG00000244734`. Older addresses redirect.
+Ensembl moved to a new website in August 2026. Its addresses now name the assembly by accession (`GCA_000001405.29` is GRCh38), as in `https://www.ensembl.org/genome-browser/GCA_000001405.29?focus=gene:ENSG00000244734`. Older addresses still work, because they redirect to the new ones.
 
 Both APIs work from a web page. The UCSC API returns sequence and track data. The Ensembl REST API returns gene records and variant effect predictions, and allows 55,000 requests an hour, but it was slow and often failed while we tested it. The example therefore waits, retries twice, and says so if there is still no answer.
 

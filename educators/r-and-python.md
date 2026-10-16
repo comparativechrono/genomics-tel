@@ -22,7 +22,7 @@ The first four suit a first-year class. The last two suit students who already w
 
 ## Activities
 
-### Predict, then run: GC content in windows
+### Predict the GC content plot, then run the code
 
 *First year. 30 minutes, in pairs.*
 
@@ -34,7 +34,7 @@ The first four suit a first-year class. The last two suit students who already w
 
 Students hand in their two sketches, the plots they got, and two or three sentences on what the size of the window does. The [developers' page](../../developers/r-and-python/#put-r-code-boxes-in-a-page-with-webr) shows how the boxes are built.
 
-### From gene to protein: the sickle-cell change
+### Make the sickle-cell change in Python and translate it
 
 *First year. 50 minutes, alone or in pairs.*
 
@@ -45,7 +45,7 @@ Students hand in their two sketches, the plots they got, and two or three senten
 
 Students produce the completed table and two sentences on how one changed base changes the protein. For a later group, fade the support: give them the same boxes with some lines removed, and leave a comment that names each step. Worked examples split into labelled steps help students learn to program [1], and examples should give way to problems as students gain skill [2].
 
-### A faded notebook in JupyterLite
+### Fade the support across three JupyterLite notebooks
 
 *First or second year. Two 50-minute sessions, alone.*
 
@@ -120,7 +120,7 @@ Pointing out common mistakes explicitly helps students avoid them [7].
 - **Offline.** R does not start without a network, even after a visit. Python starts offline only for a short time after a visit: 10 minutes for a page on GitHub Pages. Keep screenshots, printed code and the data on local devices, and plan the most important parts of the session so that they work without technology [10].
 - **Old and low-memory computers.** Every current browser runs WebAssembly, but memory matters: an R session took 180 to 500 MB of the browser's memory, depending on the packages, and Python 130 to 610 MB. Ask students to close other tabs. Phones, Chromebooks and old laptops may reload the page when memory runs out, which loses the session. We tested in Chromium on a desktop computer, not on old computers, Firefox or Safari, so try your page on the computers students will use.
 - **Networks.** Some university and school networks block the sites that R, Python and their packages come from. Test your page from the teaching room; the [developers' page](../../developers/r-and-python/#things-that-catch-people-out) lists the addresses.
-- **Accounts.** None are needed. Google Colab, by contrast, needs a Google account.
+- **Accounts.** Students need no account, although Google Colab does need a Google account.
 - **Timing.** When you live-code, go slowly, say what you type, and use the same page as your students, so that they do not have to translate between two set-ups [11]. Treat your own mistakes as teaching moments [11], and start from code with the boilerplate already written [1].
 - **Accessibility.** The code boxes on this site are plain text areas that work with the keyboard, but we have not yet tested them with a screen reader. Put a table or a printed summary next to every figure: in one evaluation, only 4.5% of notebooks had a table near a figure [12]. See [accessibility](../accessibility/).
 

@@ -82,7 +82,7 @@ https://rest.uniprot.org/uniprotkb/P68871?format=json&fields=accession,id,sequen
 https://rest.uniprot.org/uniprotkb/accessions?accessions=P68871,P02062&format=fasta
 ```
 
-How it works:
+How the code works:
 
 - **One entry.** Listing only the [fields you need](https://www.uniprot.org/help/return_fields) cut the reply for this entry from 342 kB to 106 kB. The example asks for 15 fields.
 - **Features.** Each feature, such as `Natural variant`, `Binding site` or `Helix`, has a `location` whose `start` and `end` count from 1 along the stored sequence. The `Chain` feature says where the mature protein starts, which is how the page can say "residue 6 of the mature protein".
@@ -128,7 +128,7 @@ SeqViz shows one DNA sequence with its complementary strand, its annotations and
 
 {% include example.html file="examples/seqviz-exon.html" title="HBB exon 1 with its translation and the sickle-cell base" height="475" %}
 
-Details:
+Some details:
 
 - **Drawing.** `seqviz.Viewer(element, options).render()` draws the viewer, and `setState(options)` draws it again with new options.
 - **Positions** in `annotations`, `translations` and `highlights` count from 0 and leave out the end. The sickle-cell base, c.20, is base 70 of this exon, so its highlight is `start: 69, end: 70`. The read-out turns selections back into exon positions and c. numbers.
@@ -138,7 +138,7 @@ Details:
 ## Things that catch people out
 
 - **Residue numbers.** Say whose numbering you use, and never print an alignment column as if it were a residue number. See [get residue numbers right](#get-residue-numbers-right).
-- **Phones.** Nightingale and react-msaview fit a 390-pixel screen only by showing fewer columns or very small letters. The examples here show fewer columns. The SVG version scrolls inside its own box.
+- **Phones.** Nightingale and react-msaview fit a 390-pixel screen only by showing fewer columns or very small letters. The examples on this page show fewer columns. The SVG version scrolls inside its own box.
 - **Screen readers and keyboards.** Nightingale and react-msaview draw on a canvas, which screen readers cannot read, and Nightingale's view cannot be moved from the keyboard. Give every task a text version, as the read-outs here do, and see [accessibility](../accessibility/).
 - **Colour schemes.** Clustal and Zappo colour residues by type or chemistry, not by right and wrong. In the same simulation, two pairs of Nightingale's Clustal colours came close: green and yellow for one kind of colour blindness, orange and pink for another. Keep the letters visible and name the scheme.
 - **Gaps at the start.** The horse and dog rows begin with a gap, but those species do not lack a residue: their UniProt entries describe the mature protein, which has already lost its first methionine.

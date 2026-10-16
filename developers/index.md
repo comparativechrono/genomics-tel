@@ -1,6 +1,6 @@
 ---
 title: For developers
-lede: How to put genomic tools into a teaching web page, with live examples you can open, read, download and change.
+lede: These pages show how to put genomic tools into a teaching web page. Every example is live, and you can open it, read its code, download it and change it.
 description: How to embed genome browsers, alignment viewers, 3D structures, Cytoscape.js networks, Galaxy, R and Python, phylogenetic trees and charts in teaching pages, with live examples and code to copy.
 ads: false
 ---
@@ -22,7 +22,7 @@ We test every example in Chromium (version 141 in our tests) before we publish i
 ## Before you build
 
 [Getting started](getting-started/)
-: Hosting a teaching page on GitHub Pages, fixing library versions, serving data files that other sites can read, and planning for classroom networks.
+: How to host a teaching page on GitHub Pages, fix library versions, serve data files that other sites can read, and plan for classroom networks.
 
 [Accessibility](accessibility/)
-: Keyboard use, screen readers, colour and motion in interactive genomics views, and text alternatives that teach.
+: How to make interactive genomics views work with a keyboard and a screen reader, use colour and motion with care, and write text versions that teach.

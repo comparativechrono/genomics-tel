@@ -7,28 +7,28 @@
   name: Genome browsers
   teach_title: Teaching with genome browsers
   build_title: Embedding genome browsers
-  teach: Show where a gene or variant sits, what surrounds it, and how the evidence is stacked up in tracks.
+  teach: Show students where a gene or variant sits, what lies around it, and how the evidence for it builds up track by track.
   build: Put igv.js or JBrowse 2 in a page, load your own tracks, and link to UCSC and Ensembl.
 
 - slug: sequences
   name: Sequences and alignments
   teach_title: Teaching with sequences and alignments
   build_title: Showing sequences and alignments
-  teach: Read sequences, compare them across species, and see why some positions never change.
+  teach: Help students read sequences, compare them across species, and see why some positions never change.
   build: Show sequences and multiple alignments with Nightingale, or in a few lines of SVG.
 
 - slug: structures
   name: 3D structures
   teach_title: Teaching with 3D structures
   build_title: Embedding 3D structure viewers
-  teach: Find a variant in the folded protein, and read AlphaFold confidence properly.
+  teach: Find a variant in the folded protein, and learn how far an AlphaFold model can be trusted.
   build: Embed Mol*, 3Dmol.js or NGL, load PDB and AlphaFold models, and highlight residues.
 
 - slug: networks
   name: Networks
   teach_title: Teaching with networks
   build_title: Drawing networks with Cytoscape.js
-  teach: Explore interactions and pathways without reading meaning into the layout.
+  teach: Explore interactions and pathways, without reading too much into where each molecule happens to be drawn.
   build: Draw interactive networks with Cytoscape.js and load them from STRING or Cytoscape.
 
 - slug: galaxy
@@ -56,5 +56,5 @@
   name: Charts of genomic data
   teach_title: Teaching with charts of genomic data
   build_title: Charting genomic data
-  teach: Read Manhattan plots, volcano plots and heatmaps, and know what their thresholds mean.
+  teach: Help students read Manhattan plots, volcano plots and heatmaps, and understand the thresholds drawn on them.
   build: Make interactive Manhattan plots, volcano plots and heatmaps with Vega-Lite.

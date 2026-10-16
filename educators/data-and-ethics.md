@@ -1,6 +1,6 @@
 ---
 title: Genomic data and ethics
-lede: Every human genome belongs to someone. Teach with data that were shared for open use, or with synthetic data, and keep identifiable and patient data off public servers.
+lede: Every human genome comes from a real person, who can often be identified from it. Teach with data that were shared for open use, or with synthetic data, and keep identifiable and patient data off public servers.
 description: Which genomic data to use in university teaching, why genomes are hard to anonymise, what UK GDPR guidance says about genetic data, why public servers such as Galaxy are no place for patient data, and how to approach students' own genomes, with a checklist.
 ---
 
@@ -14,7 +14,7 @@ Data protection law takes this seriously. Shabani and Marelli argue that the rea
 
 ## Use data that were shared for open use
 
-Choose data whose consent covers open use, and tell students why these data may be used. That is part of the lesson.
+Choose data whose consent covers open use, and tell students why these data may be used, because that is part of the lesson.
 
 <div class="table-wrap" markdown="1">
 

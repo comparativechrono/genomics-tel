@@ -34,7 +34,7 @@ Students look at β-globin from eight species, find the position that changes in
 
 Students produce a table of the residues and residue numbers in column 7, and three sentences that explain one conserved column using what UniProt records about it. The [developers' page](../../developers/sequences/#mark-the-sickle-cell-position-in-an-alignment) shows how the alignment is built.
 
-### Residue numbering detective
+### Reconcile four names for the sickle-cell change
 
 *First or second year. 50 minutes, in pairs.*
 
@@ -93,9 +93,9 @@ Students produce two alignments, two trees and a one-page critique.
 
 **"The E-value is the chance that the match is wrong."** The E-value is the number of matches this good that you would [expect to see by chance](https://blast.ncbi.nlm.nih.gov/doc/blast-help/FAQ.html) in a database of that size, so the same match gets a different E-value in a different database [2].
 
-**"Percent identity settles homology, or function."** It does not, on its own. Teach statistical significance and the length of the match alongside identity [1].
+**"Percent identity settles homology, or function."** On its own, it settles neither. Teach statistical significance and the length of the match alongside identity [1].
 
-**"An alignment is data."** It is the output of a program and its settings. Different methods can put different residues in the same column, especially for distant sequences, and anything built on the alignment, such as a tree, changes with it. The last activity makes this visible.
+**"An alignment is data."** It is the output of a program and its settings. Different methods can put different residues in the same column, especially for distant sequences, and anything built on the alignment, such as a tree, changes with it. The last activity on this page lets students see this for themselves.
 
 **"Red means bad."** A colour scheme shows one chosen property, such as type of residue, chemistry or conservation. Ask students to name the scheme in every figure legend.
 
@@ -108,7 +108,7 @@ Students produce two alignments, two trees and a one-page critique.
 ## Practical tips
 
 - **Devices.** Alignments are wide, so laptops or larger screens work best; a phone shows only 10 to 15 columns at a time. Jalview is a desktop program, so check that it is installed on the lab machines well before the class. The examples on this site run in any current browser.
-- **Accounts.** None are needed for UniProt, NCBI BLAST or EBI's alignment tools.
+- **Accounts.** UniProt, NCBI BLAST and EBI's alignment tools can all be used without an account.
 - **Network.** Public servers can queue at busy times. Use short queries, or hand out results you computed earlier [7]. The alignment examples here carry their data in the page, so they keep working when a public server is slow; only the UniProt look-up needs UniProt.
 - **Timing.** Allow 5 to 10 minutes for each BLAST round, including any queue. Start with one column before the whole alignment: building fluency with one part of a diagram before combining several reduces the load on novices [8].
 - **Accessibility.** Residue colours depend on hue, and about 8% of men and 0.4% of women of European ancestry have red-green colour vision deficiency [9]. Keep the letters visible, give conservation as numbers or words, and name the colour scheme. The [SVG alignment viewer](../../developers/sequences/examples/svg-alignment.html) works from the keyboard and lists the chosen column as text. See the [accessibility page](../accessibility/).

@@ -37,7 +37,7 @@ Students produce their answers to the six questions, and a short explanation of 
 
 [Open the step-by-step activity](../../developers/networks/examples/p53-step-by-step.html) and the [pathway with its sources](../../developers/networks/examples/p53-pathway.html), or see how they are built on the [developers' page](../../developers/networks/#turn-the-pathway-into-a-step-by-step-activity). Every interaction in them links to the papers that support it.
 
-### Same network, different layouts
+### Compare three layouts of one network
 
 *Second year. 50 minutes, in pairs.*
 
@@ -51,7 +51,7 @@ Students produce screenshots of three layouts and two lists: the claims that hel
 
 [Open the layouts example](../../developers/networks/examples/network-layouts.html), or read [what each layout does](../../developers/networks/#choose-a-layout-and-say-what-it-means) on the developers' page.
 
-### Evidence detective
+### Check the evidence behind each link
 
 *Second or third year. 90 minutes, in pairs or threes.*
 
@@ -64,7 +64,7 @@ Students produce the evidence table, and a paragraph on which links they would t
 
 [Open the STRING example](../../developers/networks/examples/string-network.html). If STRING is slow or blocked on your network, the address ending `?offline=1` shows a copy saved on 15 October 2026, with the functional network only.
 
-### From gene list to network story
+### Build a network from a list of genes
 
 *Final year or master's. 3 hours, in pairs.*
 
@@ -105,7 +105,7 @@ Network diagrams suit short tasks that test reading and judgement rather than re
 ## Practical tips
 
 - **Devices.** STRING's website and the examples on this site need only a web browser. The examples work at phone width, but a laptop gives more room for a network and its table. Cytoscape desktop is a program to install, so check that it runs on the lab computers before the class.
-- **Accounts.** None are needed, for STRING or for these examples.
+- **Accounts.** Neither STRING nor the examples on this site need an account.
 - **Network.** STRING answered within a few seconds in our tests, but it asks that its API be used for "limited or occasional" access. The STRING example falls back to a saved copy when STRING does not answer, and `?offline=1` uses the saved copy from the start, which suits a large class. Export any other network students need before the class.
 - **Timing.** Start with the notation (arrowheads, bars and line styles) before the first task [5]. Keep networks small: Marai and colleagues suggest showing less detail, fading what matters less, or splitting a busy network across several figures [3]. Ask students to record the STRING version (12.5 when we wrote this) and their settings.
 - **Accessibility.** Avoid pairs of red and green, and check figures in greyscale [3]; the examples use blue and vermilion, and different arrowheads. Labels should be at least as large as the caption text [3]. Give a table of the links for screen-reader users [8]: the pathway, STRING and Cytoscape desktop examples each have one. See the [accessibility page](../accessibility/).

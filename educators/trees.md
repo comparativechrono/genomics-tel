@@ -25,7 +25,7 @@ The first three suit a first-year class. Tree-reading skills develop before tree
 
 ## Activities
 
-### Clade quiz
+### Practise reading clades with a quiz
 
 *First year. 20 minutes, alone or in pairs.*
 
@@ -39,7 +39,7 @@ Students answer six questions about a tree of nine primates and the mouse, by se
 
 Students produce their answers, each with a one-sentence justification.
 
-### Rotate, ladder, tree
+### Sort trees that show the same relationships
 
 *First year. 30 to 50 minutes, in pairs.*
 
@@ -48,11 +48,11 @@ Students produce their answers, each with a one-sentence justification.
 3. Each pair redraws one ladder as a tree.
 4. Finish with multiple-choice questions whose wrong answers come from reading the tips, counting nodes and ladder thinking: vote, discuss in pairs, vote again.
 
-Start with trees, not ladders. Students understand ladders less easily than trees, especially students with weaker backgrounds in biology [5], and Novick and Catley recommend teaching with the tree format first and saying plainly that the most recent common ancestor decides relatedness [6]. The rotate controls in the clade quiz make new versions of a tree in seconds.
+Start with the tree format rather than the ladder format. Students understand ladders less easily than trees, especially students with weaker backgrounds in biology [5], and Novick and Catley recommend teaching with the tree format first and saying plainly that the most recent common ancestor decides relatedness [6]. The rotate controls in the clade quiz make new versions of a tree in seconds.
 
 Students produce the sorted sets, each with a one-sentence justification.
 
-### Move the root
+### Move the root and see which clades survive
 
 *First or second year. 30 minutes, in pairs.*
 
@@ -62,7 +62,7 @@ Students produce the sorted sets, each with a one-sentence justification.
 
 Students produce a table of their clades under each rooting, and the explanation.
 
-### Outbreak tree
+### Read an outbreak tree from Nextstrain
 
 *Second or third year, master's or clinical students. 90 minutes, in groups of three or four.*
 
@@ -72,7 +72,7 @@ Students produce a table of their clades under each rooting, and the explanation
 
 Students produce a one-page briefing note for a public-health audience, with one annotated screenshot. The [developers' page](../../developers/trees/#embed-nextstrain-at-a-fixed-date) shows how to put the same fixed view in your own page.
 
-### Build, root, break
+### Build a tree and test what it depends on
 
 *Third year or master's. 3 hours, alone or in pairs.*
 
@@ -88,7 +88,7 @@ Students produce two annotated trees and a one-page critique. Students who have 
 
 - **BETTSI, before and after.** The Basic Evolutionary Tree-Thinking Skills Instrument is a short multiple-choice test of tree reading, checked for reliability and validity, for use before and after teaching [9]. Its final version has 11 questions on reading trees and three on confidence and familiarity, and it is [published on QUBES](https://doi.org/10.25334/ZQY1-W289) under a Creative Commons Attribution-ShareAlike licence. Its authors suggest using it first to decide how much class time each skill needs, then teaching those skills explicitly [9].
 - **A delayed test.** Novick and Catley tested their tree-thinking curriculum five to six weeks after teaching, without warning students, and found a medium-sized gain over usual teaching [10]. A few tree questions in a later module show what has lasted.
-- **Questions whose wrong answers are misreadings.** Write multiple-choice questions in which each wrong answer is what a student would choose by reading the tips, counting nodes or ladder thinking, as in Kummer and colleagues' 20-question assessment [11]. The clade quiz works this way.
+- **Questions whose wrong answers are misreadings.** Write multiple-choice questions in which each wrong answer is what a student would choose by reading the tips, counting nodes or ladder thinking, as in Kummer and colleagues' 20-question assessment [11]. The clade quiz on the developers' page is built this way.
 - **The reason as well as the answer.** In one course, many students gave correct answers with reasoning they had memorised but could not apply [2]. Ask for one sentence naming the most recent common ancestor, and mark the sentence.
 - **Outbreak briefing notes**, marked on whether every claim stays within what the tree can show: dates with their uncertainty, nothing about who infected whom, and the gaps in sampling noted.
 
@@ -114,7 +114,7 @@ Students produce two annotated trees and a one-page critique. Students who have 
 
 - **Before you teach.** Gregory's introduction to evolutionary trees explains how to read them and covers ten common misconceptions [15]. It suits staff who have not taught trees before.
 - **Devices.** The live examples work on phones, but long species names leave little room for the tree, so laptops are better. Keep paper copies too, so that students can rotate and redraw trees by hand. To show how one tree fits into the whole tree of life, OneZoom lets students zoom through all of it, and runs smoothly even on old phones [16].
-- **Accounts.** None are needed for the examples or for Nextstrain. iTOL is free, and its accounts are optional [8].
+- **Accounts.** The examples and Nextstrain need no account. iTOL is free, and its accounts are optional [8].
 - **Network.** The quiz and the other primate examples carry their tree inside the page, but load their software from the internet, and Nextstrain needs a steady connection. Keep the Newick text and pictures of the key views in case the network fails.
 - **Timing.** Come back to trees in later modules rather than teaching them once. In several studies, misreadings survived the teaching [2, 11, 13].
 - **Accessibility.** A tree is a picture, so give a text version: the Newick text or a nested list, as the examples do, or a tactile print. Label clades in words, not by colour alone ([WCAG 2.2](https://www.w3.org/TR/WCAG22/), success criterion 1.4.1). The clade quiz works from the keyboard; the phylotree.js menu and Phylocanvas.gl do not. See the [accessibility page](../accessibility/).

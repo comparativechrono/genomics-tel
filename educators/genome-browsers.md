@@ -35,7 +35,7 @@ The page checks each step and answers straight away, so students can work at the
 
 Students produce a screenshot of the finished checklist and two sentences answering the discussion questions. The [developers' page](../../developers/genome-browsers/#turn-the-browser-into-an-activity) shows how the activity is built, so you can make one for another gene.
 
-### Off-by-one detective
+### Find out why two positions disagree
 
 *First or second year. 50 minutes, in pairs.*
 
@@ -108,7 +108,7 @@ To convert from counting from 1 to counting from 0, subtract 1 from the start an
 ## Practical tips
 
 - **Devices.** Laptops work best. Tablets are fine for looking, but dragging to move is fiddly, so teach the search box and zoom buttons; they also help students who cannot drag at all.
-- **Accounts.** None are needed to look at data. Give everyone the same starting link, so that every student begins with the same assembly, position and tracks. JBrowse 2 can also share whole sessions [9].
+- **Accounts.** Students need no account to look at data. Give everyone the same starting link, so that every student begins with the same assembly, position and tracks. JBrowse 2 can also share whole sessions [9].
 - **Network.** Reading BAM or bigWig files across the internet needs reliable Wi-Fi. Keep pictures of the key views in case the network fails. A browser built into your own page, with small data files hosted beside it, keeps working when public servers are slow; the [developers' page](../../developers/genome-browsers/#host-a-small-dataset-next-to-the-page) shows how.
 - **Timing.** Allow about ten minutes for students to find their way around before the first real task [8]. Over a whole project, teachers in the Genomics Education Partnership found that students need many hours with the tools before they can ask their own questions [10].
 - **Accessibility.** Genome browsers rely on dragging and colour, and their default colours are not always easy to tell apart for colour-blind readers [11]. Give a table of the key features as well as the picture, and see the [accessibility page](../accessibility/).

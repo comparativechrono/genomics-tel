@@ -22,7 +22,7 @@ All three are drawn with Cytoscape.js, an open-source library for drawing networ
 
 The examples below all use proteins of the p53 pathway, so you can compare the approaches on the same molecules. They were tested on 15 October 2026 with Cytoscape.js 3.34.3, cytoscape-dagre 4.0.1, cytoscape-fcose 2.2.0 and STRING 12.5.
 
-## A network in a few lines
+## Start with a small network
 
 One script tag and one call to `cytoscape()` give you a network. The call takes a container and three things: the elements, a style and a layout.
 
@@ -33,7 +33,7 @@ How it works:
 - **Elements** are nodes and edges, each with a `data` object. A node needs a unique `id`. An edge needs a `source` and a `target`, which are node ids. Any other field, such as `label` or `effect`, is yours to use.
 - **The style** is a list of rules, like CSS. The selector `node` picks every node, and `edge[effect = "inhibits"]` picks the edges whose data say so. `data(label)` reads a field.
 - **The layout** places the nodes. `cose`, which is built in, pulls linked nodes together and pushes all nodes apart. Also built in are `grid`, `circle`, `concentric`, `breadthfirst`, `random`, and `preset`, which uses positions you supply.
-- **The container** needs a height in CSS. Without one, nothing appears.
+- **The container** needs a height in CSS. Without one, the network does not appear at all.
 - **The mouse wheel** zooms the network unless you set `userZoomingEnabled: false`, which lets the wheel scroll the page instead. That suits a small diagram that already fits its box.
 
 ## Draw a pathway with a source for every interaction
@@ -42,7 +42,7 @@ In a teaching diagram, each arrow is a claim, so each needs a source. This examp
 
 {% include example.html file="examples/p53-pathway.html" title="The p53–MDM2 feedback loop, with a source for each interaction" height="615" caption="The table under the diagram holds the same information as text. Open it with the arrow beside its title." %}
 
-How it works:
+How the code works:
 
 - **One set of data.** Two lists, `nodes` and `edges`, hold everything. Each edge has an `effect` (activates or inhibits), a `mech` (how it acts) and `refs` (PubMed IDs). The diagram, the details panel and the table are all built from these lists, so they cannot disagree.
 - **Style from data.** Edges that inhibit end in a flat bar (`tee`) instead of an arrowhead, and edges that switch on a gene are dashed. The colours are blue and vermilion rather than green and red, and the shapes and line styles carry the same meaning, so the diagram still reads in greyscale and for colour-blind readers [4].
@@ -82,7 +82,7 @@ A whole pathway is a lot to take in at once. Revealing it a step at a time, with
 
 {% include example.html file="examples/p53-step-by-step.html" title="The feedback loop, one step at a time" height="630" %}
 
-How it works:
+What the code does:
 
 - **Positions come first.** The layout runs once on the whole pathway, so nodes stay where they are as the steps add them. Elements not yet shown have a `hidden` class, which a style rule turns into `display: none`.
 - **Each step** lists the ids it adds, a sentence and a question. `cy.batch()` makes all the class changes in one redraw, and the newest elements get a yellow glow from the `underlay-color` style.
@@ -95,11 +95,11 @@ STRING collects known and predicted links between proteins, drawn from experimen
 
 {% include example.html file="examples/string-network.html" title="Ten proteins around p53, live from STRING" height="690" caption="If STRING does not answer within 20 seconds, the example shows a saved copy of the same request, made on 15 October 2026, and says so. Add `?offline=1` to the example's address to use the saved copy from the start." %}
 
-How it works:
+Points to note in the code:
 
 - **Two calls, sometimes three.** `get_string_ids` matches the names to STRING's proteins. Names it does not know are left out of the reply, so the page lists them. `network` then returns the links among those proteins, and a third call fetches descriptions of any partners STRING added. STRING asks for one second between calls, and for a `caller_identity` that names your site.
 - **A fixed version.** `https://version-12-5.string-db.org` answers from STRING 12.5, so the network does not change when STRING is updated. STRING's [API documentation](https://string-db.org/help/api/) recommends a version-specific address like this for anything in production.
-- **Evidence.** Each link has a combined `score` and one score per kind of evidence, including `escore` (experiments), `dscore` (curated databases) and `tscore` (text mining), all from 0 to 1. The example draws a link as a solid line when experiments alone score it at least 0.4, dashed when curated databases do, and dotted otherwise. The 0.4 is our choice.
+- **Evidence.** Each link has a combined `score` and one score per kind of evidence, including `escore` (experiments), `dscore` (curated databases) and `tscore` (text mining), all from 0 to 1. The example draws a link as a solid line when experiments alone score it at least 0.4, dashed when curated databases do, and dotted otherwise. The cut-off of 0.4 is our own choice, not STRING's.
 - **Every protein appears**, even one with no links, because the nodes come from the first call rather than from the links. When students raise the minimum score, they see links disappear while the proteins stay.
 
 The `network` call takes these parameters:
@@ -119,7 +119,7 @@ The `network` call takes these parameters:
 
 Three things caught us out:
 
-- **Ask for every protein you need.** TP53 with 10 added partners gave AURKA, CSNK2A1, CUL9, DDX5, MAPK1, MAPK14, RPA1, SIRT1, STUB1 and TBP, but not MDM2. At least 60 of p53's partners share the top score of 0.999, and MDM2 came eleventh in STRING's list. STRING also adds 10 partners by itself when you give it a single protein. Name the proteins you want instead.
+- **Ask for every protein you need.** TP53 with 10 added partners gave AURKA, CSNK2A1, CUL9, DDX5, MAPK1, MAPK14, RPA1, SIRT1, STUB1 and TBP, but not MDM2. At least 60 of p53's partners share the top score of 0.999, and MDM2 came eleventh in STRING's list. STRING also adds 10 partners by itself when you give it a single protein. So name every protein you want, rather than relying on STRING to add them.
 - **Use gene symbols.** STRING read `p21` as TCEAL1, a different protein, not CDKN1A. The example reports any name that STRING read as another protein.
 - **Scores are confidence, not strength.** STRING's [help on scores](https://string-db.org/help/scores/) says the score "represents the confidence that a protein–protein relationship exists", and does "not measure interaction strength, binding affinity, or the magnitude of the biological effect". Even a physical link "does not necessarily mean that the two proteins directly bind each other".
 
@@ -134,7 +134,7 @@ To export the two files, as the [Cytoscape manual](https://manual.cytoscape.org/
 1. Choose **File → Export → Network to File…**, then the format **Cytoscape.js JSON (\*.cyjs)**.
 2. Choose **File → Export → Styles to File…**, then the format **Style for cytoscape.js (\*.json)**.
 
-How it works:
+A few points about the code:
 
 - **The network file** has an `elements` object with `nodes` and `edges`, which go straight into `cytoscape()`. Each node keeps its saved `position`, and the `preset` layout uses them.
 - **The style file** holds a list of named styles, each with a Cytoscape.js stylesheet in `style`. The example picks one by its `title`.

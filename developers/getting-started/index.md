@@ -26,7 +26,7 @@ How GitHub Pages serves files matters for genomics. When we checked with `curl`,
 
 ## Keep each example in one file
 
-Each example on this site is one HTML file that works on its own. A reader can open it, download it and change it, and you can copy it into another site. The skeleton is short:
+Each example on this site is one HTML file that works on its own. A reader can open it, download it and change it, and you can copy it into another site. The skeleton of such a file is short:
 
 ```html
 <!doctype html>
@@ -66,7 +66,7 @@ Opened straight from the disk, with a `file://` address, a page can still load i
 
 ## Fix the version and check the hash
 
-Libraries change. An address such as `igv@latest`, or a version range such as `igv@3`, gets updates automatically, and jsDelivr warns that the code behind such an address "can change any time" ([jsDelivr](https://www.jsdelivr.com/using-sri-with-dynamic-files)). Name the exact version instead, as in `igv@3.8.9`. Libraries for teaching move quickly: Mol\* went from version 5.10 to 5.13 in about four months, and react-msaview released three major versions, 7.0, 8.0 and 9.0, between 14 September and 12 October 2026.
+Libraries keep changing, so an address that does not name a version can give your page different code from one day to the next. An address such as `igv@latest`, or a version range such as `igv@3`, gets updates automatically, and jsDelivr warns that the code behind such an address "can change any time" ([jsDelivr](https://www.jsdelivr.com/using-sri-with-dynamic-files)). Name the exact version instead, as in `igv@3.8.9`. Libraries for teaching move quickly: Mol\* went from version 5.10 to 5.13 in about four months, and react-msaview released three major versions, 7.0, 8.0 and 9.0, between 14 September and 12 October 2026.
 
 Subresource integrity (SRI) adds a second check. The `integrity` attribute holds a hash of the exact file, and the browser refuses to run a download whose hash differs ([MDN](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Subresource_Integrity)). A file from another site also needs `crossorigin="anonymous"`, because the check works only when that site allows other websites to read the file. To make the hash:
 
@@ -74,7 +74,7 @@ Subresource integrity (SRI) adds a second check. The `integrity` attribute holds
 curl -s https://cdn.jsdelivr.net/npm/igv@3.8.9/dist/igv.min.js | openssl dgst -sha384 -binary | openssl base64 -A
 ```
 
-Some cautions:
+A few cautions:
 
 - **Hash only files that never change.** jsDelivr advises SRI only for full links to single files at fixed versions, because the files it minifies or combines on request can change ([jsDelivr](https://www.jsdelivr.com/using-sri-with-dynamic-files)).
 - **ES modules** can carry hashes in the `integrity` section of an import map. Chromium enforced them in our tests: a wrong hash blocked the module.
@@ -95,7 +95,7 @@ openssl dgst -sha384 -binary vendor/igv.min.js | openssl base64 -A    # must mat
 
 Then point the script tag at `vendor/igv.min.js`, keep the `integrity` attribute, and keep the library's licence file beside it. In our tests, an igv.js page and a JBrowse 2 page that loaded their library and data from the same site kept working with every outside request blocked. webR and Pyodide are harder, because they load many megabytes of further files. Pyodide worked offline on a second visit while the page itself was still in the browser's cache. webR did not start offline even after a visit, because at start-up it asks its server for a file in a way that Chromium did not answer from its cache in our tests.
 
-Data need the same care. Public servers are sometimes slow or down: during our tests, Ensembl's REST API failed 32 of 45 requests over about 40 minutes, and Zenodo failed now and then. Where a dataset's licence allows it, host a small copy next to the page.
+Data need as much care as libraries, because public servers are sometimes slow or down: during our tests, Ensembl's REST API failed 32 of 45 requests over about 40 minutes, and Zenodo failed now and then. Where a dataset's licence allows it, host a small copy next to the page.
 
 {% include ad.html slot="in_article" %}
 
@@ -103,10 +103,10 @@ Data need the same care. Public servers are sometimes slow or down: during our t
 
 A page can show an image from any site, but its code can read a file from another site only if that site's answer includes the header `Access-Control-Allow-Origin`. The rule is called cross-origin resource sharing, or CORS ([MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS)). Genome browsers, structure viewers and chart libraries all read their data with code, so the rule applies to every data file a teaching page uses.
 
-Three details catch people out:
+Three details often catch people out:
 
 - **Errors look like refusals.** Many servers leave the header off their error messages, so a busy server looks the same to a page as one that never allows other websites: the browser reports only that the request failed. Ensembl's REST API does this ([genome browsers page](../genome-browsers/#link-to-ucsc-and-ensembl)), and so did Zenodo during our tests.
-- **Most headers stay hidden.** A page can read only a few headers of another site's answer, such as `Content-Type` and `Content-Length`, unless the server lists more in `Access-Control-Expose-Headers` ([MDN](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header)). NCBI lists `Content-Range`, which gives a file's full size. UCSC and GitHub Pages do not.
+- **Most headers stay hidden.** A page can read only a few headers of another site's answer, such as `Content-Type` and `Content-Length`, unless the server lists more in `Access-Control-Expose-Headers` ([MDN](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header)). NCBI lists `Content-Range`, which gives a file's full size, but UCSC and GitHub Pages do not.
 - **A page served over https cannot read http addresses.** Browsers block the request as mixed content ([MDN](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Mixed_content)), so data addresses must start with `https://`.
 
 Range requests matter for large indexed files. Formats such as BAM, CRAM, VCF compressed with bgzip, bigWig, bigBed and 2bit are read in pieces: the browser asks for a range of bytes, and a server that supports this answers `206 Partial Content` with just that piece. A server that does not answers `200` and sends the whole file ([MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Range_requests)). A request for a single range of bytes counts as a simple request under CORS, so the browser sends it without asking the server's permission first ([MDN](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_request_header)).
@@ -163,9 +163,9 @@ While you work, keep the browser's developer tools open on the Console and Netwo
 
 ## Check the page on a phone
 
-Students open teaching pages on phones. Include the viewport line, avoid fixed widths, and put wide tables in a box that scrolls sideways. In a CSS grid, use `minmax(0, 1fr)` rather than `1fr` for columns that hold wide content: in our tests, a plain `1fr` column made a network page wider than a 412-pixel phone.
+Many students will open your teaching pages on a phone, so include the viewport line, avoid fixed widths, and put wide tables in a box that scrolls sideways. In a CSS grid, use `minmax(0, 1fr)` rather than `1fr` for columns that hold wide content: in our tests, a plain `1fr` column made a network page wider than a 412-pixel phone.
 
-What we found at phone width:
+This is what we found at phone width:
 
 <div class="table-wrap" markdown="1">
 
@@ -185,7 +185,7 @@ Check with the device emulation in your browser's developer tools, then on a rea
 
 ## Link out when embedding does not work
 
-Some services refuse to appear inside another site's page, and some are better used whole. When we tested:
+Some services refuse to appear inside another site's page, and some are better used whole. This is what we found when we tested them:
 
 <div class="table-wrap" markdown="1">
 
@@ -234,6 +234,6 @@ The libraries used on this site all have open-source licences that allow their u
 
 </div>
 
-Data have terms too. Protein Data Bank files are in the public domain (CC0). AlphaFold DB models and STRING networks are under CC BY 4.0, so credit the source. Data from UCSC, ClinVar, ENCODE and the 1000 Genomes Project are free to use under each provider's terms: cite them, and check the terms before you copy files into your site. FinnGen asks users to acknowledge and cite it, and we found no licence that allows redistribution, so link to its data rather than copying them. TreeBASE files state no licence. For human data, also read [genomic data and ethics](../../educators/data-and-ethics/).
+Data come with terms of use as well. Protein Data Bank files are in the public domain (CC0). AlphaFold DB models and STRING networks are under CC BY 4.0, so credit the source. Data from UCSC, ClinVar, ENCODE and the 1000 Genomes Project are free to use under each provider's terms: cite them, and check the terms before you copy files into your site. FinnGen asks users to acknowledge and cite it, and we found no licence that allows redistribution, so link to its data rather than copying them. TreeBASE files state no licence. For human data, also read [genomic data and ethics](../../educators/data-and-ethics/).
 
 This site's own text is under CC BY 4.0 and its code, including every example, under the MIT licence ([about this site](../../about/)).

@@ -36,7 +36,7 @@ The first two suit a first-year practical. The others suit later years and proje
 
 Students produce a shared history, their prediction, and two sentences on which filter setting they would keep, and why.
 
-### Tutorial, then tweak
+### Follow a tutorial, then change one thing
 
 *Second or third year. 2 to 3 hours, in pairs.*
 

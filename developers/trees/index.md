@@ -21,7 +21,7 @@ description: How to draw phylogenetic trees in a teaching web page with phylotre
 
 Most examples use the same small tree, so that you can compare the tools: nine primates and the mouse, from a study that used the DNA around 2,030 ultraconserved elements, regions that have barely changed across distantly related species [1]. It is tree Tr49836 in TreeBASE, a Bayesian consensus tree whose branch lengths are substitutions per site and whose node labels are posterior probabilities, all 1.00. TreeBASE does not allow other websites to read its files, so the primate examples carry the Newick text in the page. The outbreak examples use Nextstrain's Zika virus dataset. All examples were tested on 15 October 2026 with phylotree.js 2.6.0, underscore 1.13.8, d3 7.9.0 and Phylocanvas.gl 1.64.1.
 
-## A tree in a few lines
+## Start with a simple tree
 
 phylotree.js reads Newick text and draws the tree as SVG, so the names are real text that you can style, search, copy and print [2]. It needs the underscore library, loaded first, and a few lines of code.
 
@@ -53,7 +53,7 @@ phylotree.js has a menu on every internal node, with commands to collapse a clad
 
 {% include example.html file="examples/phylotree-explore.html" title="Collapse, ladderise, reroot and search with phylotree.js" height="575" %}
 
-The parts to reuse:
+These are the parts to reuse in your own pages:
 
 - **The menu** needs `phylotree-menus.css` from the package's `src` folder if your page does not use Bootstrap, and the tree's container needs `position: relative`. The menu closes only on a click inside the tree, so the example also closes it on Escape and on clicks elsewhere. It cannot be reached from the keyboard, which is why the buttons are there.
 - **Collapsing**: `tree.mrca([...])` finds the most recent common ancestor of some species. Calling `toggleCollapse(node)` on `tree.display`, then `update()`, collapses or expands its clade. A collapsed clade is drawn as a grey shape with no label.
@@ -81,7 +81,7 @@ d3 has no tree format of its own, but it lays out any hierarchy, so a 20-line Ne
 
 {% include example.html file="examples/d3-tree.html" title="A tree drawn with d3, with correct rerooting" height="540" %}
 
-How it works:
+How the code works:
 
 - **Reading Newick.** `parseNewick()` splits the text at brackets, commas, colons and semicolons, and builds nested objects. Each node's `length` and `support` describe the branch above it. It does not handle quoted names; use a library's parser for those.
 - **Layout.** `d3.hierarchy` turns the objects into a tree, and `d3.cluster` spaces the tips evenly down the page. The horizontal position of a node is the sum of the branch lengths from the root.
@@ -96,7 +96,7 @@ The quiz asks six questions about the primate tree. Students answer by selecting
 
 {% include example.html file="examples/clade-quiz.html" title="Activity: a clade quiz that works by mouse and keyboard" height="660" caption="The tree is drawn as a cladogram: it shows the order of branching, and its branch lengths mean nothing." %}
 
-The parts to reuse:
+To build a quiz of your own, reuse these parts:
 
 - **Questions are data.** Each entry in `QUESTIONS` has its text, the right answer as a list of species, and feedback for particular wrong answers. Change the tree and the list to make a quiz of your own.
 - **Tips are checkboxes.** Each name has `role="checkbox"`, `aria-checked` and `tabindex="0"`, so students can reach it with Tab and select it with Space, and screen readers say whether it is selected.
@@ -135,7 +135,7 @@ The same address returns the dataset as JSON when it is asked for JSON, and Next
 
 {% include example.html file="examples/nextstrain-d3.html" title="The Zika virus dataset drawn with d3" height="620" %}
 
-How it works:
+What the code does:
 
 - **The request** sends one header, `Accept: application/json`, which browsers allow without asking the server first. Any other header makes the browser send a pre-flight request, and Nextstrain's reply to that lacks the header that lets other websites read it, so the request fails.
 - **The data.** `tree` holds nested `children`. Each node's `node_attrs` has `num_date` (the date as a decimal year), `div` (divergence from the root), `country` and `region`. Nextstrain also estimates dates for the ancestors.
@@ -147,7 +147,7 @@ SVG makes every branch and name a separate element on the page. For trees with t
 
 {% include example.html file="examples/phylocanvas-large.html" title="972 Zika virus genomes drawn by Phylocanvas.gl" height="590" load="click" note="This example downloads Phylocanvas.gl and the Nextstrain dataset (about 0.35 MB in all), and needs a browser that can draw WebGL." %}
 
-How it works:
+Points to note:
 
 - **`new phylocanvas.PhylocanvasGL(element, settings, plugins)`** draws the tree. It takes Newick text as `source`, so `toNewick()` converts Nextstrain's JSON, with branch lengths in years.
 - **Tip names are IDs.** They must be unique (a few repeat in this dataset), and `styles` gives each ID its own colour.

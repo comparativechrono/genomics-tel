@@ -1,7 +1,7 @@
 ---
 title: About this site
 description: Who makes genomics.tel, how the live examples are checked, why the site will carry a few ads, and how you may reuse its text and code.
-lede: A free site about teaching genomics with interactive tools, written for the people who teach it and the people who build teaching websites.
+lede: genomics.tel is a free site about teaching genomics with interactive tools. It is written for the people who teach the subject and for the people who build teaching websites.
 ---
 {% include ads-flags.html %}
 

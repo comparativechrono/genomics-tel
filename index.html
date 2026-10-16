@@ -14,21 +14,21 @@ body_class: home-page
     <div class="hero-text">
       <p class="hero-eyebrow">Technology enhanced learning (TEL) for genomics</p>
       <h1 id="hero-title">Teach genomics with the tools researchers use</h1>
-      <p class="lede">Guides for educators and developers on genome browsers, alignments, 3D structures, networks, Galaxy, R and Python in the browser, phylogenetic trees and charts. Every topic has live examples, and every example has code you can copy.</p>
+      <p class="lede">These guides are for educators who want to use research tools in their genomics teaching, and for developers who build teaching websites. They cover genome browsers, alignments, 3D structures, networks, Galaxy, R and Python in the browser, phylogenetic trees and charts, and every topic comes with live examples whose code you can copy.</p>
       <div class="doors">
         <a class="door door--teach" href="{{ '/educators/' | relative_url }}">
           <span class="door-title">For educators</span>
-          <span class="door-text">What each tool is good for in class, activities to run with it, and the evidence behind them.</span>
+          <span class="door-text">Find out what each tool is good for in class, try activities that use it, and see the evidence behind them.</span>
         </a>
         <a class="door door--build" href="{{ '/developers/' | relative_url }}">
           <span class="door-title">For developers</span>
-          <span class="door-text">How to put each tool into your own teaching pages, with working examples.</span>
+          <span class="door-text">Learn how to build each tool into your own teaching pages, starting from working examples.</span>
         </a>
       </div>
     </div>
 
     <figure class="seq-figure" data-hbb data-variant-note="One base changes. <strong>c.20A&gt;T</strong> turns GAG into GTG, so codon 7 now codes for valine: the change behind sickle-cell disease. Older papers call it Glu6Val, because they number the protein without its first methionine.">
-      <figcaption><strong>HBB</strong>, the β-globin gene: the first 30 codons of its coding sequence, each with the amino acid it codes for.</figcaption>
+      <figcaption>The first 30 codons of <strong>HBB</strong>, the β-globin gene, with the amino acid that each one codes for.</figcaption>
       <p class="visually-hidden">The sequence reads ATG GTG CAT CTG ACT CCT <span data-codon7-text>GAG</span> GAG AAG TCT GCC GTT ACT GCC CTG TGG GGC AAG GTG AAC GTG GAT GAA GTT GGT GGT GAG GCC CTG GGC.</p>
       <div class="seq" aria-hidden="true">
           <span class="codon"><span class="codon-nts"><span class="nt A">A</span><span class="nt T">T</span><span class="nt G">G</span></span><span class="codon-aa">Met</span></span>
@@ -71,8 +71,8 @@ body_class: home-page
   </section>
 
   <section class="ladder-section" aria-labelledby="topics-title">
-    <h2 id="topics-title">Eight topics, each seen from two sides</h2>
-    <p class="section-intro">Each topic has a page for educators, on what the tool is good for in class and how to run an activity with it, and a page for developers, on how to build it into a web page. Each page links to its partner.</p>
+    <h2 id="topics-title">What the guides cover</h2>
+    <p class="section-intro">The site covers eight topics, and each has two pages. The page for educators is about using the tool in class: what it is good for, and how to run an activity with it. The page for developers is about building the tool into a web page. Each page links to the other, so you can move between them.</p>
     <div class="ladder-head" aria-hidden="true">
       <span>Topic</span><span class="lh-teach">For educators</span><span class="lh-build">For developers</span>
     </div>
@@ -117,7 +117,7 @@ body_class: home-page
 
   <section class="home-band" aria-labelledby="sites-title">
     <h2 id="sites-title">Teaching sites we have made</h2>
-    <p class="section-intro">They run in a web browser, so students have nothing to install. <a href="{{ '/sites/' | relative_url }}">See all our sites and teaching code</a>.</p>
+    <p class="section-intro">All of them run in a web browser, so students have nothing to install. You can find the rest, with our course materials and code, on <a href="{{ '/sites/' | relative_url }}">Our sites</a>.</p>
     <ul class="site-list">
       {%- for group in site.data.sites %}{%- for s in group.items %}{%- if s.featured %}
       <li class="site-item">

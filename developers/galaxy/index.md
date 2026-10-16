@@ -5,7 +5,7 @@ lede: Galaxy runs on its own servers, so your pages work with it from outside. L
 description: How to list Galaxy Training Network tutorials live, build links into Galaxy for tools, data and workflows, embed published workflows, and set up a class with BioBlend 1.9.0 or Galaxy's REST API, with live examples.
 ---
 
-## Which way in to use
+## Which approach to use
 
 <div class="table-wrap" markdown="1">
 
@@ -64,7 +64,7 @@ These paths work on any Galaxy server. Put the server's address, such as `https:
 
 </div>
 
-How it works:
+What the code does:
 
 - **Tool IDs** come from the GTN API (`tools`, in each tutorial) or from a server's tool search: `/api/tools?q=fastqc` on [usegalaxy.eu](https://usegalaxy.eu/api/tools?q=fastqc) lists matching IDs, best first. IDs from the Galaxy Tool Shed end in the tool's version.
 - **Versions differ between servers.** On 15 October 2026, FastQC 0.74+galaxy1 was on all four big servers, but fastp was version 1.3.7 on three of them and 1.4.0 on usegalaxy.org.au. To check a server, ask for `/api/tools/` followed by the encoded ID. Galaxy answers even when it lacks that version, with another version it has, so compare the `version` field in the reply with the one you want.
@@ -94,7 +94,7 @@ Galaxy's default settings stop its pages from appearing in a frame on another we
 
 {% include example.html file="examples/galaxy-embed.html" title="A published workflow from usegalaxy.eu, in a frame" height="630" load="click" note="This example loads Galaxy's own interface from usegalaxy.eu, about 3.5 MB, with its visit counting and error reporting, so it waits for you." %}
 
-How it works:
+Points to note:
 
 - **Galaxy writes the code for you.** Once a workflow or Page is shared by link or published, its sharing page offers the iframe code. For workflows the options are `buttons`, `about`, `heading`, `minimap`, `zoom_controls`, `initialX`, `initialY` and `zoom`. We tested only the settings that Galaxy writes by default.
 - **Why only these addresses.** By default Galaxy sends `X-Frame-Options: SAMEORIGIN`, which tells browsers to refuse frames on other sites, and leaves it out only for `/published/` addresses whose query includes `embed=true`. usegalaxy.org and usegalaxy.org.au send the header on every other page, and Chromium refused to frame them. On 16 October 2026, usegalaxy.fr sent it on `embed=true` pages as well, so its published workflows could not be framed either.
@@ -187,10 +187,10 @@ for inv in gi.invocations.get_invocations(limit=50):
     print(inv["id"], inv["state"], report["markdown"][:80])
 ```
 
-Things to know:
+A few things to know:
 
 - **Gaps in BioBlend 1.9.0.** It has no functions for tool search, importing a workflow by TRS address, sharing a history with users, or listing histories shared with you. The scripts call those routes with `gi.make_get_request`, `make_post_request` and `make_put_request`, which add your key.
-- **Slow search.** `gi.tools.get_tools(name=...)` downloads the whole tool list and matches exact names only. Use the search route, as above.
+- **Slow search.** `gi.tools.get_tools(name=...)` downloads the whole tool list and matches exact names only. Use the search route shown above instead.
 - **Exact tool versions.** `invoke_workflow` stops if the server lacks a tool at the workflow's version, unless you set `require_exact_tool_versions` to `False`. Both FastQC 0.72 and the quality filter in this workflow were on usegalaxy.eu and usegalaxy.org.
 - **PDF reports.** BioBlend's `get_invocation_report_pdf()` saves a run's report as a PDF on servers that allow it. usegalaxy.eu and usegalaxy.org did; usegalaxy.org.au and usegalaxy.fr did not.
 - **More.** The GTN's [slides on BioBlend and the Galaxy API](https://training.galaxyproject.org/training-material/topics/dev/tutorials/bioblend-api/slides.html) go further.
@@ -247,7 +247,7 @@ Galaxy Tours are short guided walks through the interface: a series of pop-ups, 
 - **No Galaxy API from a web page.** Galaxy sends no CORS headers, so `fetch()` from your site fails. Use links, landing requests, the GTN API or scripts on your own computer.
 - **API keys.** A key can do anything its owner can. Keep it out of web pages, shared notebooks and code repositories, and give each teaching assistant their own.
 - **Students who are not logged in.** Workflow import links are lost at the login page; file landing links survive it. Ask students to log in before they click anything.
-- **Records you cannot delete.** Landing requests are permanent and public to anyone with the link. Make them by hand, once.
+- **Records you cannot delete.** Landing requests are permanent and public to anyone with the link, so make them by hand, once, rather than from a script that might run again.
 - **Servers differ.** usegalaxy.org.au lets people sign in only through Australian BioCommons Access, with no Galaxy username and password. Tool versions differ, and on 15 October 2026 usegalaxy.fr ran Galaxy 26.0 while the others ran 26.1. Test every link on the server you will use.
 - **Things change.** The GTN API may change without warning, and Galaxy's screens change between releases. Check your links and examples before each course, and put a date on your instructions.
 - **Accessibility.** The GTN aims for WCAG 2.0 level AA, and one of its developers uses a screen reader regularly. Galaxy has reduced the number of tasks that need a mouse and improved keyboard navigation [1], but we found no accessibility statement for Galaxy itself. Give a text version of every workflow diagram, and see [accessibility](../accessibility/).

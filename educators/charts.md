@@ -34,7 +34,7 @@ The first three suit first- and second-year classes in genetics or statistics. T
 
 Students hand in an annotated screenshot and three sentences on why the height of a peak is not the size of the effect.
 
-### Simulate the null
+### Simulate a scan in which nothing is real
 
 *First or second year. 50 minutes, alone and then as a class.*
 
@@ -45,7 +45,7 @@ Students hand in an annotated screenshot and three sentences on why the height o
 
 Students hand in the plot and a five-sentence explanation of where 5 × 10⁻⁸ comes from. The [developers' page](../../developers/charts/#show-what-chance-alone-produces) shows how the simulation is built. Students who write R or Python can simulate the p-values themselves, in the browser: see [R and Python in the browser](../r-and-python/).
 
-### Volcano threshold game
+### Choose the cut-offs on a volcano plot
 
 *Second or third year. 60 minutes, in groups of three.*
 
@@ -56,7 +56,7 @@ Students hand in the plot and a five-sentence explanation of where 5 × 10⁻⁸
 
 Students hand in an annotated plot and a short justification of their cut-offs.
 
-### Heatmap makeover
+### Improve a heatmap one change at a time
 
 *Second or third year, or master's. 60 to 90 minutes, in pairs.*
 
@@ -67,7 +67,7 @@ Students hand in an annotated plot and a short justification of their cut-offs.
 
 Students hand in before-and-after figures, each with a caption that states the scaling, the colour scale and how the rows were ordered.
 
-### From peak to gene
+### Trace a peak to the genes beneath it
 
 *Third year, master's or clinical students. 90 minutes, in pairs.*
 
@@ -78,7 +78,7 @@ Students hand in before-and-after figures, each with a caption that states the s
 
 Students hand in a one-page memo that explains why the nearest gene is not necessarily the one that matters, and what evidence would settle it.
 
-### Why exomes miss variants
+### See why exome sequencing misses some variants
 
 *First or second year. 20 minutes, alone or in pairs.*
 
@@ -125,7 +125,7 @@ Students hand in three sentences comparing exome and genome sequencing for this 
 ## Practical tips
 
 - **Devices.** Laptops work best: the charts need width, and tooltips need a pointer. On phones the examples shrink and drop some labels, and a tap stands in for hovering. The tables under each chart work anywhere.
-- **Accounts.** None are needed. The examples run in any recent browser.
+- **Accounts.** No accounts are needed, and the examples run in any recent browser.
 - **Network.** The Manhattan plots read FinnGen's server, and the coverage plot reads UCSC's, each time they open. UCSC asks for no more than one request a second, so a whole class starting at once may wait a little. The volcano plot and the heatmap read files stored with the examples. Keep screenshots in case a server is down.
 - **Timing.** Give students five minutes to try each chart's controls before the first question. The simulation and the threshold game each fit a 50- or 60-minute session.
 - **Accessibility.** About 8% of men and 0.4% of women of European ancestry have red-green colour-vision deficiency [20]: in a class of 200 with as many men as women, expect about eight students. The examples' colours were checked for this. Charts are pictures, so each example also gives its key values as text, in a table or in a status line that screen readers announce [21]. See the [accessibility page](../accessibility/) for more.

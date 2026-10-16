@@ -24,7 +24,7 @@ Vega-Lite [1] describes a chart as a JavaScript object, or a JSON file: where th
 
 The examples below use real public data: genome-wide association results from FinnGen, RNA-seq results from the Galaxy Training Network and sequencing depth from gnomAD. All were tested on 15 October 2026 in Chromium 141, with Vega 6.4.0, Vega-Lite 6.4.3 and vega-embed 7.3.0, and Plotly.js 4.1.1 for the zoomable plot.
 
-## A chart in a few lines
+## Start with a simple chart
 
 Three script tags and one call to `vegaEmbed` give you a chart. The chart itself is a plain object, called a specification, with the data, a mark and an encoding.
 
@@ -46,7 +46,7 @@ A Manhattan plot places every tested variant along the genome, with −log₁₀
 
 {% include example.html file="examples/manhattan-finngen.html" title="Manhattan plot of FinnGen R13 results for alcohol use disorder" height="515" caption="FinnGen release R13, endpoint AUD_SWEDISH: 29,711 cases and 470,475 controls. Open the table under the chart to compare the height of each peak with its effect size and allele frequency." %}
 
-How it works:
+How the code works:
 
 - **The data** come from FinnGen's results browser, PheWeb [3], as one file from `r13.finngen.fi` (145 kB to download, 1 MB unpacked) at `/api/manhattan/pheno/AUD_SWEDISH`. It lists the 2,080 strongest variants one by one and sends the rest already summarised in 3 Mb bins, which is all a picture of the whole genome needs. Other endpoints work the same way: change the code at the end of the address (`T2D` gives type 2 diabetes, 663 kB with 10,122 variants listed).
 - **One axis for 23 chromosomes.** Each variant goes at its chromosome's start plus its own position, using the GRCh38 chromosome lengths. The labels sit at each chromosome's middle, and any chromosome narrower than 13 pixels loses its label, so that they do not overlap on a phone.
@@ -59,11 +59,11 @@ FinnGen's server answers requests from any website, and from pages opened from y
 
 ## Show what chance alone produces
 
-A scan of a genome with no real associations still produces peaks. This example simulates one: a million random p-values, which is what a million independent tests of variants with no effect would give. Students can run it again and again, and count how often anything crosses 5 × 10⁻⁸. The [educators' page](../../educators/charts/#simulate-the-null) turns it into a class activity.
+A scan of a genome with no real associations still produces peaks. This example simulates one: a million random p-values, which is what a million independent tests of variants with no effect would give. Students can run it again and again, and count how often anything crosses 5 × 10⁻⁸. The [educators' page](../../educators/charts/#simulate-a-scan-in-which-nothing-is-real) turns it into a class activity.
 
 {% include example.html file="examples/null-scan.html" title="A simulated genome-wide scan with no real associations" height="620" caption="Simulated data: no genome or person is involved." %}
 
-How it works:
+What the code does:
 
 - **With no real effect, a p-value is equally likely to fall anywhere between 0 and 1**, so `1 - Math.random()` stands in for one test. In our tests, one scan of a million, drawn on the chart, took about 0.4 seconds, and 100 scans, of which only the last is drawn, took about 2 seconds.
 - **Only tests with p < 0.01 are drawn**, about 10,000 of them, in the same spirit as FinnGen's bins.
@@ -74,13 +74,13 @@ Chance predicts 50,000 tests below 0.05 and 10 below 10⁻⁵ in every scan. Wit
 
 {% include ad.html slot="in_article" %}
 
-## A volcano plot with cut-offs that students move
+## Let students move the cut-offs on a volcano plot
 
 A volcano plot shows a whole table of differential-expression results at once: fold change across, −log₁₀ of the p-value upwards. The genes people talk about are the ones past two cut-offs, and where the cut-offs go is a choice. Here students move them and watch the list of genes change.
 
 {% include example.html file="examples/volcano-thresholds.html" title="Volcano plot of 15,804 mouse genes, with cut-offs you can move" height="645" caption="limma-voom results [5, 6] for luminal cells from pregnant and lactating mice [7], from the Galaxy Training Network's training data [8, 9], CC BY 4.0." %}
 
-How it works:
+Points to note in the code:
 
 - **The cut-offs are parameters.** `params` declares `lfcCut`, `pCut` and `useAdj`, and the calculations in `transform` use them to give each gene its height and its group. The page changes them with `view.signal("lfcCut", 1).runAsync()`, and Vega recalculates only what depends on them: 0.2 to 0.4 seconds for 15,804 genes in our tests.
 - **The controls are ordinary HTML**, a slider and two menus with labels, so they work from a keyboard. The chart redraws when the slider is let go (its `change` event), while the text beside it follows every move (`input`). Vega-Lite can also make controls for you with `bind`, but you then have less say over how they look and behave.
@@ -97,7 +97,7 @@ A heatmap shows a table of numbers as colours, and what it shows depends on thre
 
 {% include example.html file="examples/heatmap-makeover.html" title="Expression heatmap of 31 genes, with a choice of scaling, order and colours" height="770" tall=true caption="Normalised expression from the Galaxy Training Network's heatmap training data [10], CC BY 4.0. The address can set the starting choices, as in [this poor version](examples/heatmap-makeover.html?values=raw&order=alpha&colours=rainbow)." %}
 
-How it works:
+How the example is put together:
 
 - **From a wide table to long data.** `fold` turns the 12 sample columns into rows of gene, sample and value. Sample names with dots, such as `MCL1.DG`, must be escaped (`"MCL1\\.DG"` in JavaScript), for the reason given above.
 - **z-scores in the specification.** `joinaggregate` adds each gene's mean and standard deviation to its rows, and `calculate` turns each value into a z-score: how far that sample sits above or below the gene's own average.
@@ -114,7 +114,7 @@ A coverage plot shows how many sequencing reads cover each base. This one sets g
 
 {% include example.html file="examples/coverage-cftr.html" title="Sequencing depth across CFTR exons 4 to 9 in gnomAD genomes and exomes" height="495" %}
 
-How it works:
+A few points about the code:
 
 - **The UCSC Genome Browser's API** [13] returns any track in a region as JSON. The page asks `api.genome.ucsc.edu` for `getData/track` with the genome, chromosome, start, end and track name (`API` in the code). It allows requests from any website. Its positions count from 0, as in BED files, so the page adds 1 to match what genome browsers show.
 - **One request a second.** UCSC recommends no more than one request a second to its API, so the page fetches its three tracks in turn, with a pause between them. The data take about 3 seconds to arrive.
@@ -129,12 +129,12 @@ Vega-Lite charts do not zoom unless you build it in. Plotly.js zooms and pans wi
 
 {% include example.html file="examples/plotly-manhattan-zoom.html" title="A zoomable Manhattan plot made with Plotly.js" height="575" %}
 
-How it works:
+What the code does:
 
 - **Traces.** Plotly takes one array per axis for each set of points, called a trace. A `null` in the arrays breaks a line, which is how the binned ranges become separate strokes.
 - **The toolbar.** Plotly 4 adds a "Share chart" button unless told not to. After a dialog, it opens Plotly Cloud in a new tab and sends it the chart, data included. Turn it off with `showSendToCloud: false`, remove the link to Plotly's website with `displaylogo: false`, and take out tools you do not need with `modeBarButtonsToRemove`.
 - **Hover labels** come from `hovertemplate`; `<extra></extra>` hides the trace name that Plotly adds to each one.
-- **Words for every view.** Plotly adds nothing for screen readers. After every zoom (the `plotly_relayout` event), the page says in a status line what is in view and which variant is strongest, and relabels the axis with positions such as `4:99.5 Mb`.
+- **Words for every view.** Plotly adds nothing that a screen reader can use. After every zoom (the `plotly_relayout` event), the page says in a status line what is in view and which variant is strongest, and relabels the axis with positions such as `4:99.5 Mb`.
 - **Keyboard.** The buttons above the chart and Plotly's toolbar work from the keyboard; dragging does not. The chart sits in a `<figure>` with a caption. Do not give it `role="img"`, which would hide the toolbar's buttons from screen readers.
 
 The cartesian bundle used here holds the common chart types, including scatter, bar, box and heatmap: 1.5 MB, or about 500 kB to download. The full `plotly.min.js` is 4.8 MB.
