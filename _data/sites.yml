@@ -38,6 +38,12 @@
       description: Two practicals and a coursework workbench. Students take raw exome reads to a variant that matters in the clinic, CYP2C19*2, then annotate, filter and interpret variants, and finally analyse a patient's exome for their coursework.
       notes: Real samtools and bcftools run in the browser, and FastQC, BWA-MEM and FreeBayes replay their recorded output. Answers are saved in the student's browser.
       featured: true
+    - name: "Pedigrees: drawing, inheritance and ethics"
+      url: https://comparativechrono.github.io/pedigree-practical/
+      github: https://github.com/comparativechrono/pedigree-practical
+      for: students and educators
+      description: A three-hour practical in which students take a family history, draw it as a pedigree, work out how a condition is inherited and think through the ethical problems that follow. They interview two simulated patients and draw each family as they go.
+      notes: Pedigree Studio is built in, and each drawing can be checked against the family it should show. Answers, drawings and interviews are saved in the student's browser and can be downloaded to hand in.
     - name: Variant calling practical
       url: https://comparativechrono.github.io/variant-lab/
       github: https://github.com/comparativechrono/variant-lab
