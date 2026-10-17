@@ -1,6 +1,6 @@
 ---
 title: Accessible interactive pages
-lede: To a screen reader, a canvas or WebGL view is only a picture, and with a keyboard it is hard work. So build the rest of the page around the view: give every action a keyboard route, announce feedback, add a text version of what the picture shows, choose colours that colour-blind students can tell apart, and let motion be turned off.
+lede: "To a screen reader, a canvas or WebGL view is only a picture, and with a keyboard it is hard work. So build the rest of the page around the view: give every action a keyboard route, announce feedback, add a text version of what the picture shows, choose colours that colour-blind students can tell apart, and let motion be turned off."
 description: How to make interactive genomics teaching pages accessible, with keyboard access and focus, ARIA live regions, text alternatives and data tables for canvas and WebGL views, colour-blind-safe palettes and reduced motion, what igv.js, JBrowse, Mol*, Cytoscape.js, Vega-Lite and other libraries support, and a live example.
 ---
 
